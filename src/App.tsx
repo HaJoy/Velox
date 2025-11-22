@@ -1,12 +1,15 @@
-import { useState } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
-import { Button } from "./components/ui/button";
+import { RefPage } from "./pages/RefPage";
 
 function App() {
   return (
     <>
-      <h1>Hello World!</h1>
-      <Button>Boton</Button>
+      <Router>
+        <Routes>
+          <Route path="/" element={<RefPage />} />
+        </Routes>
+      </Router>
     </>
   );
 }
