@@ -1,8 +1,24 @@
+@import url('https://fonts.googleapis.com/css2?family=Stack+Sans+Notch:wght@200..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
 #root {
   max-width: 1280px;
+  height: 100vh;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+  font-family: "Montserrat", system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
 
+h1 {
+  font-family: "Stack Sans Notch", "Raleway", system-ui, Avenir, Helvetica, Arial, sans-serif;
+  background: #020024;
+  background: -webkit-linear-gradient(208deg, rgba(2, 0, 36, 1) 0%, rgba(9, 9, 121, 1) 20%, rgba(0, 212, 255, 1) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
 
+body {
+  background: #020024;
+  background: -webkit-linear-gradient(218deg, rgba(2, 0, 36, 1) 52%, rgba(28, 0, 150, 1) 80%, rgba(0, 212, 255, 1) 100%);
+}

@@ -1,24 +1,8 @@
-/**
- * ----------------------------------------------------
- * Este codigo es solo para referencia, el archivo sera
- * eliminado una vez la app funcione correctamente.
- * 
- * El codigo base fue extraido de Medium para servir
- * como referencia y se le ha agregado tipado y mayor
- * legibilidad, se seguira modificando mientras sirva
- * para pruebas del funcionamiento.
- * 
- * fuente: https://medium.com/@nikhiladigaz/measure-your-internet-speed-programmatically-aad49f3f4738
- * Creditos al autor.
- * ----------------------------------------------------
- */
-
 import { useState } from "react";
 import ndt7 from "@m-lab/ndt7";
-import { Button } from "@/components/ui/button";
 import type { ClientMeasurementMsg, ServerMeasurementMsg } from "@/types/ndt7";
 
-export const RefPage = () => {
+export const useNdt7 = () => {
 
   const [downloadSpeed, setDownloadSpeed] = useState<string>('0');
   const [uploadSpeed, setUploadSpeed] = useState<string>('0');
@@ -88,7 +72,7 @@ export const RefPage = () => {
           const throughput = elapsed > 0 ? (bytesReceived * 8) / elapsed : 0;
           setUploadSpeed(throughput.toFixed(2) + ' Mb/s');
         },
-        error: function (err:Error) {
+        error: function (err: Error) {
           console.log('Error while running upload test: ', err.message);
           setComplete(false);
         }
@@ -99,22 +83,5 @@ export const RefPage = () => {
       setComplete(true);
     })
   };
-  return (
-    <div>
-      <Button onClick={startTest} disabled={!complete}>
-        {complete ? 'Iniciar' : 'Calculando...'}
-      </Button>
-
-      <h2>Velocidad de descarga</h2>
-      {downloadSpeed || '0 Mb/s'}
-
-      <h2>Velocidad de subida</h2>
-      {uploadSpeed || '0 Mb/s'}
-
-      <div className="m-2">
-        <h3>Duracion del test</h3>
-        {`${testTime || 0} segundos`}
-      </div>
-    </div>
-  )
+  return { downloadSpeed, uploadSpeed, complete, testTime, startTest };
 }
