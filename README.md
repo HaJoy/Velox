@@ -1,73 +1,51 @@
-# React + TypeScript + Vite
+<figure align="center">
+  <img src="public/icon.png" alt="Icono Velox" width="350" />
+</figure>
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# Velox
 
-Currently, two official plugins are available:
+**¡Bienvenido al repositorio de Velox!**
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Proyecto de aula para medir velocidad de red usando la librería @m-lab/ndt7.
+Incluye integración con workers (download/upload), tipos TypeScript, y guards para validar mensajes.
 
-## React Compiler
+## Contenido
+- src/ — código fuente (React + TypeScript)
+  - hooks/useNdt7.ts — hook para ejecutar pruebas NDT7
+  - guards/ndt7.guard.ts — type guards para validar mensajes
+  - types/ndt7.d.ts — definiciones de tipos y declaración del módulo `@m-lab/ndt7`
+- public/ — archivos estáticos, aquí **deben** ir los workers ndt7 (ndt7-*.js)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Requisitos
+- Node.js 16+ (o LTS compatible)
+- npm / pnpm / yarn
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Instalación
+```bash
+# desde la raíz del proyecto
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Desarrollo
+```bash
+npm run dev
 ```
+- Abre http://localhost:5173 (o la URL que informe Vite).
+- Asegúrate de que los archivos worker (ndt7-download-worker.min.js, ndt7-upload-worker.min.js) estén en `public/` para que sean servidos correctamente.
+
+## Construcción
+```bash
+npm run build
+npm run preview   # para ver la build estática localmente
+```
+
+## Tipos y integraciones importantes
+- Agregué `src/types/ndt7.d.ts` con los tipos principales (TCPInfo, ClientMeasurementMsg, ServerMeasurementMsg, Ndt7Message).
+- Usa `src/guards/ndt7.guard.ts` para validar los mensajes recibidos desde los workers antes de acceder a sus propiedades — evita errores de runtime.
+
+## Depuración
+- Si el navegador reporta `Unexpected token '<'` al cargar un worker, revisa la pestaña Network: la ruta del worker está devolviendo HTML (SPA fallback). Mueve el worker a `public/` y referencia con una ruta absoluta o relativa correcta.
+
+## Créditos
+- Basado en el ejemplo de Nikhil A. Digaz en Medium y la librería `@m-lab/ndt7` (Measurement Lab).
+Fuente: https://medium.com/@nikhiladigaz/measure-your-internet-speed-programmatically-aad49f3f4738
