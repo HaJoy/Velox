@@ -50,30 +50,13 @@ export interface ServerMeasurementMsg extends BaseNdt7Msg {
   LastServerMeasurement?: LastServerMeasurement;
 }
 
-/** Start / control / terminal messages */
-export interface StartMsg extends BaseNdt7Msg {
-  MsgType: "start";
-  Data?: {
-    StartTime?: number;       // epoch seconds
-    ExpectedEndTime?: number; // epoch seconds
-    [key: string]: unknown;
-  };
-}
-
 export interface CompleteMsg extends BaseNdt7Msg {
   MsgType: "complete";
-}
-
-export interface ErrorMsg extends BaseNdt7Msg {
-  MsgType: "error";
-  Error?: string;
 }
 
 /** Union of possible messages received in callbacks */
 export type Ndt7Message =
   | ClientMeasurementMsg
   | ServerMeasurementMsg
-  | StartMsg
   | CompleteMsg
-  | ErrorMsg
   | BaseNdt7Msg;
