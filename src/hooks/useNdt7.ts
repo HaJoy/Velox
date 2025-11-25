@@ -123,6 +123,7 @@ export const useNdt7 = () => {
         }
       },
     )
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     .then((exitcode: number) => {
       setTestTime((Date.now() - startTime) / 1000);
       setComplete(true);
