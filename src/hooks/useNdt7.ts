@@ -20,16 +20,17 @@ import {
  */
 export const useNdt7 = () => {
 
-  const [downloadSpeed, setDownloadSpeed] = useState<string>('0');
-  const [uploadSpeed, setUploadSpeed] = useState<string>('0');
+  const [downloadSpeed, setDownloadSpeed] = useState<number>(0);
+  const [uploadSpeed, setUploadSpeed] = useState<number>(0);
   const [complete, setComplete] = useState<boolean>(true);
   const [testTime, setTestTime] = useState<number>(0);
+  const [isDownStream, setIsDownStream] = useState<boolean>(true);
 
   const startTest = () => {
 
     // Reiniciar variables de estado
-    setDownloadSpeed('0');
-    setUploadSpeed('0');
+    setDownloadSpeed(0);
+    setUploadSpeed(0);
     setComplete(false);
     setTestTime(0);
 
@@ -54,6 +55,7 @@ export const useNdt7 = () => {
         // Muestra un log cuando la medicion de descarga comience
         downloadStart: function () {
           console.log('Initializing download speed measurement...');
+          setIsDownStream(true);
         },
         // Medir velocidad de descarga
         downloadMeasurement: function (data: ClientMeasurementMsg) {
@@ -62,7 +64,7 @@ export const useNdt7 = () => {
             // que no necesariamente son del cliente, no afectan la medicion.
             if (isClientMeasurementMsg(data)) {
               const msg = data.Data?.MeanClientMbps ?? 0;
-              setDownloadSpeed(msg.toFixed(2) + ' Mb/s');
+              setDownloadSpeed(parseFloat(msg.toFixed(2)));
             }
           } else {
             console.error('The client response was not an object in this sample.');
@@ -74,8 +76,8 @@ export const useNdt7 = () => {
           // en pantalla sera el mismo que la ultima medicion de downloadMeasurment
           // que es el mismo que LastClientMeasurement, por lo que no hay problemas.
           if (isCompleteMsg(data) && isLastClientMeasurement(data.LastClientMeasurement)) {
-              const clientGoodPut = data.LastClientMeasurement.MeanClientMbps;
-              setDownloadSpeed(clientGoodPut?.toFixed(2) + ' Mb/s');
+              const clientGoodPut = data.LastClientMeasurement.MeanClientMbps ?? 0;
+              setDownloadSpeed(parseFloat(clientGoodPut?.toFixed(2)));
           } else {
             console.warn('The last measurement could not be found when completing the test. Using the last measurement during-test to prevent \'undefined\'');
           }
@@ -85,16 +87,14 @@ export const useNdt7 = () => {
         // Mostrar un log cuando la medicion de subida comience
         uploadStart: function () {
           console.log('Initializing upload speed measurement...')
+          setIsDownStream(false);
         },
         // Medir velocidad de subida
         uploadMeasurement: function (data: ServerMeasurementMsg) {
           if (isNdt7Message(data)) {
             if (isServerMeasurementMsg(data)) {
               const measurementData = data.Data.TCPInfo;
-              setUploadSpeed(
-                ((measurementData.BytesReceived / measurementData.ElapsedTime) * 8)
-                .toFixed(2) + ' Mb/s'
-              );
+              setUploadSpeed(parseFloat(((measurementData.BytesReceived / measurementData.ElapsedTime) * 8).toFixed(2)));
             }
           } else {
             console.error('The server response was not an object in this sample.')
@@ -108,7 +108,7 @@ export const useNdt7 = () => {
             const bytesReceived = msg ? msg.BytesReceived : 0;
             const elapsed = msg ? msg.ElapsedTime : 0;
             const throughput = elapsed > 0 ? (bytesReceived * 8) / elapsed : 0;
-            setUploadSpeed(throughput.toFixed(2) + ' Mb/s');
+            setUploadSpeed(parseFloat(throughput.toFixed(2)));
           } else {
             // Si el if no se cumple, avisar.
             // No altera la medicion, el valor retornado por esta funcion es el mismo
@@ -129,5 +129,5 @@ export const useNdt7 = () => {
       setComplete(true);
     })
   };
-  return { downloadSpeed, uploadSpeed, complete, testTime, startTest };
+  return { downloadSpeed, uploadSpeed, complete, testTime, isDownStream, startTest };
 }
