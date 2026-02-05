@@ -1,6 +1,8 @@
+import { getIP, getISP } from "@/api/ipService";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNdt7 } from "@/hooks/useNdt7";
+import { useEffect, useState } from "react";
 import ReactSpeedometer from "react-d3-speedometer";
 
 // Este componente es toda la pagina de la aplicacion.
@@ -8,6 +10,48 @@ export const Home = () => {
   // Obtener las metricas a traves del custom hook.
   const { downloadSpeed, uploadSpeed, complete, testTime, isDownStream, startTest } =
     useNdt7();
+  
+    const [publicIp, setPublicIp] = useState<string>("Cargando...");
+    const [userIsp, setUserIsp] = useState<string>("Cargando...");
+    const [ipErrorMsg, setIpErrorMsg] = useState<string>("");
+    const [ispErrorMsg, setIspErrorMsg] = useState<string>("");
+    
+    useEffect(() => {
+      
+      const fetchPublicIP = async () => {
+        try {
+          const ipifyRaw = await getIP();
+          const userPublicIP = ipifyRaw.ip;
+
+          setPublicIp(userPublicIP);
+          setIpErrorMsg("");
+        } catch (error) {
+          console.error("Failed to fetch user IP: ", error);
+          setPublicIp("No disponible");
+          setIpErrorMsg("No se pudo obtener la IP pública");
+        }
+
+        try {
+          // Para el desarrollo se utilizara 'isp' como una variable estatica
+          // para evitar requests innecesarias a ipinfo
+
+          // const infoIpRaw = await getISP();
+          // const isp = infoIpRaw.ispinfo.org.split(' ').slice(1).join(' ');
+          const isp = "UNE TELECOMUNICACIONES S.A";
+
+          setUserIsp(isp);
+          setIspErrorMsg("");
+        } catch (error) {
+          console.error("Failed to fetch user ISP: ", error);
+          setUserIsp("No disponible");
+          setIspErrorMsg("No se pudo obtener el proveedor");
+        }
+      };
+    
+      fetchPublicIP();
+
+    }, [])
+    
 
   return (
     <div className="flex flex-col items-center h-full min-w-[285px]">
@@ -50,16 +94,20 @@ export const Home = () => {
               </div>
 
               {/* Tiempo que duro la prueba */}
+              <h3>Duración: {`${testTime.toFixed(1) || 0} segundos`}</h3>
+              
+              {/* Direccion IP e ISP del usuario */}
               <div>
-                <div className="m-2">
-                  <h3>Duración: {`${testTime.toFixed(1) || 0} segundos`}</h3>
+                <div className="text-sm md:text-base">
+                  <p>IP: {ipErrorMsg? ipErrorMsg : publicIp}</p>
+                  <p>Proveedor: {ispErrorMsg? ispErrorMsg : userIsp}</p>
                 </div>
               </div>
 
               {/* Boton para iniciar la prueba */}
               <div>
                 <Button
-                  className="w-[125px]"
+                  className="w-[125px] hover:bg-primary/60 hover:cursor-pointer disabled:cursor-default"
                   onClick={startTest}
                   disabled={!complete}
                 >
