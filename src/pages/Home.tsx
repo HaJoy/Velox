@@ -11,7 +11,7 @@ export const Home = () => {
 
   return (
     <div className="flex flex-col items-center h-full min-w-[285px]">
-      <main className="flex justify-center w-full">
+      <div className="flex justify-center w-full">
         <Card className="w-full max-w-[562px]">
           <CardHeader>
             <CardTitle>Mide tu velocidad de internet</CardTitle>
@@ -63,7 +63,7 @@ export const Home = () => {
             </div>
           </CardContent>
         </Card>
-      </main>
+      </div>
     </div>
   );
 };
