@@ -2,9 +2,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
 #root {
-  max-width: 1280px;
+  display: flex;
+  flex-direction: column;
   height: 100vh;
-  margin: 0 auto;
+}
+
+.root-content {
+  max-width: 1280px;
+  flex: 1;
   padding: 2rem;
   text-align: center;
   font-family: "Montserrat", system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -21,7 +26,9 @@ h1 {
 }
 
 body {
-  background: #020024;
-  background: linear-gradient(218deg, rgba(2, 0, 36, 1) 52%, rgba(28, 0, 150, 1) 80%, rgba(0, 212, 255, 1) 100%);
-  background: -webkit-linear-gradient(218deg, rgba(2, 0, 36, 1) 52%, rgba(28, 0, 150, 1) 80%, rgba(0, 212, 255, 1) 100%);
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255,255,255,0.04), transparent 40%),
+    radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: cover, 40px 40px;
+  background-color: #0b0b0f;
 }
