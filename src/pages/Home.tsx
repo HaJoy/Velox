@@ -11,13 +11,7 @@ export const Home = () => {
 
   return (
     <div className="flex flex-col items-center h-full min-w-[285px]">
-      {/* Titulo */}
-      <header className="flex h-1/3 justify-center items-center">
-        <h1 className="text-6xl md:text-8xl" lang="en">
-          Velox
-        </h1>
-      </header>
-      <main className="flex justify-center w-full">
+      <div className="flex justify-center w-full">
         <Card className="w-full max-w-[562px]">
           <CardHeader>
             <CardTitle>Mide tu velocidad de internet</CardTitle>
@@ -59,7 +53,7 @@ export const Home = () => {
               {/* Boton para iniciar la prueba */}
               <div>
                 <Button
-                  className="w-[125px]"
+                  className="w-[125px] cursor-pointer disabled:cursor-default"
                   onClick={startTest}
                   disabled={!complete}
                 >
@@ -69,7 +63,7 @@ export const Home = () => {
             </div>
           </CardContent>
         </Card>
-      </main>
+      </div>
     </div>
   );
 };
