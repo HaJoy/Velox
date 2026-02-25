@@ -17,15 +17,29 @@ import {
 } from "@/components/ui/button-group";
 import { Button } from "@/components/ui/button";
 import { RotateCcwIcon } from "lucide-react";
+import { useLogin } from "@/hooks/useLogin";
+import { UserAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
+
+
+
 
 export const LoginForm = () => {
+  const { login, isLoading, error } = useLogin();
+  const { session } = UserAuth();
+  const navigate = useNavigate();
+
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "" },
   });
 
-  const handleLogin = (data: LoginFormValues) => {
-    console.log(data);
+  const handleLogin = async (data: LoginFormValues) => {
+    const result = await login(data.email, data.password);
+    if (result?.success) {
+      console.log(result.data);
+      navigate('/');
+    }
   };
 
   return (
@@ -92,6 +106,7 @@ export const LoginForm = () => {
                 <Button
                   form="login-form"
                   type="submit"
+                  disabled={isLoading}
                   className="cursor-pointer disabled:cursor-default"
                 >
                   Iniciar sesión
@@ -101,6 +116,7 @@ export const LoginForm = () => {
                   size="icon"
                   type="button"
                   onClick={() => form.reset()}
+                  disabled={isLoading}
                   className="cursor-pointer disabled:cursor-default"
                 >
                   <RotateCcwIcon />
@@ -108,6 +124,7 @@ export const LoginForm = () => {
               </ButtonGroup>
             </FieldSet>
           </form>
+          {error && <p className="text-red-500 mt-2">{error}</p>}
         </CardContent>
       </Card>
     </div>

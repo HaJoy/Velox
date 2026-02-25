@@ -13,6 +13,7 @@
     "@hookform/resolvers": "^5.2.2",
     "@m-lab/ndt7": "^0.0.6",
     "@radix-ui/react-slot": "^1.2.3",
+    "@supabase/supabase-js": "^2.97.0",
     "@tailwindcss/vite": "^4.1.16",
     "axios": "^1.13.2",
     "class-variance-authority": "^0.7.1",

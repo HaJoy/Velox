@@ -3,10 +3,11 @@ import "./App.css";
 import { Home } from "./pages/Home";
 import { Header } from "./components/Header";
 import { LoginForm } from "./pages/LoginForm";
+import { AuthContextProvider } from "./context/AuthContext";
 
 function App() {
   return (
-    <>
+    <AuthContextProvider>
       <Router>
         <Header />
         <div className="root-content">
@@ -16,7 +17,7 @@ function App() {
           </Routes>
         </div>
       </Router>
-    </>
+    </AuthContextProvider>
   );
 }
 
