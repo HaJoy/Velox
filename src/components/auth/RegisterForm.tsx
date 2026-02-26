@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Field,
   FieldDescription,
@@ -19,9 +18,11 @@ import { Button } from "@/components/ui/button";
 import { RotateCcwIcon } from "lucide-react";
 import { useRegister } from "@/hooks/useRegister";
 import { useNavigate } from "react-router-dom";
+import { UserAuth } from "@/context/AuthContext";
 
 export const RegisterForm = () => {
   const { register, isLoading, error } = useRegister();
+  const { session } = UserAuth();
   const navigate = useNavigate();
 
   const form = useForm<RegisterFormValues>({
@@ -33,94 +34,87 @@ export const RegisterForm = () => {
     const result = await register(data.email, data.password);
     if (result?.success) {
       console.log(result.data);
-      navigate('/');
+      navigate("/");
     }
   };
 
   return (
-    <div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Registrarse</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form id="register-form" onSubmit={form.handleSubmit(handleRegister)}>
-            <FieldSet className="w-full max-w-xs">
-              <FieldGroup>
-                {/* Input email */}
-                <Controller
-                  name="email"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="email">Email</FieldLabel>
-                      <Input
-                        {...field}
-                        id="email"
-                        type="email"
-                        placeholder="example@gmail.com"
-                        aria-invalid={fieldState.invalid}
-                      />
-                      <FieldDescription>
-                        Por favor introduce tu correo electrónico.
-                      </FieldDescription>
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
+    <>
+      <form id="register-form" onSubmit={form.handleSubmit(handleRegister)}>
+        <FieldSet className="w-full flex flex-col items-center">
+          <FieldGroup>
+            {/* Input email */}
+            <Controller
+              name="email"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="email">Email</FieldLabel>
+                  <Input
+                    {...field}
+                    id="email"
+                    type="email"
+                    placeholder="example@gmail.com"
+                    aria-invalid={fieldState.invalid}
+                  />
+                  <FieldDescription>
+                    Por favor introduce tu correo electrónico.
+                  </FieldDescription>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
                   )}
-                />
+                </Field>
+              )}
+            />
 
-                {/* Input password */}
-                <Controller
-                  name="password"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="password">Contraseña</FieldLabel>
-                      <Input
-                        {...field}
-                        id="password"
-                        type="password"
-                        placeholder="••••••••"
-                        aria-invalid={fieldState.invalid}
-                      />
-                      <FieldDescription>
-                        La contraseña debe tener al menos 6 caracteres.
-                      </FieldDescription>
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
+            {/* Input password */}
+            <Controller
+              name="password"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor="password">Contraseña</FieldLabel>
+                  <Input
+                    {...field}
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    aria-invalid={fieldState.invalid}
+                  />
+                  <FieldDescription>
+                    La contraseña debe tener al menos 6 caracteres.
+                  </FieldDescription>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
                   )}
-                />
-              </FieldGroup>
+                </Field>
+              )}
+            />
+          </FieldGroup>
 
-              <ButtonGroup>
-                <Button
-                  form="register-form"
-                  type="submit"
-                  disabled={isLoading}
-                  className="cursor-pointer disabled:cursor-default"
-                >
-                  Registrarse
-                </Button>
-                <ButtonGroupSeparator />
-                <Button
-                  size="icon"
-                  type="button"
-                  onClick={() => form.reset()}
-                  disabled={isLoading}
-                  className="cursor-pointer disabled:cursor-default"
-                >
-                  <RotateCcwIcon />
-                </Button>
-              </ButtonGroup>
-            </FieldSet>
-          </form>
-          {error && <p className="text-red-500 mt-2">{error}</p>}
-        </CardContent>
-      </Card>
-    </div>
+          <ButtonGroup>
+            <Button
+              form="register-form"
+              type="submit"
+              disabled={isLoading}
+              className="cursor-pointer disabled:cursor-default"
+            >
+              Registrarse
+            </Button>
+            <ButtonGroupSeparator />
+            <Button
+              size="icon"
+              type="button"
+              onClick={() => form.reset()}
+              disabled={isLoading}
+              className="cursor-pointer disabled:cursor-default"
+            >
+              <RotateCcwIcon />
+            </Button>
+          </ButtonGroup>
+        </FieldSet>
+      </form>
+      {error && <p className="text-red-500 mt-2">{error}</p>}
+    </>
   );
 };
