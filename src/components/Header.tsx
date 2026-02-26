@@ -1,13 +1,15 @@
+import { useState } from "react";
 import {
   NavigationMenu,
   NavigationMenuList,
   NavigationMenuItem,
-  NavigationMenuLink,
 } from "@/components/ui/navigation-menu";
 import { Button } from "./ui/button";
-import { Link } from "react-router-dom";
+import { AuthDialog } from "./auth/AuthDialog";
 
 export const Header = () => {
+  const [dialogMode, setDialogMode] = useState<'login' | 'register' | null>(null);
+
   return (
     <header className="flex justify-center border-b mb-2 sticky top-0 bg-[#0b0b0f]">
       <NavigationMenu className="max-w-11/12">
@@ -20,16 +22,25 @@ export const Header = () => {
               </h1>
             </NavigationMenuItem>
 
-            <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <Button className="cursor-pointer">
-                  <Link to={"/login"}>Login</Link>
-                </Button>
-              </NavigationMenuLink>
+            <NavigationMenuItem className="flex gap-2">
+              <Button
+                className="cursor-pointer"
+                onClick={() => setDialogMode('login')}
+              >
+                Login
+              </Button>
+              <Button
+                variant="outline"
+                className="cursor-pointer"
+                onClick={() => setDialogMode('register')}
+              >
+                Register
+              </Button>
             </NavigationMenuItem>
           </NavigationMenuList>
         </div>
       </NavigationMenu>
+      <AuthDialog mode={dialogMode} onClose={() => setDialogMode(null)} />
     </header>
   );
 };

@@ -8,7 +8,7 @@ import {
   FieldSet,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { loginSchema, type LoginFormValues } from "@/schemas/auth.schema";
+import { registerSchema, type RegisterFormValues } from "@/schemas/auth.schema";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -17,25 +17,20 @@ import {
 } from "@/components/ui/button-group";
 import { Button } from "@/components/ui/button";
 import { RotateCcwIcon } from "lucide-react";
-import { useLogin } from "@/hooks/useLogin";
-import { UserAuth } from "@/context/AuthContext";
+import { useRegister } from "@/hooks/useRegister";
 import { useNavigate } from "react-router-dom";
 
-
-
-
-export const LoginForm = () => {
-  const { login, isLoading, error } = useLogin();
-  const { session } = UserAuth();
+export const RegisterForm = () => {
+  const { register, isLoading, error } = useRegister();
   const navigate = useNavigate();
 
-  const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
+  const form = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
     defaultValues: { email: "", password: "" },
   });
 
-  const handleLogin = async (data: LoginFormValues) => {
-    const result = await login(data.email, data.password);
+  const handleRegister = async (data: RegisterFormValues) => {
+    const result = await register(data.email, data.password);
     if (result?.success) {
       console.log(result.data);
       navigate('/');
@@ -46,11 +41,10 @@ export const LoginForm = () => {
     <div>
       <Card>
         <CardHeader>
-          <CardTitle>Iniciar Sesión</CardTitle>
+          <CardTitle>Registrarse</CardTitle>
         </CardHeader>
-
         <CardContent>
-          <form id="login-form" onSubmit={form.handleSubmit(handleLogin)}>
+          <form id="register-form" onSubmit={form.handleSubmit(handleRegister)}>
             <FieldSet className="w-full max-w-xs">
               <FieldGroup>
                 {/* Input email */}
@@ -68,7 +62,7 @@ export const LoginForm = () => {
                         aria-invalid={fieldState.invalid}
                       />
                       <FieldDescription>
-                        Por favor introduce tu correo electronico.
+                        Por favor introduce tu correo electrónico.
                       </FieldDescription>
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
@@ -92,7 +86,7 @@ export const LoginForm = () => {
                         aria-invalid={fieldState.invalid}
                       />
                       <FieldDescription>
-                        Por favor introduce tu contraseña.
+                        La contraseña debe tener al menos 6 caracteres.
                       </FieldDescription>
                       {fieldState.invalid && (
                         <FieldError errors={[fieldState.error]} />
@@ -104,12 +98,12 @@ export const LoginForm = () => {
 
               <ButtonGroup>
                 <Button
-                  form="login-form"
+                  form="register-form"
                   type="submit"
                   disabled={isLoading}
                   className="cursor-pointer disabled:cursor-default"
                 >
-                  Iniciar sesión
+                  Registrarse
                 </Button>
                 <ButtonGroupSeparator />
                 <Button
