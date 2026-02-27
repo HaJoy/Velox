@@ -17,12 +17,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { RotateCcwIcon } from "lucide-react";
 import { useLogin } from "@/hooks/useLogin";
-import { UserAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 export const LoginForm = () => {
   const { login, isLoading, error } = useLogin();
-  const { session } = UserAuth();
+  const { session } = useAuth();
   const navigate = useNavigate();
 
   const form = useForm<LoginFormValues>({

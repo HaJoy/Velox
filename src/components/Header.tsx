@@ -6,9 +6,14 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Button } from "./ui/button";
 import { AuthDialog } from "./auth/AuthDialog";
+import { useAuth } from "@/context/AuthContext";
 
 export const Header = () => {
-  const [dialogMode, setDialogMode] = useState<'login' | 'register' | null>(null);
+  const [dialogMode, setDialogMode] = useState<"login" | "register" | null>(
+    null,
+  );
+
+  const { user, logout } = useAuth();
 
   return (
     <header className="flex justify-center border-b mb-2 sticky top-0 bg-[#0b0b0f]">
@@ -23,19 +28,33 @@ export const Header = () => {
             </NavigationMenuItem>
 
             <NavigationMenuItem className="flex gap-2">
-              <Button
-                className="cursor-pointer"
-                onClick={() => setDialogMode('login')}
-              >
-                Login
-              </Button>
-              <Button
-                variant="outline"
-                className="cursor-pointer"
-                onClick={() => setDialogMode('register')}
-              >
-                Register
-              </Button>
+              {!user ? (
+                <>
+                  <Button
+                    className="cursor-pointer"
+                    onClick={() => setDialogMode("login")}
+                  >
+                    Login
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="cursor-pointer"
+                    onClick={() => setDialogMode("register")}
+                  >
+                    Register
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="outline"
+                    className="cursor-pointer"
+                    onClick={logout}
+                  >
+                    Log out
+                  </Button>
+                </>
+              )}
             </NavigationMenuItem>
           </NavigationMenuList>
         </div>

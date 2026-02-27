@@ -18,11 +18,11 @@ import { Button } from "@/components/ui/button";
 import { RotateCcwIcon } from "lucide-react";
 import { useRegister } from "@/hooks/useRegister";
 import { useNavigate } from "react-router-dom";
-import { UserAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/AuthContext";
 
 export const RegisterForm = () => {
   const { register, isLoading, error } = useRegister();
-  const { session } = UserAuth();
+  const { session } = useAuth();
   const navigate = useNavigate();
 
   const form = useForm<RegisterFormValues>({
