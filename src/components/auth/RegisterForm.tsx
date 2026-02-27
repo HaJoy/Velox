@@ -17,13 +17,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { RotateCcwIcon } from "lucide-react";
 import { useRegister } from "@/hooks/useRegister";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
 
-export const RegisterForm = () => {
+interface RegisterFormProps {
+  onClose: () => void;
+}
+
+export const RegisterForm = ({ onClose }: RegisterFormProps) => {
   const { register, isLoading, error } = useRegister();
-  const { session } = useAuth();
-  const navigate = useNavigate();
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -34,7 +34,7 @@ export const RegisterForm = () => {
     const result = await register(data.email, data.password);
     if (result?.success) {
       console.log(result.data);
-      navigate("/");
+      onClose();
     }
   };
 

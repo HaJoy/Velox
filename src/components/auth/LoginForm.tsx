@@ -17,13 +17,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { RotateCcwIcon } from "lucide-react";
 import { useLogin } from "@/hooks/useLogin";
-import { useAuth } from "@/context/AuthContext";
-import { useNavigate } from "react-router-dom";
 
-export const LoginForm = () => {
+interface LoginFormProps {
+  onClose: () => void;
+}
+
+export const LoginForm = ({ onClose }: LoginFormProps) => {
   const { login, isLoading, error } = useLogin();
-  const { session } = useAuth();
-  const navigate = useNavigate();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -34,7 +34,7 @@ export const LoginForm = () => {
     const result = await login(data.email, data.password);
     if (result?.success) {
       console.log(result.data);
-      navigate("/");
+      onClose();
     }
   };
 

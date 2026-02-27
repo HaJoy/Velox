@@ -34,8 +34,8 @@ export const AuthDialog = ({ mode, onClose }: AuthDialogProps) => {
           </DialogDescription>
         </DialogHeader>
         <div className="py-4">
-          {mode === 'login' && <LoginForm />}
-          {mode === 'register' && <RegisterForm />}
+          {mode === 'login' && <LoginForm onClose={onClose} />}
+          {mode === 'register' && <RegisterForm onClose={onClose} />}
         </div>
         <DialogFooter>
           <DialogClose asChild>
