@@ -7,11 +7,13 @@ import {
 import { Button } from "./ui/button";
 import { AuthDialog } from "./auth/AuthDialog";
 import { useAuth } from "@/context/AuthContext";
+import { ConfirmDialog } from "./AlertDialog";
 
 export const Header = () => {
   const [dialogMode, setDialogMode] = useState<"login" | "register" | null>(
     null,
   );
+  const [openAlertDialog, setOpenAlertDialog] = useState<boolean>(false);
 
   const { user, logout } = useAuth();
 
@@ -49,7 +51,7 @@ export const Header = () => {
                   <Button
                     variant="outline"
                     className="cursor-pointer"
-                    onClick={logout}
+                    onClick={() => setOpenAlertDialog(true)}
                   >
                     Log out
                   </Button>
@@ -60,6 +62,13 @@ export const Header = () => {
         </div>
       </NavigationMenu>
       <AuthDialog mode={dialogMode} onClose={() => setDialogMode(null)} />
+      <ConfirmDialog
+        isOpen={openAlertDialog}
+        title="Cerrar sesión"
+        description="¿Está seguro que desea cerrar sesión?"
+        onClose={() => setOpenAlertDialog(false)}
+        handler={logout}
+      />
     </header>
   );
 };
