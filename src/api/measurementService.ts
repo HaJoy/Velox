@@ -9,3 +9,12 @@ export const getAllMeasurements = async () => {
     console.error('Error while fetching all measurements: ', error);
   }
 };
+
+export const createMeasurement = async (payload: any) => {
+    try {
+        const response = await api.post('/measurement', payload);
+        return response.data;
+    } catch (error) {
+        console.error('Error trying to create measurement: ', error);
+    }
+}

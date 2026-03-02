@@ -1,4 +1,5 @@
 import { isIpifyResponse, isIpinfoResponse } from "@/guards/isp.guard";
+import { isMeasurement } from "@/guards/measurement.guard";
 import axios from "axios";
 
 /**
@@ -23,7 +24,11 @@ export const getISP = async () => {
     const clientIP = await getIP();
     try {
         const response = await axios.post(`http://localhost:${import.meta.env.VITE_PORT}/api/measurements/isp`, { ip: clientIP.ip });
-        return response.data;
+        if (isMeasurement(response)) {
+            return response.data;
+        } else {
+            throw new Error("Invalid response from server.");
+        }
     } catch (error) {
         if (axios.isAxiosError(error) && error.response?.status === 404) {
             const fallbackResponse = await axios.post(`http://localhost:${import.meta.env.VITE_PORT}/api/isp`, { ip: clientIP.ip });

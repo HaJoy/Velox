@@ -13,6 +13,8 @@ import {
   isLastServerMeasurement, isNdt7Message,
   isServerMeasurementMsg
 } from "@/guards/ndt7.guard";
+import { createMeasurement } from "@/api/measurementService";
+import { getIP, getISP } from "@/api/ipService";
 
 /**
  * Utiliza la API de NDT7 (M-lab) para realizar una prueba de velocidad de red.
@@ -124,9 +126,30 @@ export const useNdt7 = () => {
       },
     )
 
-    .then((_exitcode: number) => {
-      setTestTime((Date.now() - startTime) / 1000);
-      setComplete(true);
+    .then((exitcode: number) => {
+      if (exitcode > 0) {
+        console.error('An error has ocurred during test.');
+      } else {
+        setTestTime((Date.now() - startTime) / 1000);
+        setComplete(true);
+
+        try {
+          const userIP = getIP();
+          const ispInfoRaw = getISP();
+          const userISP = ispInfoRaw.ispInfo;
+          const userISP = 'Test ISP';
+          
+
+          createMeasurement({
+
+        });
+        } catch (error) {
+          
+        }
+
+        
+      }
+      
     })
   };
   return { downloadSpeed, uploadSpeed, complete, testTime, isDownStream, startTest };
