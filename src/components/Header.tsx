@@ -23,7 +23,7 @@ export const Header = () => {
     <header className="flex justify-center border-b mb-2 sticky top-0 bg-[#0b0b0f]">
       <NavigationMenu className="max-w-11/12">
         <div className="w-full">
-          <NavigationMenuList className="grid grid-cols-3 items-center w-full">
+          <NavigationMenuList className={`grid ${user ? `grid-cols-3` : `grid-cols-2`} items-center w-full`}>
             {/* Brand */}
             <NavigationMenuItem className="justify-self-start">
               <h1 className="text-5xl select-none" lang="en">
