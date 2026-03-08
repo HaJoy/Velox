@@ -127,7 +127,10 @@ export function isServerMeasurementMsg(v: unknown): v is ServerMeasurementMsg {
 export function isCompleteMsg(v: unknown): v is CompleteMsg {
   if (!isObject(v)) return false;
   const maybe = v as Record<string, unknown>;
-  return isLastClientMeasurement(maybe.LastClientMeasurement) && isLastServerMeasurement(maybe.LastServerMeasurement);  
+  return (
+    isLastClientMeasurement(maybe.LastClientMeasurement) &&
+    isLastServerMeasurement(maybe.LastServerMeasurement)
+  );
 }
 
 
