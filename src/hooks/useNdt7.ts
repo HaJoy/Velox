@@ -139,23 +139,24 @@ export const useNdt7 = () => {
       },
     )
 
-    .then((_exitcode: number) => {
-      setTestTime((Date.now() - startTime) / 1000);
+    .then((exitcode: number) => {
+      // setTestTime((Date.now() - startTime) / 1000);
+      //   setComplete(true);
+      //   setPing(currentPing);
+        // console.log(currentPing);
+      if (exitcode > 0) {
+        console.error('An error has ocurred during test.');
+      } else {
+        setTestTime((Date.now() - startTime) / 1000);
         setComplete(true);
         setPing(currentPing);
-        // console.log(currentPing);
-      // if (exitcode > 0) {
-      //   console.error('An error has ocurred during test.');
-      // } else {
-      //   setTestTime((Date.now() - startTime) / 1000);
-      //   setComplete(true);
 
-      //   createMeasurement({
-      //     downloadSpeed: downloadSpeed,
-      //     uploadSpeed: uploadSpeed,
-
-      //   })
-      // }
+        createMeasurement({
+          downloadSpeed: downloadSpeed,
+          uploadSpeed: uploadSpeed,
+          ping: ping / 1000,
+        });
+      }
       
     })
   };

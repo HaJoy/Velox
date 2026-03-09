@@ -1,5 +1,7 @@
 import { isIpifyResponse, isIpinfoResponse } from "@/guards/isp.guard";
-import { isMeasurement } from "@/guards/measurement.guard";
+import { isGetOneMeasurementResponse } from "@/guards/measurement.guard";
+import type { ipinfoResponse } from "@/types/isp";
+import type { GetOneMeasurementResponse } from "@/types/measurement";
 import axios from "axios";
 
 /**
@@ -20,11 +22,12 @@ export const getIP = async () => {
  * Obtiene el ISP del usuario
  * @returns El ISP del usuario (`string`)
  */
-export const getISP = async () => {
+export const getISP = async (): Promise<ipinfoResponse | GetOneMeasurementResponse> => {
     const clientIP = await getIP();
     try {
-        const response = await axios.post(`http://localhost:${import.meta.env.VITE_PORT}/api/measurements/isp`, { ip: clientIP.ip });
-        if (isMeasurement(response)) {
+        const response = await axios.post(`http://localhost:${import.meta.env.VITE_PORT}/api/measurement/isp`, { ip: clientIP.ip });
+        console.log(response.data);
+        if (isGetOneMeasurementResponse(response.data)) {
             return response.data;
         } else {
             throw new Error("Invalid response from server.");
