@@ -154,7 +154,7 @@ export const useNdt7 = () => {
         createMeasurement({
           downloadSpeed: downloadSpeed,
           uploadSpeed: uploadSpeed,
-          ping: ping / 1000,
+          ping: currentPing / 1000,
         });
       }
       
