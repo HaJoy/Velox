@@ -2,8 +2,7 @@ import { useState } from "react";
 import ndt7 from "@m-lab/ndt7";
 import type {
   ClientMeasurementMsg,
-  LastClientMeasurement,
-  LastServerMeasurement,
+  CompleteMsg,
   ServerMeasurementMsg
 } from "@/types/ndt7";
 import {
@@ -13,6 +12,7 @@ import {
   isLastServerMeasurement, isNdt7Message,
   isServerMeasurementMsg
 } from "@/guards/ndt7.guard";
+import { createMeasurement } from "@/api/measurementService";
 
 /**
  * Utiliza la API de NDT7 (M-lab) para realizar una prueba de velocidad de red.
@@ -22,6 +22,7 @@ export const useNdt7 = () => {
 
   const [downloadSpeed, setDownloadSpeed] = useState<number>(0);
   const [uploadSpeed, setUploadSpeed] = useState<number>(0);
+  const [ping, setPing] = useState<number>(Infinity);
   const [complete, setComplete] = useState<boolean>(true);
   const [testTime, setTestTime] = useState<number>(0);
   const [isDownStream, setIsDownStream] = useState<boolean>(true);
@@ -34,6 +35,7 @@ export const useNdt7 = () => {
     setComplete(false);
     setTestTime(0);
 
+    let currentPing = Infinity;
     const startTime = Date.now();
 
     // Proceso de medicion
@@ -71,17 +73,25 @@ export const useNdt7 = () => {
           }
         },
         // Tomar la ultima medicion realizada al completar el test
-        downloadComplete: function (data: LastClientMeasurement) {
+        downloadComplete: function (data: CompleteMsg) {
           // Si la siguiente condicion no se cumple, el resultado que se mostrara
           // en pantalla sera el mismo que la ultima medicion de downloadMeasurment
           // que es el mismo que LastClientMeasurement, por lo que no hay problemas.
-          if (isCompleteMsg(data) && isLastClientMeasurement(data.LastClientMeasurement)) {
-              const clientGoodPut = data.LastClientMeasurement.MeanClientMbps ?? 0;
-              setDownloadSpeed(parseFloat(clientGoodPut?.toFixed(2)));
+          if (isCompleteMsg(data) &&
+            isLastClientMeasurement(data.LastClientMeasurement) &&
+            isLastServerMeasurement(data.LastServerMeasurement)) {
+              
+            const clientGoodPut = data.LastClientMeasurement.MeanClientMbps ?? 0;
+            const downloadPing = data.LastServerMeasurement.TCPInfo?.MinRTT ?? Infinity;
+
+            setDownloadSpeed(parseFloat(clientGoodPut?.toFixed(2)));
+            currentPing = Math.min(currentPing, downloadPing);
+
           } else {
             console.warn('The last measurement could not be found when completing the test. Using the last measurement during-test to prevent \'undefined\'');
           }
           console.log('Download speed measurement completed.')
+          console.log(data);
         },
         
         // Mostrar un log cuando la medicion de subida comience
@@ -101,14 +111,18 @@ export const useNdt7 = () => {
           }
         },
         // Tomar la ultima medicion realizada al completar el test.
-        uploadComplete: function (data: LastServerMeasurement) {
+        uploadComplete: function (data: CompleteMsg) {
           // Evitar bug undefined en UI
           if (isCompleteMsg(data) && isLastServerMeasurement(data.LastServerMeasurement)) {
             const msg = data.LastServerMeasurement.TCPInfo;
             const bytesReceived = msg ? msg.BytesReceived : 0;
             const elapsed = msg ? msg.ElapsedTime : 0;
             const throughput = elapsed > 0 ? (bytesReceived * 8) / elapsed : 0;
+            const uploadPing = msg ? msg.MinRTT : Infinity;
+
             setUploadSpeed(parseFloat(throughput.toFixed(2)));
+            currentPing = Math.min(currentPing, uploadPing);
+
           } else {
             // Si el if no se cumple, avisar.
             // No altera la medicion, el valor retornado por esta funcion es el mismo
@@ -116,6 +130,7 @@ export const useNdt7 = () => {
             console.warn('The last measurement could not be found when completing the test. Using the last measurement during-test to prevent \'undefined\'');
           }
           console.log('Upload speed measurement completed.');
+          console.log(data);
         },
         error: function (err: Error) {
           console.log('Error while running upload test: ', err.message);
@@ -124,10 +139,26 @@ export const useNdt7 = () => {
       },
     )
 
-    .then((_exitcode: number) => {
-      setTestTime((Date.now() - startTime) / 1000);
-      setComplete(true);
+    .then((exitcode: number) => {
+      // setTestTime((Date.now() - startTime) / 1000);
+      //   setComplete(true);
+      //   setPing(currentPing);
+        // console.log(currentPing);
+      if (exitcode > 0) {
+        console.error('An error has ocurred during test.');
+      } else {
+        setTestTime((Date.now() - startTime) / 1000);
+        setComplete(true);
+        setPing(currentPing);
+
+        createMeasurement({
+          downloadSpeed: downloadSpeed,
+          uploadSpeed: uploadSpeed,
+          ping: currentPing / 1000,
+        });
+      }
+      
     })
   };
-  return { downloadSpeed, uploadSpeed, complete, testTime, isDownStream, startTest };
+  return { downloadSpeed, uploadSpeed, ping, complete, testTime, isDownStream, startTest };
 }

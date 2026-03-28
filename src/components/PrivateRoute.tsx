@@ -5,6 +5,7 @@ export const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
 
     const { session } = useAuth();
 
+
   return (
     <>
         {session ? <>{children}</> : <Navigate to="/" />}
