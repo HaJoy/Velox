@@ -25,6 +25,7 @@ export interface Measurement {
 
     /* metadata */
     userAgent: string;
+    createdAt: string;
 }
 
 // generic API responses in the `/measurement` namespace
