@@ -15,6 +15,13 @@ import {
   YAxis,
   CartesianGrid,
   ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  Legend,
+  Tooltip,
 } from "recharts";
 import type { Measurement } from "@/types/measurement.d";
 import { Card } from "@/components/ui/card";
@@ -39,6 +46,17 @@ const pingChartConfig = {
     color: "hsl(var(--destructive))",
   },
 } satisfies ChartConfig;
+
+// Colores para la gráfica pie de ISPs
+const COLORS = [
+  "#0080FF",
+  "#9900ff",
+  "#00ff95",
+  "#ff6b35",
+  "#f7931e",
+  "#c1272d",
+  "#651c32",
+];
 
 export const Dashboard = () => {
   const [measurements, setMeasurements] = useState<Measurement[]>([]);
@@ -119,6 +137,38 @@ export const Dashboard = () => {
       ? (measurements.reduce((sum, m) => sum + m.ping, 0) / measurements.length).toFixed(2)
       : 0;
 
+  // Calcular distribución de ISPs
+  const ispDistribution = measurements.reduce((acc: { [key: string]: number }, m) => {
+    acc[m.isp] = (acc[m.isp] || 0) + 1;
+    return acc;
+  }, {});
+
+  const ispPieData = Object.entries(ispDistribution).map(([name, value]) => ({
+    name,
+    value,
+  }));
+
+  // Calcular promedios por ISP
+  const ispAverages = measurements.reduce(
+    (acc: { [key: string]: { download: number[]; upload: number[]; ping: number[] } }, m) => {
+      if (!acc[m.isp]) {
+        acc[m.isp] = { download: [], upload: [], ping: [] };
+      }
+      acc[m.isp].download.push(m.downloadSpeed);
+      acc[m.isp].upload.push(m.uploadSpeed);
+      acc[m.isp].ping.push(m.ping);
+      return acc;
+    },
+    {}
+  );
+
+  const ispBarData = Object.entries(ispAverages).map(([name, data]) => ({
+    name,
+    "Descarga (Mbps)": parseFloat((data.download.reduce((a, b) => a + b, 0) / data.download.length).toFixed(2)),
+    "Subida (Mbps)": parseFloat((data.upload.reduce((a, b) => a + b, 0) / data.upload.length).toFixed(2)),
+    "Ping (ms)": parseFloat((data.ping.reduce((a, b) => a + b, 0) / data.ping.length).toFixed(2)),
+  }));
+
   // Componente KPI
   const KPICard = ({ label, value, unit }: { label: string; value: string | number; unit: string }) => (
     <Card className="p-6 flex flex-col items-center justify-center space-y-2 bg-[#0b0b0f]">
@@ -167,7 +217,7 @@ export const Dashboard = () => {
             <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" tick={{ fontSize: 12, angle: -45, textAnchor: "end" }} />
-              <YAxis label={{ value: "Mbps", angle: -90, position: "insideLeft", offset: -5 }} />
+              <YAxis label={{ value: "Mbps", angle: -90, position: "insideLeft", offset: 15 }} />
               <ChartTooltip content={<ChartTooltipContent />} />
               <ChartLegend content={<ChartLegendContent />} />
               <Line
@@ -188,7 +238,7 @@ export const Dashboard = () => {
             <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" tick={{ fontSize: 12, angle: -45, textAnchor: "end" }} />
-              <YAxis label={{ value: "ms", angle: -90, position: "insideLeft", offset: -5 }} />
+              <YAxis label={{ value: "ms", angle: -90, position: "insideLeft", offset: 15 }} />
               <ChartTooltip content={<ChartTooltipContent />} />
               <ChartLegend content={<ChartLegendContent />} />
               <Line
@@ -199,6 +249,54 @@ export const Dashboard = () => {
                 strokeWidth={2}
               />
             </LineChart>
+          </ChartContainer>
+        </Card>
+      </div>
+
+      {/* Cuarta fila: Distribución de ISPs y Promedios por ISP */}
+      <div className="grid grid-cols-2 w-full gap-4">
+        {/* Gráfica Pie de Distribución de ISPs */}
+        <Card className="space-y-2 px-5 py-5 bg-[#0b0b0f]">
+          <h2 className="text-xl font-semibold">Distribución de ISPs</h2>
+          <div className="flex justify-center h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={ispPieData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, value }) => `${name}: ${value}`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {ispPieData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+
+        {/* Gráfica de Barras: Promedios por ISP */}
+        <Card className="space-y-2 px-5 py-5 bg-[#0b0b0f]">
+          <h2 className="text-xl font-semibold">Promedios por ISP</h2>
+          <ChartContainer config={{}} className="h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={ispBarData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="Descarga (Mbps)" fill="#0080FF" />
+                <Bar dataKey="Subida (Mbps)" fill="#9900ff" />
+                <Bar dataKey="Ping (ms)" fill="#00ff95" />
+              </BarChart>
+            </ResponsiveContainer>
           </ChartContainer>
         </Card>
       </div>
