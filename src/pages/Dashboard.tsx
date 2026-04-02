@@ -25,7 +25,7 @@ import {
 } from "recharts";
 import type { Measurement } from "@/types/measurement.d";
 import { Card } from "@/components/ui/card";
-import { calcAvgs, formatChartData } from "@/lib/measurements/measurementCharts";
+import { calcAvgs, calcISPdata, formatChartData } from "@/lib/measurements/measurementCharts";
 
 const downloadChartConfig = {
   downloadSpeed: {
@@ -113,37 +113,8 @@ export const Dashboard = () => {
   // Calcular promedios
   const { avgDownloadSpeed, avgUploadSpeed, avgPing } = calcAvgs(measurements);
 
-  // Calcular distribución de ISPs
-  const ispDistribution = measurements.reduce((acc: { [key: string]: number }, m) => {
-    acc[m.isp] = (acc[m.isp] || 0) + 1;
-    return acc;
-  }, {});
-
-  const ispPieData = Object.entries(ispDistribution).map(([name, value]) => ({
-    name,
-    value,
-  }));
-
-  // Calcular promedios por ISP
-  const ispAverages = measurements.reduce(
-    (acc: { [key: string]: { download: number[]; upload: number[]; ping: number[] } }, m) => {
-      if (!acc[m.isp]) {
-        acc[m.isp] = { download: [], upload: [], ping: [] };
-      }
-      acc[m.isp].download.push(m.downloadSpeed);
-      acc[m.isp].upload.push(m.uploadSpeed);
-      acc[m.isp].ping.push(m.ping);
-      return acc;
-    },
-    {}
-  );
-
-  const ispBarData = Object.entries(ispAverages).map(([name, data]) => ({
-    name,
-    "Descarga (Mbps)": parseFloat((data.download.reduce((a, b) => a + b, 0) / data.download.length).toFixed(2)),
-    "Subida (Mbps)": parseFloat((data.upload.reduce((a, b) => a + b, 0) / data.upload.length).toFixed(2)),
-    "Ping (ms)": parseFloat((data.ping.reduce((a, b) => a + b, 0) / data.ping.length).toFixed(2)),
-  }));
+  // preparar los datos para la grafica Pie y de barras de ISPs
+  const { ispPieData, ispBarData} = calcISPdata(measurements);
 
   // Componente KPI
   const KPICard = ({ label, value, unit }: { label: string; value: string | number; unit: string }) => (
