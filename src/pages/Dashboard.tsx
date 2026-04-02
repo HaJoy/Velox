@@ -25,6 +25,7 @@ import {
 } from "recharts";
 import type { Measurement } from "@/types/measurement.d";
 import { Card } from "@/components/ui/card";
+import { calcAvgs, formatChartData } from "@/lib/measurements/measurementCharts";
 
 const downloadChartConfig = {
   downloadSpeed: {
@@ -107,35 +108,10 @@ export const Dashboard = () => {
   }
 
   // Preparar datos para las gráficas
-  const chartData = measurements.map((measurement) => ({
-    date: new Date(measurement.createdAt).toLocaleDateString(),
-    time: new Date(measurement.createdAt).toLocaleTimeString(),
-    downloadSpeed: measurement.downloadSpeed,
-    uploadSpeed: measurement.uploadSpeed,
-    ping: measurement.ping,
-  }));
+  const chartData = formatChartData(measurements);
 
   // Calcular promedios
-  const avgDownloadSpeed =
-    measurements.length > 0
-      ? (
-          measurements.reduce((sum, m) => sum + m.downloadSpeed, 0) /
-          measurements.length
-        ).toFixed(2)
-      : 0;
-
-  const avgUploadSpeed =
-    measurements.length > 0
-      ? (
-          measurements.reduce((sum, m) => sum + m.uploadSpeed, 0) /
-          measurements.length
-        ).toFixed(2)
-      : 0;
-
-  const avgPing =
-    measurements.length > 0
-      ? (measurements.reduce((sum, m) => sum + m.ping, 0) / measurements.length).toFixed(2)
-      : 0;
+  const { avgDownloadSpeed, avgUploadSpeed, avgPing } = calcAvgs(measurements);
 
   // Calcular distribución de ISPs
   const ispDistribution = measurements.reduce((acc: { [key: string]: number }, m) => {
