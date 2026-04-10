@@ -6,6 +6,13 @@ import {
   NavigationMenuLink,
 } from "@/components/ui/navigation-menu";
 import { Button } from "./ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "./ui/dropdown-menu";
 import { AuthDialog } from "./auth/AuthDialog";
 import { useAuth } from "@/context/AuthContext";
 import { ConfirmDialog } from "./AlertDialog";
@@ -23,7 +30,7 @@ export const Header = () => {
     <header className="flex justify-center border-b mb-2 sticky top-0 bg-[#0b0b0f]">
       <NavigationMenu className="max-w-11/12">
         <div className="w-full">
-          <NavigationMenuList className={`grid ${user ? `grid-cols-3` : `grid-cols-2`} items-center w-full`}>
+          <NavigationMenuList className={`flex justify-between md:grid ${user ? `md:grid-cols-3` : `md:grid-cols-2`} items-center w-full`}>
             {/* Brand */}
             <NavigationMenuItem className="justify-self-start">
               <h1 className="text-5xl select-none" lang="en">
@@ -33,7 +40,7 @@ export const Header = () => {
 
             {/* Tabs */}
             {user && (
-              <div className="flex gap-5 justify-self-center">
+              <div className="hidden md:flex gap-5 justify-self-center">
                 <NavigationMenuItem>
                   <NavigationMenuLink asChild>
                     <Link to="/">Inicio</Link>
@@ -48,8 +55,9 @@ export const Header = () => {
             )}
 
             {/* Botones de sesion */}
-            <NavigationMenuItem className="flex gap-2 justify-self-end">
+            <NavigationMenuItem className="flex gap-2 justify-self-end items-center">
               {!user ? (
+                // Usuario no autenticado
                 <>
                   <Button
                     className="cursor-pointer"
@@ -66,14 +74,41 @@ export const Header = () => {
                   </Button>
                 </>
               ) : (
+                // Usuario autenticado
                 <>
-                  <Button
-                    variant="outline"
-                    className="cursor-pointer"
-                    onClick={() => setOpenAlertDialog(true)}
-                  >
-                    Log out
-                  </Button>
+                  {/* Desktop */}
+                  <div className="hidden md:flex gap-2">
+                    <Button
+                      variant="outline"
+                      className="cursor-pointer"
+                      onClick={() => setOpenAlertDialog(true)}
+                    >
+                      Log out
+                    </Button>
+                  </div>
+
+                  {/* Mobile */}
+                  <div className="md:hidden">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" className="cursor-pointer">
+                          Menu
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent sideOffset={8} align="end" className="w-40">
+                        <DropdownMenuItem asChild>
+                          <Link to="/">Inicio</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to="/dashboard">Dashboard</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onSelect={() => setOpenAlertDialog(true)}>
+                          Log out
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </>
               )}
             </NavigationMenuItem>
