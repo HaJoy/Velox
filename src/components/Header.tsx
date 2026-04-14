@@ -17,6 +17,7 @@ import { AuthDialog } from "./auth/AuthDialog";
 import { useAuth } from "@/context/AuthContext";
 import { ConfirmDialog } from "./AlertDialog";
 import { Link } from "react-router-dom";
+import { LogOut, Menu } from "lucide-react";
 
 export const Header = () => {
   const [dialogMode, setDialogMode] = useState<"login" | "register" | null>(
@@ -92,7 +93,7 @@ export const Header = () => {
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="outline" className="cursor-pointer">
-                          Menu
+                          <Menu />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent sideOffset={8} align="end" className="w-40">
@@ -103,7 +104,8 @@ export const Header = () => {
                           <Link to="/dashboard">Dashboard</Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onSelect={() => setOpenAlertDialog(true)}>
+                        <DropdownMenuItem variant="destructive" onSelect={() => setOpenAlertDialog(true)}>
+                          <LogOut />
                           Log out
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -120,6 +122,7 @@ export const Header = () => {
         isOpen={openAlertDialog}
         title="Cerrar sesión"
         description="¿Está seguro que desea cerrar sesión?"
+        destructiveConfirmVariant={true}
         onClose={() => setOpenAlertDialog(false)}
         handler={logout}
       />
