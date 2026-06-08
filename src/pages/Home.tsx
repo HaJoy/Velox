@@ -1,62 +1,90 @@
 import { getIP, getISP } from "@/api/ipService";
+import { getUserHistory } from "@/api/measurementService";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNdt7 } from "@/hooks/useNdt7";
+import { useAuth } from "@/context/AuthContext";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+  TableCaption,
+} from "@/components/ui/table";
 import { useEffect, useState } from "react";
 import ReactSpeedometer from "react-d3-speedometer";
+import type { Measurement } from "@/types/measurement";
 
 // Este componente es toda la pagina de la aplicacion.
 export const Home = () => {
   // Obtener las metricas a traves del custom hook.
   const { downloadSpeed, uploadSpeed, complete, testTime, isDownStream, startTest } =
     useNdt7();
-  
-    const [publicIp, setPublicIp] = useState<string>("Cargando...");
-    const [userIsp, setUserIsp] = useState<string>("Cargando...");
-    const [ipErrorMsg, setIpErrorMsg] = useState<string>("");
-    const [ispErrorMsg, setIspErrorMsg] = useState<string>("");
-    
-    useEffect(() => {
-      
-      const fetchPublicIP = async () => {
-        try {
-          const ipifyRaw = await getIP();
-          const userPublicIP = ipifyRaw.ip;
 
-          setPublicIp(userPublicIP);
-          setIpErrorMsg("");
-        } catch (error) {
-          console.error("Failed to fetch user IP: ", error);
-          setPublicIp("No disponible");
-          setIpErrorMsg("No se pudo obtener la IP pública");
-        }
+  const { session, user } = useAuth();
 
-        try {
-          // Para el desarrollo se utilizara 'isp' como una variable estatica
-          // para evitar requests innecesarias a ipinfo
+  const [publicIp, setPublicIp] = useState<string>("Cargando...");
+  const [userIsp, setUserIsp] = useState<string>("Cargando...");
+  const [ipErrorMsg, setIpErrorMsg] = useState<string>("");
+  const [ispErrorMsg, setIspErrorMsg] = useState<string>("");
 
-          // const infoIpRaw = await getISP();
-          // const isp = infoIpRaw.ispinfo.org.split(' ').slice(1).join(' ');
-          const isp = "UNE TELECOMUNICACIONES S.A";
+  const [measurements, setMeasurements] = useState<Measurement[]>([]);
 
-          setUserIsp(isp);
-          setIspErrorMsg("");
-        } catch (error) {
-          console.error("Failed to fetch user ISP: ", error);
-          setUserIsp("No disponible");
-          setIspErrorMsg("No se pudo obtener el proveedor");
-        }
-      };
-    
-      fetchPublicIP();
+  useEffect(() => {
+    const fetchPublicIP = async () => {
+      try {
+        const ipifyRaw = await getIP();
+        const userPublicIP = ipifyRaw.ip;
 
-    }, [])
+        setPublicIp(userPublicIP);
+        setIpErrorMsg("");
+      } catch (error) {
+        console.error("Failed to fetch user IP: ", error);
+        setPublicIp("No disponible");
+        setIpErrorMsg("No se pudo obtener la IP pública");
+      }
+
+      try {
+        // Para el desarrollo se utilizara 'isp' como una variable estatica
+        // para evitar requests innecesarias a ipinfo
+
+        // const infoIpRaw = await getISP();
+        // const isp = infoIpRaw.ispinfo.org.split(' ').slice(1).join(' ');
+        const isp = "UNE TELECOMUNICACIONES S.A";
+
+        setUserIsp(isp);
+        setIspErrorMsg("");
+      } catch (error) {
+        console.error("Failed to fetch user ISP: ", error);
+        setUserIsp("No disponible");
+        setIspErrorMsg("No se pudo obtener el proveedor");
+      }
+    };
+
+    fetchPublicIP();
+  }, []);
+
+  useEffect(() => {
+    const loadHistory = async () => {
+      try {
+        const data = await getUserHistory();
+        setMeasurements(data.measurementHistory);
+      } catch (err) {
+        console.error("Failed to load user history:", err);
+        setMeasurements([]);
+      }
+    };
+
+    if (user) {loadHistory(); console.log(measurements)};
+  }, [user]);
     
 
   return (
     <div className="flex flex-col items-center h-full min-w-[285px]">
       <div className="flex justify-center w-full">
-        <Card className="w-full max-w-[562px]">
+        <Card className="w-full max-w-[562px] bg-[#0b0b0f]">
           <CardHeader>
             <CardTitle>Mide tu velocidad de internet</CardTitle>
           </CardHeader>
@@ -108,6 +136,42 @@ export const Home = () => {
                   {complete ? "Iniciar" : "Calculando..."}
                 </Button>
               </div>
+
+              {/* Tabla de historial del usuario (solo si está autenticado) */}
+              {user && measurements.length > 0 && (
+                <div className="mt-6 w-full">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>IP</TableHead>
+                        <TableHead>ISP</TableHead>
+                        <TableHead>Descarga (Mb/s)</TableHead>
+                        <TableHead>Subida (Mb/s)</TableHead>
+                        <TableHead>Ping (ms)</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {measurements.map((m: Measurement, idx: number) => {
+                        const ip = m.userIP ?? "N/A";
+                        const isp = m.isp ?? "N/A";
+                        const download = m.downloadSpeed ?? 0;
+                        const upload = m.uploadSpeed ?? 0;
+                        const ping = m.ping ?? 0;
+
+                        return (
+                          <TableRow key={idx}>
+                            <TableCell>{ip}</TableCell>
+                            <TableCell>{isp}</TableCell>
+                            <TableCell>{download}</TableCell>
+                            <TableCell>{upload}</TableCell>
+                            <TableCell>{ping}</TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
