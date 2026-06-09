@@ -10,7 +10,7 @@ import { MeasurementsTable } from "@/components/MeasurementsTable";
 // Este componente es toda la pagina de la aplicacion.
 export const Home = () => {
   // Obtener las metricas a traves del custom hook.
-  const { downloadSpeed, uploadSpeed, complete, testTime, isDownStream, startTest } =
+  const { downloadSpeed, uploadSpeed, complete, testTime, isDownStream, downloadComplete, uploadComplete, startTest } =
     useNdt7();
 
   const { session, user } = useAuth();
@@ -68,11 +68,11 @@ export const Home = () => {
                 {/* Mediciones de velocidad */}
                 <div className="w-1/2">
                   <h2>Descarga</h2>
-                  <span className="text-base md:text-2xl font-bold">{`${downloadSpeed || 0} Mb/s`}</span>
+                  <span className="text-base md:text-2xl font-bold">{`${downloadComplete && downloadSpeed || 0} Mb/s`}</span>
                 </div>
                 <div className="w-1/2">
                   <h2>Subida</h2>
-                  <span className="text-base md:text-2xl font-bold">{`${uploadSpeed || 0} Mb/s`}</span>
+                  <span className="text-base md:text-2xl font-bold">{`${uploadComplete && uploadSpeed || 0} Mb/s`}</span>
                 </div>
               </div>
 
@@ -81,8 +81,8 @@ export const Home = () => {
                 <ReactSpeedometer
                   minValue={0}
                   maxValue={100}
-                  value={isDownStream? downloadSpeed : uploadSpeed}
-                  currentValueText={`${isDownStream? downloadSpeed : uploadSpeed} Mb/s`}
+                  value={!complete? isDownStream? downloadSpeed : uploadSpeed : 0}
+                  currentValueText={`${!complete? isDownStream? downloadSpeed : uploadSpeed : 0} Mb/s`}
                   segmentColors={["#0000FF", "#0040FF", "#0080FF", "#00BFFF", "#00FFFF"]}
                   height={180}
                 />

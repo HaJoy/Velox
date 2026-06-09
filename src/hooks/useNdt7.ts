@@ -26,6 +26,8 @@ export const useNdt7 = () => {
   const [complete, setComplete] = useState<boolean>(true);
   const [testTime, setTestTime] = useState<number>(0);
   const [isDownStream, setIsDownStream] = useState<boolean>(true);
+  const [downloadComplete, setDownloadComplete] = useState<boolean>(false);
+  const [uploadComplete, setUploadComplete] = useState<boolean>(false);
 
   const startTest = () => {
 
@@ -34,6 +36,8 @@ export const useNdt7 = () => {
     setUploadSpeed(0);
     setComplete(false);
     setTestTime(0);
+    setDownloadComplete(false);
+    setUploadComplete(false);
 
     let currentPing = Infinity;
     const startTime = Date.now();
@@ -85,6 +89,7 @@ export const useNdt7 = () => {
             const downloadPing = data.LastServerMeasurement.TCPInfo?.MinRTT ?? Infinity;
 
             setDownloadSpeed(parseFloat(clientGoodPut?.toFixed(2)));
+            setDownloadComplete(true);
             currentPing = Math.min(currentPing, downloadPing);
 
           } else {
@@ -121,6 +126,7 @@ export const useNdt7 = () => {
             const uploadPing = msg ? msg.MinRTT : Infinity;
 
             setUploadSpeed(parseFloat(throughput.toFixed(2)));
+            setUploadComplete(true);
             currentPing = Math.min(currentPing, uploadPing);
 
           } else {
@@ -140,10 +146,6 @@ export const useNdt7 = () => {
     )
 
     .then((exitcode: number) => {
-      // setTestTime((Date.now() - startTime) / 1000);
-      //   setComplete(true);
-      //   setPing(currentPing);
-        // console.log(currentPing);
       if (exitcode > 0) {
         console.error('An error has ocurred during test.');
       } else {
@@ -160,5 +162,5 @@ export const useNdt7 = () => {
       
     })
   };
-  return { downloadSpeed, uploadSpeed, ping, complete, testTime, isDownStream, startTest };
+  return { downloadSpeed, uploadSpeed, ping, complete, testTime, isDownStream, downloadComplete, uploadComplete, startTest };
 }
