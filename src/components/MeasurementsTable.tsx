@@ -8,14 +8,15 @@ import {
   TableRow,
 } from "./ui/table";
 import { useEffect, useState } from "react";
+import { CSVLink } from "react-csv";
 import { getUserHistory } from "@/api/measurementService";
 import type { User } from "@supabase/supabase-js";
+import { Download } from "lucide-react";
 
 export const MeasurementsTable = ({ user }: { user?: User | null }) => {
+  const [measurements, setMeasurements] = useState<Measurement[]>([]);
 
-    const [measurements, setMeasurements] = useState<Measurement[]>([]);
-
-    useEffect(() => {
+  useEffect(() => {
     const loadHistory = async () => {
       try {
         const data = await getUserHistory();
@@ -26,15 +27,52 @@ export const MeasurementsTable = ({ user }: { user?: User | null }) => {
       }
     };
 
-    if (user) {loadHistory(); console.log(measurements)};
-  }, [user]);
+    if (user) {
+      loadHistory();
+      console.log(measurements);
+    }
+  }, [measurements, user]);
 
   if (!measurements || measurements.length === 0) {
     return null;
   }
 
+  const csvHeaders = [
+    { label: "#", key: "index" },
+    { label: "IP", key: "userIP" },
+    { label: "ISP", key: "isp" },
+    { label: "Descarga (Mb/s)", key: "downloadSpeed" },
+    { label: "Subida (Mb/s)", key: "uploadSpeed" },
+    { label: "Ping (ms)", key: "ping" },
+    { label: "Fecha", key: "createdAt" },
+  ];
+
+  const csvData = measurements.map((m, idx) => ({
+    index: idx + 1,
+    userIP: m.userIP ?? "N/A",
+    isp: m.isp ?? "N/A",
+    downloadSpeed: m.downloadSpeed ?? 0,
+    uploadSpeed: m.uploadSpeed ?? 0,
+    ping: m.ping ?? 0,
+    createdAt: new Date(m.createdAt).toLocaleString("es-ES", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }),
+  }));
+
   return (
     <div className="mt-6 w-full">
+      <div className="mb-4 flex justify-end">
+        <CSVLink
+          data={csvData}
+          headers={csvHeaders}
+          filename="mediciones.csv"
+          className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md border bg-background shadow-xs px-4 py-2 text-sm font-medium transition-all hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50"
+        >
+          <Download />
+          Descargar CSV
+        </CSVLink>
+      </div>
       <Table>
         <TableHeader>
           <TableRow>
