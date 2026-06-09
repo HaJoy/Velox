@@ -1,21 +1,11 @@
 import { getIP, getISP } from "@/api/ipService";
-import { getUserHistory } from "@/api/measurementService";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNdt7 } from "@/hooks/useNdt7";
 import { useAuth } from "@/context/AuthContext";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-  TableCaption,
-} from "@/components/ui/table";
 import { useEffect, useState } from "react";
 import ReactSpeedometer from "react-d3-speedometer";
-import type { Measurement } from "@/types/measurement";
+import { MeasurementsTable } from "@/components/MeasurementsTable";
 
 // Este componente es toda la pagina de la aplicacion.
 export const Home = () => {
@@ -29,8 +19,6 @@ export const Home = () => {
   const [userIsp, setUserIsp] = useState<string>("Cargando...");
   const [ipErrorMsg, setIpErrorMsg] = useState<string>("");
   const [ispErrorMsg, setIspErrorMsg] = useState<string>("");
-
-  const [measurements, setMeasurements] = useState<Measurement[]>([]);
 
   useEffect(() => {
     const fetchPublicIP = async () => {
@@ -65,21 +53,6 @@ export const Home = () => {
 
     fetchPublicIP();
   }, []);
-
-  useEffect(() => {
-    const loadHistory = async () => {
-      try {
-        const data = await getUserHistory();
-        setMeasurements(data.measurementHistory);
-      } catch (err) {
-        console.error("Failed to load user history:", err);
-        setMeasurements([]);
-      }
-    };
-
-    if (user) {loadHistory(); console.log(measurements)};
-  }, [user]);
-    
 
   return (
     <div className="flex flex-col items-center h-full min-w-[285px]">
@@ -138,48 +111,7 @@ export const Home = () => {
               </div>
 
               {/* Tabla de historial del usuario (solo si está autenticado) */}
-              {user && measurements.length > 0 && (
-                <div className="mt-6 w-full">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>#</TableHead>
-                        <TableHead>IP</TableHead>
-                        <TableHead>ISP</TableHead>
-                        <TableHead>Descarga (Mb/s)</TableHead>
-                        <TableHead>Subida (Mb/s)</TableHead>
-                        <TableHead>Ping (ms)</TableHead>
-                        <TableHead>Fecha</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {measurements.map((m: Measurement, idx: number) => {
-                        const ip = m.userIP ?? "N/A";
-                        const isp = m.isp ?? "N/A";
-                        const download = m.downloadSpeed ?? 0;
-                        const upload = m.uploadSpeed ?? 0;
-                        const ping = m.ping ?? 0;
-                        const date = new Date(m.createdAt).toLocaleString("es-ES", {
-                          dateStyle: "medium",
-                          timeStyle: "short",
-                        });
-
-                        return (
-                          <TableRow key={idx}>
-                            <TableCell className="font-bold">{idx + 1}</TableCell>
-                            <TableCell>{ip}</TableCell>
-                            <TableCell>{isp}</TableCell>
-                            <TableCell>{download}</TableCell>
-                            <TableCell>{upload}</TableCell>
-                            <TableCell>{ping}</TableCell>
-                            <TableCell>{date}</TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
+              {user && <MeasurementsTable user={user} />}
             </div>
           </CardContent>
         </Card>
