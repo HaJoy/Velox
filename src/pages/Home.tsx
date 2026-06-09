@@ -84,7 +84,7 @@ export const Home = () => {
   return (
     <div className="flex flex-col items-center h-full min-w-[285px]">
       <div className="flex justify-center w-full">
-        <Card className="w-full max-w-[562px] bg-[#0b0b0f]">
+        <Card className="w-full bg-[#0b0b0f]">
           <CardHeader>
             <CardTitle>Mide tu velocidad de internet</CardTitle>
           </CardHeader>
@@ -143,11 +143,13 @@ export const Home = () => {
                   <Table>
                     <TableHeader>
                       <TableRow>
+                        <TableHead>#</TableHead>
                         <TableHead>IP</TableHead>
                         <TableHead>ISP</TableHead>
                         <TableHead>Descarga (Mb/s)</TableHead>
                         <TableHead>Subida (Mb/s)</TableHead>
                         <TableHead>Ping (ms)</TableHead>
+                        <TableHead>Fecha</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -157,14 +159,20 @@ export const Home = () => {
                         const download = m.downloadSpeed ?? 0;
                         const upload = m.uploadSpeed ?? 0;
                         const ping = m.ping ?? 0;
+                        const date = new Date(m.createdAt).toLocaleString("es-ES", {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        });
 
                         return (
                           <TableRow key={idx}>
+                            <TableCell className="font-bold">{idx + 1}</TableCell>
                             <TableCell>{ip}</TableCell>
                             <TableCell>{isp}</TableCell>
                             <TableCell>{download}</TableCell>
                             <TableCell>{upload}</TableCell>
                             <TableCell>{ping}</TableCell>
+                            <TableCell>{date}</TableCell>
                           </TableRow>
                         );
                       })}
