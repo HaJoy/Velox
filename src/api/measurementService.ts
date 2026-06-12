@@ -2,6 +2,7 @@ import { isGetOneMeasurementResponse } from "@/guards/measurement.guard";
 import { api } from "./axios";
 import { getIP, getISP } from "./ipService";
 import { isIpinfoResponse } from "@/guards/isp.guard";
+import type { Measurement } from "@/types/measurement";
 
 
 export const getAllMeasurements = async () => {
@@ -48,7 +49,6 @@ export const createMeasurement = async (payload: CreateMeasurementPayload) => {
           country: userCountry ?? "Unavailable",
           ...payload
         };
-        console.log('Data being sent to /measurement:', dataToSend);
 
         const response = await api.post('/measurement', dataToSend);
 
@@ -59,3 +59,34 @@ export const createMeasurement = async (payload: CreateMeasurementPayload) => {
         console.error('Error trying to create measurement: ', error);
     }
 }
+
+type userHistoryResponse = {
+  message: string;
+  measurementHistory: Measurement[];
+};
+
+export const getUserHistory = async (): Promise<userHistoryResponse> => {
+
+  try {
+    const response = await api.get(`/measurement/history`);
+    return response.data;
+  } catch (error) {
+    console.error('Error while fetching user history: ', error);
+    return { message: 'Error fetching user history', measurementHistory: [] };
+  }
+};
+
+type CountryISPData = {
+  message: string;
+  countries: { [key: string]: string[] };
+};
+
+export const getCountriesAndIsps = async (): Promise<CountryISPData> => {
+  try {
+    const response = await api.get('/measurement/countries');
+    return response.data;
+  } catch (error) {
+    console.error('Error while fetching countries and ISPs: ', error);
+    throw error;
+  }
+};

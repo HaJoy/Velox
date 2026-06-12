@@ -2,61 +2,64 @@ import { getIP, getISP } from "@/api/ipService";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNdt7 } from "@/hooks/useNdt7";
+import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
 import ReactSpeedometer from "react-d3-speedometer";
+import { MeasurementsTable } from "@/components/MeasurementsTable";
 
 // Este componente es toda la pagina de la aplicacion.
 export const Home = () => {
   // Obtener las metricas a traves del custom hook.
-  const { downloadSpeed, uploadSpeed, complete, testTime, isDownStream, startTest } =
-    useNdt7();
-  
-    const [publicIp, setPublicIp] = useState<string>("Cargando...");
-    const [userIsp, setUserIsp] = useState<string>("Cargando...");
-    const [ipErrorMsg, setIpErrorMsg] = useState<string>("");
-    const [ispErrorMsg, setIspErrorMsg] = useState<string>("");
-    
-    useEffect(() => {
-      
-      const fetchPublicIP = async () => {
-        try {
-          const ipifyRaw = await getIP();
-          const userPublicIP = ipifyRaw.ip;
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
 
-          setPublicIp(userPublicIP);
-          setIpErrorMsg("");
-        } catch (error) {
-          console.error("Failed to fetch user IP: ", error);
-          setPublicIp("No disponible");
-          setIpErrorMsg("No se pudo obtener la IP pública");
-        }
+  const { downloadSpeed, uploadSpeed, complete, testTime, isDownStream, downloadComplete, uploadComplete, startTest } =
+    useNdt7({ onMeasurementSaved: () => setHistoryRefreshKey((value) => value + 1) });
 
-        try {
-          // Para el desarrollo se utilizara 'isp' como una variable estatica
-          // para evitar requests innecesarias a ipinfo
+  const { session, user } = useAuth();
 
-          // const infoIpRaw = await getISP();
-          // const isp = infoIpRaw.ispinfo.org.split(' ').slice(1).join(' ');
-          const isp = "UNE TELECOMUNICACIONES S.A";
+  const [publicIp, setPublicIp] = useState<string>("Cargando...");
+  const [userIsp, setUserIsp] = useState<string>("Cargando...");
+  const [ipErrorMsg, setIpErrorMsg] = useState<string>("");
+  const [ispErrorMsg, setIspErrorMsg] = useState<string>("");
 
-          setUserIsp(isp);
-          setIspErrorMsg("");
-        } catch (error) {
-          console.error("Failed to fetch user ISP: ", error);
-          setUserIsp("No disponible");
-          setIspErrorMsg("No se pudo obtener el proveedor");
-        }
-      };
-    
-      fetchPublicIP();
+  useEffect(() => {
+    const fetchPublicIP = async () => {
+      try {
+        const ipifyRaw = await getIP();
+        const userPublicIP = ipifyRaw.ip;
 
-    }, [])
-    
+        setPublicIp(userPublicIP);
+        setIpErrorMsg("");
+      } catch (error) {
+        console.error("Failed to fetch user IP: ", error);
+        setPublicIp("No disponible");
+        setIpErrorMsg("No se pudo obtener la IP pública");
+      }
+
+      try {
+        // Para el desarrollo se utilizara 'isp' como una variable estatica
+        // para evitar requests innecesarias a ipinfo
+
+        // const infoIpRaw = await getISP();
+        // const isp = infoIpRaw.ispinfo.org.split(' ').slice(1).join(' ');
+        const isp = "UNE TELECOMUNICACIONES S.A";
+
+        setUserIsp(isp);
+        setIspErrorMsg("");
+      } catch (error) {
+        console.error("Failed to fetch user ISP: ", error);
+        setUserIsp("No disponible");
+        setIspErrorMsg("No se pudo obtener el proveedor");
+      }
+    };
+
+    fetchPublicIP();
+  }, []);
 
   return (
     <div className="flex flex-col items-center h-full min-w-[285px]">
       <div className="flex justify-center w-full">
-        <Card className="w-full max-w-[562px]">
+        <Card className="w-full bg-[#0b0b0f]">
           <CardHeader>
             <CardTitle>Mide tu velocidad de internet</CardTitle>
           </CardHeader>
@@ -67,11 +70,11 @@ export const Home = () => {
                 {/* Mediciones de velocidad */}
                 <div className="w-1/2">
                   <h2>Descarga</h2>
-                  <span className="text-base md:text-2xl font-bold">{`${downloadSpeed || 0} Mb/s`}</span>
+                  <span className="text-base md:text-2xl font-bold">{`${downloadComplete && downloadSpeed || 0} Mb/s`}</span>
                 </div>
                 <div className="w-1/2">
                   <h2>Subida</h2>
-                  <span className="text-base md:text-2xl font-bold">{`${uploadSpeed || 0} Mb/s`}</span>
+                  <span className="text-base md:text-2xl font-bold">{`${uploadComplete && uploadSpeed || 0} Mb/s`}</span>
                 </div>
               </div>
 
@@ -80,8 +83,8 @@ export const Home = () => {
                 <ReactSpeedometer
                   minValue={0}
                   maxValue={100}
-                  value={isDownStream? downloadSpeed : uploadSpeed}
-                  currentValueText={`${isDownStream? downloadSpeed : uploadSpeed} Mb/s`}
+                  value={!complete? isDownStream? downloadSpeed : uploadSpeed : 0}
+                  currentValueText={`${!complete? isDownStream? downloadSpeed : uploadSpeed : 0} Mb/s`}
                   segmentColors={["#0000FF", "#0040FF", "#0080FF", "#00BFFF", "#00FFFF"]}
                   height={180}
                 />
@@ -108,6 +111,9 @@ export const Home = () => {
                   {complete ? "Iniciar" : "Calculando..."}
                 </Button>
               </div>
+
+              {/* Tabla de historial del usuario (solo si está autenticado) */}
+              {user && <MeasurementsTable user={user} refreshKey={historyRefreshKey} />}
             </div>
           </CardContent>
         </Card>

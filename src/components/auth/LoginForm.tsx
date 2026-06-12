@@ -33,7 +33,6 @@ export const LoginForm = ({ onClose }: LoginFormProps) => {
   const handleLogin = async (data: LoginFormValues) => {
     const result = await login(data.email, data.password);
     if (result?.success) {
-      console.log(result.data);
       onClose();
     }
   };

@@ -33,7 +33,6 @@ export const RegisterForm = ({ onClose }: RegisterFormProps) => {
   const handleRegister = async (data: RegisterFormValues) => {
     const result = await register(data.email, data.password);
     if (result?.success) {
-      console.log(result.data);
       onClose();
     }
   };

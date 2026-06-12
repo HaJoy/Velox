@@ -26,7 +26,7 @@ export const getISP = async (): Promise<ipinfoResponse | GetOneMeasurementRespon
     const clientIP = await getIP();
     try {
         const response = await axios.post(`http://localhost:${import.meta.env.VITE_PORT}/api/measurement/isp`, { ip: clientIP.ip });
-        console.log(response.data);
+        
         if (isGetOneMeasurementResponse(response.data)) {
             return response.data;
         } else {
@@ -37,7 +37,6 @@ export const getISP = async (): Promise<ipinfoResponse | GetOneMeasurementRespon
             const fallbackResponse = await axios.post(`http://localhost:${import.meta.env.VITE_PORT}/api/isp`, { ip: clientIP.ip });
             const data = fallbackResponse.data;
             if (isIpinfoResponse(data)) {
-                // console.log(data);
                 return data;
             } else {
                 throw new Error("Invalid response from ipinfo");

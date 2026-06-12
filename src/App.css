@@ -30,5 +30,30 @@ body {
     radial-gradient(circle at 20% 20%, rgba(255,255,255,0.04), transparent 40%),
     radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px);
   background-size: cover, 40px 40px;
+  background-attachment: fixed;
   background-color: #0b0b0f;
+}
+
+div[data-slot="table-container"]::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+div[data-slot="table-container"]::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+div[data-slot="table-container"]::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+div[data-slot="table-container"]::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Scroball Firefox */
+div[data-slot="table-container"] {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
