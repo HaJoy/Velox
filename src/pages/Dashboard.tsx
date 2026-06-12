@@ -67,7 +67,6 @@ export const Dashboard = () => {
     const getMeasurements = async () => {
       try {
         const response = await getAllMeasurements();
-        console.log(response);
         // Ordenar por fecha para mejor visualización en gráficas
         const measurementsArray = response.measurements || [];
         const sortedMeasurements = measurementsArray.sort(

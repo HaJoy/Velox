@@ -100,7 +100,6 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
             console.warn('The last measurement could not be found when completing the test. Using the last measurement during-test to prevent \'undefined\'');
           }
           console.log('Download speed measurement completed.')
-          console.log(data);
         },
         
         // Mostrar un log cuando la medicion de subida comience
@@ -142,7 +141,6 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
             console.warn('The last measurement could not be found when completing the test. Using the last measurement during-test to prevent \'undefined\'');
           }
           console.log('Upload speed measurement completed.');
-          console.log(data);
         },
         error: function (err: Error) {
           console.log('Error while running upload test: ', err.message);

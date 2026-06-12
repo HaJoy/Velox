@@ -49,7 +49,6 @@ export const createMeasurement = async (payload: CreateMeasurementPayload) => {
           country: userCountry ?? "Unavailable",
           ...payload
         };
-        console.log('Data being sent to /measurement:', dataToSend);
 
         const response = await api.post('/measurement', dataToSend);
 
