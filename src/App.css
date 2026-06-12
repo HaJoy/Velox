@@ -33,3 +33,27 @@ body {
   background-attachment: fixed;
   background-color: #0b0b0f;
 }
+
+div[data-slot="table-container"]::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+div[data-slot="table-container"]::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+div[data-slot="table-container"]::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+div[data-slot="table-container"]::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Scroball Firefox */
+div[data-slot="table-container"] {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}

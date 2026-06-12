@@ -10,8 +10,10 @@ import { MeasurementsTable } from "@/components/MeasurementsTable";
 // Este componente es toda la pagina de la aplicacion.
 export const Home = () => {
   // Obtener las metricas a traves del custom hook.
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
+
   const { downloadSpeed, uploadSpeed, complete, testTime, isDownStream, downloadComplete, uploadComplete, startTest } =
-    useNdt7();
+    useNdt7({ onMeasurementSaved: () => setHistoryRefreshKey((value) => value + 1) });
 
   const { session, user } = useAuth();
 
@@ -111,7 +113,7 @@ export const Home = () => {
               </div>
 
               {/* Tabla de historial del usuario (solo si está autenticado) */}
-              {user && <MeasurementsTable user={user} />}
+              {user && <MeasurementsTable user={user} refreshKey={historyRefreshKey} />}
             </div>
           </CardContent>
         </Card>

@@ -13,14 +13,18 @@ import { getUserHistory } from "@/api/measurementService";
 import type { User } from "@supabase/supabase-js";
 import { Download } from "lucide-react";
 
-export const MeasurementsTable = ({ user }: { user?: User | null }) => {
+export const MeasurementsTable = ({ user, refreshKey }: { user?: User | null; refreshKey?: number }) => {
   const [measurements, setMeasurements] = useState<Measurement[]>([]);
 
   useEffect(() => {
     const loadHistory = async () => {
       try {
         const data = await getUserHistory();
-        setMeasurements(data.measurementHistory);
+        // Ordenar de más antiguo a más reciente (fecha ascendente)
+        const sorted = (data.measurementHistory ?? [])
+          .slice()
+          .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        setMeasurements(sorted);
       } catch (err) {
         console.error("Failed to load user history:", err);
         setMeasurements([]);
@@ -29,9 +33,8 @@ export const MeasurementsTable = ({ user }: { user?: User | null }) => {
 
     if (user) {
       loadHistory();
-      console.log(measurements);
     }
-  }, [measurements, user]);
+  }, [user, refreshKey]);
 
   if (!measurements || measurements.length === 0) {
     return null;
@@ -74,7 +77,7 @@ export const MeasurementsTable = ({ user }: { user?: User | null }) => {
         </CSVLink>
       </div>
       <Table>
-        <TableHeader>
+        <TableHeader className="sticky top-0 z-10 bg-[#0b0b0f]">
           <TableRow>
             <TableHead>#</TableHead>
             <TableHead>IP</TableHead>

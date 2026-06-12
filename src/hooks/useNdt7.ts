@@ -18,7 +18,7 @@ import { createMeasurement } from "@/api/measurementService";
  * Utiliza la API de NDT7 (M-lab) para realizar una prueba de velocidad de red.
  * @returns Resultado de la prueba
  */
-export const useNdt7 = () => {
+export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => void } = {}) => {
 
   const [downloadSpeed, setDownloadSpeed] = useState<number>(0);
   const [uploadSpeed, setUploadSpeed] = useState<number>(0);
@@ -40,6 +40,8 @@ export const useNdt7 = () => {
     setUploadComplete(false);
 
     let currentPing = Infinity;
+    let currentDownloadSpeed = 0;
+    let currentUploadSpeed = 0;
     const startTime = Date.now();
 
     // Proceso de medicion
@@ -70,7 +72,8 @@ export const useNdt7 = () => {
             // que no necesariamente son del cliente, no afectan la medicion.
             if (isClientMeasurementMsg(data)) {
               const msg = data.Data?.MeanClientMbps ?? 0;
-              setDownloadSpeed(parseFloat(msg.toFixed(2)));
+              currentDownloadSpeed = parseFloat(msg.toFixed(2));
+              setDownloadSpeed(currentDownloadSpeed);
             }
           } else {
             console.error('The client response was not an object in this sample.');
@@ -88,7 +91,8 @@ export const useNdt7 = () => {
             const clientGoodPut = data.LastClientMeasurement.MeanClientMbps ?? 0;
             const downloadPing = data.LastServerMeasurement.TCPInfo?.MinRTT ?? Infinity;
 
-            setDownloadSpeed(parseFloat(clientGoodPut?.toFixed(2)));
+            currentDownloadSpeed = parseFloat(clientGoodPut?.toFixed(2));
+            setDownloadSpeed(currentDownloadSpeed);
             setDownloadComplete(true);
             currentPing = Math.min(currentPing, downloadPing);
 
@@ -109,7 +113,8 @@ export const useNdt7 = () => {
           if (isNdt7Message(data)) {
             if (isServerMeasurementMsg(data)) {
               const measurementData = data.Data.TCPInfo;
-              setUploadSpeed(parseFloat(((measurementData.BytesReceived / measurementData.ElapsedTime) * 8).toFixed(2)));
+              currentUploadSpeed = parseFloat(((measurementData.BytesReceived / measurementData.ElapsedTime) * 8).toFixed(2));
+              setUploadSpeed(currentUploadSpeed);
             }
           } else {
             console.error('The server response was not an object in this sample.')
@@ -125,7 +130,8 @@ export const useNdt7 = () => {
             const throughput = elapsed > 0 ? (bytesReceived * 8) / elapsed : 0;
             const uploadPing = msg ? msg.MinRTT : Infinity;
 
-            setUploadSpeed(parseFloat(throughput.toFixed(2)));
+            currentUploadSpeed = parseFloat(throughput.toFixed(2));
+            setUploadSpeed(currentUploadSpeed);
             setUploadComplete(true);
             currentPing = Math.min(currentPing, uploadPing);
 
@@ -145,7 +151,7 @@ export const useNdt7 = () => {
       },
     )
 
-    .then((exitcode: number) => {
+    .then(async (exitcode: number) => {
       if (exitcode > 0) {
         console.error('An error has ocurred during test.');
       } else {
@@ -153,11 +159,15 @@ export const useNdt7 = () => {
         setComplete(true);
         setPing(currentPing);
 
-        createMeasurement({
-          downloadSpeed: downloadSpeed,
-          uploadSpeed: uploadSpeed,
+        const savedMeasurement = await createMeasurement({
+          downloadSpeed: currentDownloadSpeed,
+          uploadSpeed: currentUploadSpeed,
           ping: currentPing / 1000,
         });
+
+        if (savedMeasurement) {
+          onMeasurementSaved?.();
+        }
       }
       
     })
