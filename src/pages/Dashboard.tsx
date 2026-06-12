@@ -48,6 +48,21 @@ const pingChartConfig = {
   },
 } satisfies ChartConfig;
 
+const renderXAxisTick = (props: any) => {
+  const { x, y, payload } = props;
+  return (
+    <text
+      x={x}
+      y={y + 16}
+      textAnchor="end"
+      fill="#666"
+      transform={`rotate(-45 ${x} ${y})`}
+    >
+      {payload?.value}
+    </text>
+  );
+};
+
 // Colores para la gráfica pie de ISPs
 const COLORS = [
   "#0080FF",
@@ -139,7 +154,7 @@ export const Dashboard = () => {
         <ChartContainer config={downloadChartConfig} className="h-64 md:h-96">
           <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" tick={{ fontSize: 12, angle: -45, textAnchor: "end" }} />
+            <XAxis dataKey="date" tick={renderXAxisTick} />
             <YAxis label={{ value: "Mbps", angle: -90, position: "insideLeft", offset: 15 }} />
             <ChartTooltip content={<ChartTooltipContent />} />
             <ChartLegend content={<ChartLegendContent />} wrapperStyle={{ paddingTop: 5 }} />
@@ -162,7 +177,7 @@ export const Dashboard = () => {
           <ChartContainer config={uploadChartConfig} className="h-64 md:h-72">
             <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" tick={{ fontSize: 12, angle: -45, textAnchor: "end" }} />
+              <XAxis dataKey="date" tick={renderXAxisTick} />
               <YAxis label={{ value: "Mbps", angle: -90, position: "insideLeft", offset: 15 }} />
               <ChartTooltip content={<ChartTooltipContent />} />
               <ChartLegend content={<ChartLegendContent />} />
@@ -183,7 +198,7 @@ export const Dashboard = () => {
           <ChartContainer config={pingChartConfig} className="h-64 md:h-72">
             <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" tick={{ fontSize: 12, angle: -45, textAnchor: "end" }} />
+              <XAxis dataKey="date" tick={renderXAxisTick} />
               <YAxis label={{ value: "ms", angle: -90, position: "insideLeft", offset: 15 }} />
               <ChartTooltip content={<ChartTooltipContent />} />
               <ChartLegend content={<ChartLegendContent />} />
