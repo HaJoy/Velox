@@ -3,6 +3,7 @@ import { isGetOneMeasurementResponse } from "@/guards/measurement.guard";
 import type { ipinfoResponse } from "@/types/isp";
 import type { GetOneMeasurementResponse } from "@/types/measurement";
 import axios from "axios";
+import { api } from "./axios";
 
 /**
  * Obtiene la direccion IP publica del usuario
@@ -25,8 +26,7 @@ export const getIP = async () => {
 export const getISP = async (): Promise<ipinfoResponse | GetOneMeasurementResponse> => {
     const clientIP = await getIP();
     try {
-        const response = await axios.post(`http://localhost:${import.meta.env.VITE_PORT}/api/measurement/isp`, { ip: clientIP.ip });
-        
+        const response = await api.post(`/measurement/isp`, { ip: clientIP.ip });
         if (isGetOneMeasurementResponse(response.data)) {
             return response.data;
         } else {
@@ -34,7 +34,7 @@ export const getISP = async (): Promise<ipinfoResponse | GetOneMeasurementRespon
         }
     } catch (error) {
         if (axios.isAxiosError(error) && error.response?.status === 404) {
-            const fallbackResponse = await axios.post(`http://localhost:${import.meta.env.VITE_PORT}/api/isp`, { ip: clientIP.ip });
+            const fallbackResponse = await api.post(`/isp`, { ip: clientIP.ip });
             const data = fallbackResponse.data;
             if (isIpinfoResponse(data)) {
                 return data;

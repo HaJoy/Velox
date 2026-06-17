@@ -6,6 +6,8 @@ import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
 import ReactSpeedometer from "react-d3-speedometer";
 import { MeasurementsTable } from "@/components/MeasurementsTable";
+import { isIpinfoResponse } from "@/guards/isp.guard";
+import { isGetOneMeasurementResponse } from "@/guards/measurement.guard";
 
 // Este componente es toda la pagina de la aplicacion.
 export const Home = () => {
@@ -40,11 +42,20 @@ export const Home = () => {
         // Para el desarrollo se utilizara 'isp' como una variable estatica
         // para evitar requests innecesarias a ipinfo
 
-        // const infoIpRaw = await getISP();
-        // const isp = infoIpRaw.ispinfo.org.split(' ').slice(1).join(' ');
-        const isp = "UNE TELECOMUNICACIONES S.A";
+        const ispRaw = await getISP();
+        // Parsear el ISP segun la respuesta
+        let isp = "";
+        if (isGetOneMeasurementResponse(ispRaw)) {
+          isp = ispRaw.measurement.isp;
+        }
+        if (isIpinfoResponse(ispRaw)) {
+          isp = ispRaw.ispinfo.org;
+        }
+        // Quitar el AS#####
+        const parsedISP = isp.split(' ').slice(1).join(' ');
+        // const isp = "UNE TELECOMUNICACIONES S.A";
 
-        setUserIsp(isp);
+        setUserIsp(parsedISP);
         setIspErrorMsg("");
       } catch (error) {
         console.error("Failed to fetch user ISP: ", error);
