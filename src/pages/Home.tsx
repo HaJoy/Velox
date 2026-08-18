@@ -8,13 +8,14 @@ import ReactSpeedometer from "react-d3-speedometer";
 import { MeasurementsTable } from "@/components/MeasurementsTable";
 import { isIpinfoResponse } from "@/guards/isp.guard";
 import { isGetOneMeasurementResponse } from "@/guards/measurement.guard";
+import { Download, Signal, Upload } from "lucide-react";
 
 // Este componente es toda la pagina de la aplicacion.
 export const Home = () => {
   // Obtener las metricas a traves del custom hook.
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
 
-  const { downloadSpeed, uploadSpeed, complete, testTime, isDownStream, downloadComplete, uploadComplete, startTest } =
+  const { downloadSpeed, uploadSpeed, ping, downloadPing, uploadPing, complete, testTime, isDownStream, downloadComplete, uploadComplete, startTest } =
     useNdt7({ onMeasurementSaved: () => setHistoryRefreshKey((value) => value + 1) });
 
   const { session, user } = useAuth();
@@ -81,11 +82,19 @@ export const Home = () => {
                 {/* Mediciones de velocidad */}
                 <div className="w-1/2">
                   <h2>Descarga</h2>
-                  <span className="text-base md:text-2xl font-bold">{`${downloadComplete && downloadSpeed || 0} Mb/s`}</span>
+                  <span className="text-base md:text-2xl font-bold">{`${(downloadComplete && downloadSpeed) || 0} Mb/s`}</span>
+                  <div className="flex justify-center items-center gap-2 text-sm text-muted-foreground mt-2">
+                    <Download className="text-blue-500" />
+                    <span>{`${(downloadPing && downloadPing !== Infinity ? downloadPing.toFixed(1) : 0)} ms`}</span>
+                  </div>
                 </div>
                 <div className="w-1/2">
                   <h2>Subida</h2>
-                  <span className="text-base md:text-2xl font-bold">{`${uploadComplete && uploadSpeed || 0} Mb/s`}</span>
+                  <span className="text-base md:text-2xl font-bold">{`${(uploadComplete && uploadSpeed) || 0} Mb/s`}</span>
+                  <div className="flex justify-center items-center gap-2 text-sm text-muted-foreground mt-2">
+                    <Upload className="text-pink-300" />
+                    <span>{`${(uploadPing && uploadPing !== Infinity ? uploadPing.toFixed(1) : 0)} ms`}</span>
+                  </div>
                 </div>
               </div>
 
@@ -99,6 +108,11 @@ export const Home = () => {
                   segmentColors={["#0000FF", "#0040FF", "#0080FF", "#00BFFF", "#00FFFF"]}
                   height={180}
                 />
+              </div>
+
+              <div className="flex justify-center items-center gap-3 mt-2 text-sm">
+                <Signal />
+                <span className="font-medium">{`${(ping && ping !== Infinity ? ping.toFixed(1) : 0)} ms`}</span>
               </div>
 
               {/* Tiempo que duro la prueba */}

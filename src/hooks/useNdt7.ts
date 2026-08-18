@@ -23,6 +23,8 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
   const [downloadSpeed, setDownloadSpeed] = useState<number>(0);
   const [uploadSpeed, setUploadSpeed] = useState<number>(0);
   const [ping, setPing] = useState<number>(Infinity);
+  const [downloadPing, setDownloadPing] = useState<number>(Infinity);
+  const [uploadPing, setUploadPing] = useState<number>(Infinity);
   const [complete, setComplete] = useState<boolean>(true);
   const [testTime, setTestTime] = useState<number>(0);
   const [isDownStream, setIsDownStream] = useState<boolean>(true);
@@ -89,12 +91,14 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
             isLastServerMeasurement(data.LastServerMeasurement)) {
               
             const clientGoodPut = data.LastClientMeasurement.MeanClientMbps ?? 0;
-            const downloadPing = data.LastServerMeasurement.TCPInfo?.MinRTT ?? Infinity;
+            const downloadMinRtt = data.LastServerMeasurement.TCPInfo?.MinRTT ?? Infinity;
 
             currentDownloadSpeed = parseFloat(clientGoodPut?.toFixed(2));
             setDownloadSpeed(currentDownloadSpeed);
             setDownloadComplete(true);
-            currentPing = Math.min(currentPing, downloadPing);
+            // store ping in milliseconds
+            setDownloadPing(downloadMinRtt === Infinity ? Infinity : downloadMinRtt / 1000);
+            currentPing = Math.min(currentPing, downloadMinRtt);
 
           } else {
             console.warn('The last measurement could not be found when completing the test. Using the last measurement during-test to prevent \'undefined\'');
@@ -127,12 +131,14 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
             const bytesReceived = msg ? msg.BytesReceived : 0;
             const elapsed = msg ? msg.ElapsedTime : 0;
             const throughput = elapsed > 0 ? (bytesReceived * 8) / elapsed : 0;
-            const uploadPing = msg ? msg.MinRTT : Infinity;
+            const uploadMinRtt = msg ? msg.MinRTT : Infinity;
 
             currentUploadSpeed = parseFloat(throughput.toFixed(2));
             setUploadSpeed(currentUploadSpeed);
             setUploadComplete(true);
-            currentPing = Math.min(currentPing, uploadPing);
+            // store ping in milliseconds
+            setUploadPing(uploadMinRtt === Infinity ? Infinity : uploadMinRtt / 1000);
+            currentPing = Math.min(currentPing, uploadMinRtt);
 
           } else {
             // Si el if no se cumple, avisar.
@@ -153,9 +159,10 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
       if (exitcode > 0) {
         console.error('An error has ocurred during test.');
       } else {
-        setTestTime((Date.now() - startTime) / 1000);
-        setComplete(true);
-        setPing(currentPing);
+      setTestTime((Date.now() - startTime) / 1000);
+      setComplete(true);
+      // convert to milliseconds for UI
+      setPing(currentPing === Infinity ? Infinity : currentPing / 1000);
 
         const savedMeasurement = await createMeasurement({
           downloadSpeed: currentDownloadSpeed,
@@ -170,5 +177,5 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
       
     })
   };
-  return { downloadSpeed, uploadSpeed, ping, complete, testTime, isDownStream, downloadComplete, uploadComplete, startTest };
+  return { downloadSpeed, uploadSpeed, ping, downloadPing, uploadPing, complete, testTime, isDownStream, downloadComplete, uploadComplete, startTest };
 }
