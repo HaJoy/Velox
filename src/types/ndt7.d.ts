@@ -7,6 +7,7 @@ export type TCPInfo = {
   BytesReceived: number;     // bytes
   ElapsedTime: number;       // seconds
   MinRTT: number;
+  RTT: number;              // round-trip time in milliseconds
   [key: string]: unknown;
 };
 
