@@ -22,7 +22,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
 
   const [downloadSpeed, setDownloadSpeed] = useState<number>(0);
   const [uploadSpeed, setUploadSpeed] = useState<number>(0);
-  const [ping, setPing] = useState<number>(Infinity);
+  const [pingAvg, setPingAvg] = useState<number>(Infinity);
   const [downloadPing, setDownloadPing] = useState<number>(Infinity);
   const [uploadPing, setUploadPing] = useState<number>(Infinity);
   const [complete, setComplete] = useState<boolean>(true);
@@ -43,6 +43,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
 
     let currentDownloadSpeed = 0;
     let currentUploadSpeed = 0;
+    const arrayPings: number[] = [];
     const startTime = Date.now();
 
     // Proceso de medicion
@@ -75,7 +76,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
               const msg = data.Data.TCPInfo;
               const downloadRTT = msg?.RTT ? msg.RTT / 1000 : Infinity; // Extrae el RTT
               setDownloadPing(downloadRTT);
-              setPing(downloadRTT);
+              arrayPings.push(downloadRTT);
             }
             // Si el mensaje es del cliente se extrae la velocidad de descarga
             if (isClientMeasurementMsg(data)) {
@@ -105,7 +106,6 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
             setDownloadComplete(true);
 
             setDownloadPing(downloadRtt);
-            setPing(downloadRtt);
           } else {
             console.warn('The last measurement could not be found when completing the test. Using the last measurement during-test to prevent \'undefined\'');
           }
@@ -120,7 +120,6 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
         // Medir velocidad de subida
         uploadMeasurement: function (data: ServerMeasurementMsg) {
           if (isNdt7Message(data)) {
-            // console.log(data);
             if (isServerMeasurementMsg(data)) {
               const measurementData = data.Data.TCPInfo;
               currentUploadSpeed = parseFloat(((measurementData.BytesReceived / measurementData.ElapsedTime) * 8).toFixed(2));
@@ -128,7 +127,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
 
               const uploadRtt = measurementData.RTT ? measurementData.RTT / 1000 : Infinity;
               setUploadPing(uploadRtt);
-              setPing(uploadRtt);
+              arrayPings.push(uploadRtt);
             }
           } else {
             console.error('The server response was not an object in this sample.')
@@ -147,7 +146,6 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
             currentUploadSpeed = parseFloat(throughput.toFixed(2));
             setUploadSpeed(currentUploadSpeed);
             setUploadPing(uploadRTT);
-            setPing(uploadRTT);
             setUploadComplete(true);
           } else {
             // Si el if no se cumple, avisar.
@@ -171,10 +169,16 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
       setTestTime((Date.now() - startTime) / 1000);
       setComplete(true);
 
+      // Promedio de pings
+      const pingSum = arrayPings.reduce((acc, curr) => acc + curr, 0);
+      const pingCount = arrayPings.length;
+      const pingAverage = pingCount > 0 ? pingSum / pingCount : Infinity;
+      setPingAvg(pingAverage);
+
         const savedMeasurement = await createMeasurement({
           downloadSpeed: currentDownloadSpeed,
           uploadSpeed: currentUploadSpeed,
-          ping: ping / 1000,
+          ping: pingAvg,
         });
 
         if (savedMeasurement) {
@@ -184,5 +188,5 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
       
     })
   };
-  return { downloadSpeed, uploadSpeed, ping, downloadPing, uploadPing, complete, testTime, isDownStream, downloadComplete, uploadComplete, startTest };
+  return { downloadSpeed, uploadSpeed, pingAvg, downloadPing, uploadPing, complete, testTime, isDownStream, downloadComplete, uploadComplete, startTest };
 }
