@@ -36,6 +36,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
     // Reiniciar variables de estado
     setDownloadSpeed(0);
     setUploadSpeed(0);
+    setPingAvg(0);
     setComplete(false);
     setTestTime(0);
     setDownloadComplete(false);
@@ -96,7 +97,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
           if (isCompleteMsg(data) &&
             isLastClientMeasurement(data.LastClientMeasurement) &&
             isLastServerMeasurement(data.LastServerMeasurement)) {
-              
+
             const clientGoodPut = data.LastClientMeasurement.MeanClientMbps ?? 0;
             const lastServerMsg = data.LastServerMeasurement.TCPInfo;
             const downloadRtt = lastServerMsg?.RTT ? lastServerMsg.RTT / 1000 : Infinity;

@@ -1,5 +1,5 @@
 import { getAllMeasurements } from "@/api/measurementService";
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   ChartContainer,
   ChartTooltip,
@@ -26,6 +26,7 @@ import {
 import type { Measurement } from "@/types/measurement.d";
 import { Card } from "@/components/ui/card";
 import { calcAvgs, calcISPdata, formatChartData } from "@/lib/measurements/measurementCharts";
+import Select from "@/components/Select";
 
 const downloadChartConfig = {
   downloadSpeed: {
@@ -78,45 +79,56 @@ export const Dashboard = () => {
   const [measurements, setMeasurements] = useState<Measurement[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    const getMeasurements = async () => {
-      try {
-        const response = await getAllMeasurements();
-        // Ordenar por fecha para mejor visualización en gráficas
-        const measurementsArray = response.measurements || [];
-        const sortedMeasurements = measurementsArray.sort(
-          (a: Measurement, b: Measurement) => {
-            return (
-              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-            );
-          },
-        );
-        setMeasurements(sortedMeasurements);
-      } catch (error) {
-        console.error(
-          "Error trying to fetch measurements from Dashboard: ",
-          error,
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Funcion para obtener todos las mediciones de un pais e isp en especifico
+  const getMeasurements = async (country?: string, isp?: string) => {
+    setLoading(true);
+    try {
+      const response = await getAllMeasurements(country, isp);
+      // Ordenar por fecha para mejor visualización en gráficas
+      const measurementsArray = response?.measurements || [];
+      const sortedMeasurements = measurementsArray.sort(
+        (a: Measurement, b: Measurement) => {
+          return (
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
+        },
+      );
+      setMeasurements(sortedMeasurements);
+    } catch (error) {
+      console.error(
+        "Error trying to fetch measurements from Dashboard: ",
+        error,
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    getMeasurements();
-  }, []);
+  const onFilterChange = useCallback(
+    (filters: { country?: string; isp?: string }) => {
+      getMeasurements(filters.country, filters.isp);
+    },
+    [],
+  );
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        Cargando datos...
+      <div className="space-y-6 px-4 pb-8 md:px-0">
+        <Select onFilterChange={onFilterChange} initialCountry="Colombia" />
+        <div className="flex items-center justify-center h-screen">
+          Cargando datos...
+        </div>
       </div>
     );
   }
 
   if (measurements.length === 0) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        No hay mediciones disponibles
+      <div className="space-y-6 px-4 pb-8 md:px-0">
+        <Select onFilterChange={onFilterChange} initialCountry="Colombia" />
+        <div className="flex items-center justify-center h-screen">
+          No hay mediciones disponibles
+        </div>
       </div>
     );
   }
@@ -141,6 +153,7 @@ export const Dashboard = () => {
 
   return (
     <div className="space-y-6 px-4 pb-8 md:px-0">
+      <Select onFilterChange={onFilterChange} initialCountry="Colombia" />
       {/* Primera fila: 3 KPIs */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3 w-full">
         <KPICard label="Descarga Promedio" value={avgDownloadSpeed} unit="Mbps" />
@@ -246,18 +259,25 @@ export const Dashboard = () => {
         <Card className="space-y-2 px-4 py-5 bg-[#0b0b0f] md:px-5">
           <h2 className="text-xl font-semibold">Promedios por ISP</h2>
           <ChartContainer config={{}} className="h-64 md:h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={ispBarData}>
+              <BarChart data={ispBarData} margin={{ bottom: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                <XAxis
+                  dataKey="name"
+                  textAnchor="middle"
+                  tick={ window.innerWidth > 680 ? { fontSize: 10 } : false}
+                  height={60}
+                  tickFormatter={(nombreIsp: string) => {
+                    const parsedIsp = nombreIsp.split(' ').slice(1).join(' ');
+                    return parsedIsp;
+                  }}
+                />
                 <YAxis />
-                <Tooltip />
+                <Tooltip labelStyle={{ color: "#000" }}/>
                 <Legend />
                 <Bar dataKey="Descarga (Mbps)" fill="#0080FF" />
                 <Bar dataKey="Subida (Mbps)" fill="#9900ff" />
                 <Bar dataKey="Ping (ms)" fill="#00ff95" />
               </BarChart>
-            </ResponsiveContainer>
           </ChartContainer>
         </Card>
       </div>
