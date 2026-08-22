@@ -68,6 +68,29 @@ export const Home = () => {
     fetchPublicIP();
   }, []);
 
+  /**
+   * Controla la velocidad para hacerla visible en el velocimetro.
+   * **NO altera la medicion**
+   * @returns `number` La velcidad controlada.
+   */
+  const handleSpeed = (): number => {
+    // Si la prueba esta activa usa downloadSpeed o uploadSpeed,
+    // si no, devuelve 0 (no hay nada que medir).
+    if (!complete) {
+      // Si es prueba de descarga usa downloadSpeed, si no
+      // se asume que es prueba de subida y usa uploadSpeed.
+      if (isDownStream) {
+        // Esto mantendrá la aguja en 100 si la velocidad es superior
+        // a dicho valor.
+        return downloadSpeed <= 100 ? downloadSpeed : 100;
+      } else {
+        return uploadSpeed <= 100 ? uploadSpeed : 100;
+      }
+    } else {
+      return 0;
+    }
+  };
+
   return (
     <div className="flex flex-col items-center h-full min-w-[285px]">
       <div className="flex justify-center w-full">
@@ -114,7 +137,7 @@ export const Home = () => {
                 <ReactSpeedometer
                   minValue={0}
                   maxValue={100}
-                  value={!complete? isDownStream? downloadSpeed : uploadSpeed : 0}
+                  value={handleSpeed()}
                   currentValueText={`${!complete? isDownStream? downloadSpeed : uploadSpeed : 0} Mb/s`}
                   segmentColors={["#0000FF", "#0040FF", "#0080FF", "#00BFFF", "#00FFFF"]}
                   height={180}
