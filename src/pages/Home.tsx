@@ -8,13 +8,14 @@ import ReactSpeedometer from "react-d3-speedometer";
 import { MeasurementsTable } from "@/components/MeasurementsTable";
 import { isIpinfoResponse } from "@/guards/isp.guard";
 import { isGetOneMeasurementResponse } from "@/guards/measurement.guard";
+import { Download, Signal, Upload } from "lucide-react";
 
 // Este componente es toda la pagina de la aplicacion.
 export const Home = () => {
   // Obtener las metricas a traves del custom hook.
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
 
-  const { downloadSpeed, uploadSpeed, complete, testTime, isDownStream, downloadComplete, uploadComplete, startTest } =
+  const { downloadSpeed, uploadSpeed, pingAvg, downloadPing, uploadPing, complete, testTime, isDownStream, downloadComplete, uploadComplete, startTest } =
     useNdt7({ onMeasurementSaved: () => setHistoryRefreshKey((value) => value + 1) });
 
   const { session, user } = useAuth();
@@ -67,6 +68,29 @@ export const Home = () => {
     fetchPublicIP();
   }, []);
 
+  /**
+   * Controla la velocidad para hacerla visible en el velocimetro.
+   * **NO altera la medicion**
+   * @returns `number` La velcidad controlada.
+   */
+  const handleSpeed = (): number => {
+    // Si la prueba esta activa usa downloadSpeed o uploadSpeed,
+    // si no, devuelve 0 (no hay nada que medir).
+    if (!complete) {
+      // Si es prueba de descarga usa downloadSpeed, si no
+      // se asume que es prueba de subida y usa uploadSpeed.
+      if (isDownStream) {
+        // Esto mantendrá la aguja en 100 si la velocidad es superior
+        // a dicho valor.
+        return downloadSpeed <= 100 ? downloadSpeed : 100;
+      } else {
+        return uploadSpeed <= 100 ? uploadSpeed : 100;
+      }
+    } else {
+      return 0;
+    }
+  };
+
   return (
     <div className="flex flex-col items-center h-full min-w-[285px]">
       <div className="flex justify-center w-full">
@@ -77,15 +101,34 @@ export const Home = () => {
 
           <CardContent>
             <div className="flex flex-col gap-10">
-              <div className="flex justify-center gap-18 w-full md:text-base">
+              <div className="flex justify-center gap-8 w-full md:text-base">
                 {/* Mediciones de velocidad */}
-                <div className="w-1/2">
-                  <h2>Descarga</h2>
-                  <span className="text-base md:text-2xl font-bold">{`${downloadComplete && downloadSpeed || 0} Mb/s`}</span>
+                <div className="w-1/2 grid grid-cols-1 grid-rows-2">
+                  <div>
+                    <h2>Descarga</h2>
+                    <span className="text-base md:text-2xl font-bold">{`${(downloadComplete && downloadSpeed) || 0} Mb/s`}</span>
+                  </div>
+                  <div className="flex justify-center items-center gap-2 text-sm text-muted-foreground mt-2">
+                    <Download className="text-blue-500" />
+                    <span>{`${(downloadPing && downloadPing !== Infinity ? downloadPing.toFixed(1) : 0)} ms`}</span>
+                  </div>
                 </div>
                 <div className="w-1/2">
-                  <h2>Subida</h2>
-                  <span className="text-base md:text-2xl font-bold">{`${uploadComplete && uploadSpeed || 0} Mb/s`}</span>
+                  <h2>RTT promedio</h2>
+                  <div className={`flex justify-center items-center gap-2 text-sm mt-2 ${!complete ? 'text-muted-foreground' : 'font-bold'}`}>
+                    <Signal />
+                    <span>{`${(pingAvg && pingAvg !== Infinity ? pingAvg.toFixed(1) : 0)} ms`}</span>
+                  </div>
+                </div>
+                <div className="w-1/2 grid grid-cols-1 grid-rows-2">
+                  <div>
+                    <h2>Subida</h2>
+                    <span className="text-base md:text-2xl font-bold">{`${(uploadComplete && uploadSpeed) || 0} Mb/s`}</span>
+                  </div>
+                  <div className="flex justify-center items-center gap-2 text-sm text-muted-foreground mt-2">
+                    <Upload className="text-pink-300" />
+                    <span>{`${(uploadPing && uploadPing !== Infinity ? uploadPing.toFixed(1) : 0)} ms`}</span>
+                  </div>
                 </div>
               </div>
 
@@ -94,12 +137,13 @@ export const Home = () => {
                 <ReactSpeedometer
                   minValue={0}
                   maxValue={100}
-                  value={!complete? isDownStream? downloadSpeed : uploadSpeed : 0}
+                  value={handleSpeed()}
                   currentValueText={`${!complete? isDownStream? downloadSpeed : uploadSpeed : 0} Mb/s`}
                   segmentColors={["#0000FF", "#0040FF", "#0080FF", "#00BFFF", "#00FFFF"]}
                   height={180}
                 />
               </div>
+
 
               {/* Tiempo que duro la prueba */}
               <h3>Duración: {`${testTime.toFixed(1) || 0} segundos`}</h3>
