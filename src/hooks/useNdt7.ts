@@ -179,7 +179,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
         const savedMeasurement = await createMeasurement({
           downloadSpeed: currentDownloadSpeed,
           uploadSpeed: currentUploadSpeed,
-          ping: pingAvg,
+          avgRTT: pingAverage,
         });
 
         if (savedMeasurement) {

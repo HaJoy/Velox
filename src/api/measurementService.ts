@@ -22,7 +22,7 @@ export const getAllMeasurements = async (country?: string, isp?: string): Promis
 type CreateMeasurementPayload = {
   downloadSpeed: number;
   uploadSpeed: number;
-  ping: number;
+  avgRTT: number;
 };
 
 export const createMeasurement = async (payload: CreateMeasurementPayload) => {

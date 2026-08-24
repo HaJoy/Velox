@@ -14,7 +14,7 @@ export const formatChartData = (measurements: Measurement[]) => {
     time: new Date(measurement.createdAt).toLocaleTimeString(),
     downloadSpeed: measurement.downloadSpeed,
     uploadSpeed: measurement.uploadSpeed,
-    ping: measurement.ping,
+    avgRTT: measurement.avgRTT,
   }));
 
   return chartData;
@@ -45,7 +45,7 @@ export const calcAvgs = (measurements: Measurement[]) => {
   const avgPing =
     measurements.length > 0
       ? (
-          measurements.reduce((sum, m) => sum + m.ping, 0) / measurements.length
+          measurements.reduce((sum, m) => sum + m.avgRTT, 0) / measurements.length
         ).toFixed(2)
       : 0;
 
@@ -78,16 +78,16 @@ export const calcISPdata = (measurements: Measurement[]) => {
   const ispAverages = measurements.reduce(
     (
       acc: {
-        [key: string]: { download: number[]; upload: number[]; ping: number[] };
+        [key: string]: { download: number[]; upload: number[]; avgRTT: number[] };
       },
       m,
     ) => {
       if (!acc[m.isp]) {
-        acc[m.isp] = { download: [], upload: [], ping: [] };
+        acc[m.isp] = { download: [], upload: [], avgRTT: [] };
       }
       acc[m.isp].download.push(m.downloadSpeed);
       acc[m.isp].upload.push(m.uploadSpeed);
-      acc[m.isp].ping.push(m.ping);
+      acc[m.isp].avgRTT.push(m.avgRTT);
       return acc;
     },
     {},
@@ -98,7 +98,7 @@ export const calcISPdata = (measurements: Measurement[]) => {
     name,
     "Descarga (Mbps)": parseFloat((data.download.reduce((a, b) => a + b, 0) / data.download.length).toFixed(2)),
     "Subida (Mbps)": parseFloat((data.upload.reduce((a, b) => a + b, 0) / data.upload.length).toFixed(2)),
-    "Ping (ms)": parseFloat((data.ping.reduce((a, b) => a + b, 0) / data.ping.length).toFixed(2)),
+    "Ping (ms)": parseFloat((data.avgRTT.reduce((a, b) => a + b, 0) / data.avgRTT.length).toFixed(2)),
   }));
 
   return { ispDistribution, ispPieData, ispAverages, ispBarData };

@@ -43,7 +43,7 @@ const uploadChartConfig = {
 } satisfies ChartConfig;
 
 const pingChartConfig = {
-  ping: {
+  avgRTT: {
     label: "Ping (ms)",
     color: "hsl(var(--destructive))",
   },
@@ -217,7 +217,7 @@ export const Dashboard = () => {
               <ChartLegend content={<ChartLegendContent />} />
               <Line
                 type="monotone"
-                dataKey="ping"
+                dataKey="avgRTT"
                 stroke="#00ff95"
                 dot={false}
                 strokeWidth={2}
