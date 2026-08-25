@@ -14,6 +14,7 @@ import { Download, Signal, Upload } from "lucide-react";
 export const Home = () => {
   // Obtener las metricas a traves del custom hook.
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { downloadSpeed, uploadSpeed, pingAvg, downloadPing, uploadPing, complete, testTime, isDownStream, downloadComplete, uploadComplete, startTest } =
     useNdt7({ onMeasurementSaved: () => setHistoryRefreshKey((value) => value + 1) });
@@ -27,18 +28,22 @@ export const Home = () => {
 
   useEffect(() => {
     const fetchPublicIP = async () => {
+      setIsLoading(true);
+      let approveIP = false;
       try {
         const ipifyRaw = await getIP();
         const userPublicIP = ipifyRaw.ip;
 
         setPublicIp(userPublicIP);
         setIpErrorMsg("");
+        approveIP = true;
       } catch (error) {
         console.error("Failed to fetch user IP: ", error);
         setPublicIp("No disponible");
         setIpErrorMsg("No se pudo obtener la IP pública");
       }
 
+      let approveISP = false;
       try {
         // Para el desarrollo se utilizara 'isp' como una variable estatica
         // para evitar requests innecesarias a ipinfo
@@ -58,11 +63,14 @@ export const Home = () => {
 
         setUserIsp(parsedISP);
         setIspErrorMsg("");
+        approveISP = true;
       } catch (error) {
         console.error("Failed to fetch user ISP: ", error);
         setUserIsp("No disponible");
         setIspErrorMsg("No se pudo obtener el proveedor");
       }
+
+      setIsLoading(!(approveIP && approveISP));
     };
 
     fetchPublicIP();
@@ -161,7 +169,7 @@ export const Home = () => {
                 <Button
                   className="w-[125px] hover:bg-primary/60 hover:cursor-pointer disabled:cursor-default"
                   onClick={startTest}
-                  disabled={!complete}
+                  disabled={!complete || isLoading}
                 >
                   {complete ? "Iniciar" : "Calculando..."}
                 </Button>
