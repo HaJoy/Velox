@@ -5,6 +5,7 @@ import { Header } from "./components/Header";
 import { AuthContextProvider } from "./context/AuthContext";
 import { Dashboard } from "./pages/Dashboard";
 import { PrivateRoute } from "./components/PrivateRoute";
+import { ErrorPage } from "./pages/ErrorPage";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
                 </PrivateRoute>
               }
             />
+            <Route path="*" element={<ErrorPage />} />
           </Routes>
         </div>
       </Router>
