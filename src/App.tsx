@@ -6,6 +6,7 @@ import { AuthContextProvider } from "./context/AuthContext";
 import { Dashboard } from "./pages/Dashboard";
 import { PrivateRoute } from "./components/PrivateRoute";
 import { ErrorPage } from "./pages/ErrorPage";
+import { PrivacyPage } from "./pages/PrivacyPage";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
                 </PrivateRoute>
               }
             />
+            <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="*" element={<ErrorPage />} />
           </Routes>
         </div>
