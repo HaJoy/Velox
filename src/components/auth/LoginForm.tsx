@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { RotateCcwIcon } from "lucide-react";
 import { useLogin } from "@/hooks/useLogin";
+import { toast, Toaster } from "sonner";
 
 interface LoginFormProps {
   onClose: () => void;
@@ -32,14 +33,34 @@ export const LoginForm = ({ onClose }: LoginFormProps) => {
 
   const handleLogin = async (data: LoginFormValues) => {
     const result = await login(data.email, data.password);
-    if (result?.success) {
-      onClose();
+
+    console.log(result?.success);
+    if (!result?.success) {
+      toast.error(
+        (result?.error as string) ??
+          "Error al iniciar sesión. Por favor, intentelo nuevamente.",
+        {
+          position: "top-center",
+          style: {
+            backgroundColor: "#dc2626",
+            color: "#fff",
+            borderColor: "#dc2626",
+          },
+        },
+      );
+      return;
     }
+
+    onClose();
   };
 
   return (
     <>
-      <form id="login-form"className="flex flex-col justify-center" onSubmit={form.handleSubmit(handleLogin)}>
+      <form
+        id="login-form"
+        className="flex flex-col justify-center"
+        onSubmit={form.handleSubmit(handleLogin)}
+      >
         <FieldSet className="w-full flex flex-col items-center">
           <FieldGroup>
             {/* Input email */}
@@ -48,7 +69,7 @@ export const LoginForm = ({ onClose }: LoginFormProps) => {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="email">Email</FieldLabel>
+                  <FieldLabel htmlFor="email">Correo electrónico</FieldLabel>
                   <Input
                     {...field}
                     id="email"
@@ -112,8 +133,8 @@ export const LoginForm = ({ onClose }: LoginFormProps) => {
             </Button>
           </ButtonGroup>
         </FieldSet>
+        <Toaster />
       </form>
-      {error && <p className="text-red-500 mt-2">{error}</p>}
     </>
   );
 };
