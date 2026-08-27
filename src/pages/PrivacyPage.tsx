@@ -14,6 +14,8 @@ const sections = [
   { id: "derechos", label: "Tus derechos" },
 ];
 
+export const CURRENT_POLICY_VERSION = "26-08-2026";
+
 export const PrivacyPage = () => {
 
   return (
