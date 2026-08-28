@@ -34,7 +34,6 @@ export const LoginForm = ({ onClose }: LoginFormProps) => {
   const handleLogin = async (data: LoginFormValues) => {
     const result = await login(data.email, data.password);
 
-    console.log(result?.success);
     if (!result?.success) {
       toast.error(
         (result?.error as string) ??

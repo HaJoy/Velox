@@ -8,11 +8,11 @@
 }
 
 .root-content {
-  max-width: 1280px;
   flex: 1;
   padding: 2rem;
   text-align: center;
   font-family: "Montserrat", system-ui, Avenir, Helvetica, Arial, sans-serif;
+  justify-items: center;
 }
 
 h1 {

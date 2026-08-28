@@ -138,7 +138,7 @@ export const Home = () => {
   };
 
   return (
-    <div className="flex flex-col items-center h-full min-w-[285px]">
+    <div className="flex flex-col items-center w-full h-full min-w-[285px] max-w-[1280px]">
       <div className="flex justify-center w-full">
         <Card className="w-full bg-[#0b0b0f]">
           <CardHeader>
