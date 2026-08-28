@@ -212,7 +212,6 @@ export const Home = () => {
               <FieldGroup className="flex w-full items-center">
                 <Field className="w-fit max-w-full" orientation={"horizontal"}>
                   <Checkbox
-                    className="data-[state=checked]:bg-cyan-400 data-state-checked:border-cyan-400"
                     id="privacy-check"
                     checked={userAceptedPolicy}
                     onCheckedChange={(checked) =>
