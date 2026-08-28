@@ -28,7 +28,7 @@ export const Header = () => {
   const { user, logout } = useAuth();
 
   return (
-    <header className="flex justify-center border-b mb-2 px-8 py-1.5 sticky top-0 bg-[#0b0b0f]">
+    <header className="flex justify-center border-b mb-2 px-8 py-1.5 sticky top-0 bg-[#0b0b0f] z-50">
       <NavigationMenu className="max-w-[1500px]">
         <div className="w-full">
           <NavigationMenuList className={`flex justify-between md:grid ${user ? `md:grid-cols-3` : `md:grid-cols-2`} items-center w-full`}>
