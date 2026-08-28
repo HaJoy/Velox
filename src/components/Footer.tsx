@@ -5,18 +5,33 @@ export const Footer = () => {
   const { user } = useAuth();
 
   return (
-    <div className="w-full bg-[#111116] border-t p-5">
-      <div className="flex flex-col gap-3">
+    <div className="w-full bg-[#111116] border-t px-6 py-0">
+      <div className="flex flex-col gap-3 lg:flex-row lg:justify-around mx-auto py-8 max-w-[1500px]">
         <div>
-          <h3 className="font-bold my-3">Velox</h3>
-          <nav className="flex flex-col gap-3 text-gray-300 hover:underline hover:underline-offset-4 hover:text-white">
+          <h3 className="font-bold my-3 text-xl">Velox</h3>
+          <nav className="flex flex-col gap-3 text-gray-300">
             {user && (
               <>
-                <Link to={"/"}>Inicio</Link>
-                <Link to={"/dashboard"}>Dashboard</Link>
+                <Link
+                  to={"/"}
+                  className="hover:underline hover:underline-offset-4 hover:text-white"
+                >
+                  Inicio
+                </Link>
+                <Link
+                  to={"/dashboard"}
+                  className="hover:underline hover:underline-offset-4 hover:text-white"
+                >
+                  Dashboard
+                </Link>
               </>
             )}
-            <Link to={"/privacy"}>Política de privacidad</Link>
+            <Link
+              to={"/privacy"}
+              className="hover:underline hover:underline-offset-4 hover:text-white"
+            >
+              Política de privacidad
+            </Link>
           </nav>
         </div>
 
