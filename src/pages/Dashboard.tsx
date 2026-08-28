@@ -25,8 +25,20 @@ import {
 } from "recharts";
 import type { Measurement } from "@/types/measurement.d";
 import { Card } from "@/components/ui/card";
-import { calcAvgs, calcISPdata, formatChartData } from "@/lib/measurements/measurementCharts";
+import {
+  calcAvgs,
+  calcISPdata,
+  formatChartData,
+  type ISPMetric,
+} from "@/lib/measurements/measurementCharts";
 import Select from "@/components/Select";
+import {
+  Select as MetricSelect,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const downloadChartConfig = {
   downloadSpeed: {
@@ -85,6 +97,7 @@ const COLORS = [
 export const Dashboard = () => {
   const [measurements, setMeasurements] = useState<Measurement[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [ispSortMetric, setIspSortMetric] = useState<ISPMetric>("Descarga (Mbps)");
 
   // Funcion para obtener todos las mediciones de un pais e isp en especifico
   const getMeasurements = async (country?: string, isp?: string) => {
@@ -147,7 +160,7 @@ export const Dashboard = () => {
   const { avgDownloadSpeed, avgUploadSpeed, avgPing } = calcAvgs(measurements);
 
   // preparar los datos para la grafica Pie y de barras de ISPs
-  const { ispPieData, ispBarData} = calcISPdata(measurements);
+  const { ispPieData, ispBarData } = calcISPdata(measurements, ispSortMetric);
 
   // Componente KPI
   const KPICard = ({ label, value, unit }: { label: string; value: string | number; unit: string }) => (
@@ -264,7 +277,22 @@ export const Dashboard = () => {
 
         {/* Gráfica de Barras: Promedios por ISP */}
         <Card className="min-w-0 max-w-full space-y-2 px-4 py-5 bg-[#0b0b0f] md:px-5">
-          <h2 className="text-xl font-semibold">Promedios por ISP</h2>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-xl font-semibold">Promedios por ISP</h2>
+            <MetricSelect
+              value={ispSortMetric}
+              onValueChange={(value) => setIspSortMetric(value as ISPMetric)}
+            >
+              <SelectTrigger size="sm" aria-label="Ordenar ISPs por métrica">
+                <SelectValue placeholder="Ordenar por" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Descarga (Mbps)">Descarga</SelectItem>
+                <SelectItem value="Subida (Mbps)">Subida</SelectItem>
+                <SelectItem value="Ping (ms)">Ping</SelectItem>
+              </SelectContent>
+            </MetricSelect>
+          </div>
           <ChartContainer config={{}} className="h-64 md:h-72">
               <BarChart data={ispBarData} margin={{ bottom: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -279,7 +307,7 @@ export const Dashboard = () => {
                   }}
                 />
                 <YAxis />
-                <Tooltip labelStyle={{ color: "#000" }}/>
+                <Tooltip labelStyle={{ color: "#fff" }} contentStyle={{ backgroundColor: "#0009" }}/>
                 <Legend />
                 <Bar dataKey="Descarga (Mbps)" fill="#0080FF" />
                 <Bar dataKey="Subida (Mbps)" fill="#9900ff" />
