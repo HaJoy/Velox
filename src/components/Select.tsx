@@ -65,7 +65,7 @@ const Select: React.FC<Props> = ({ onFilterChange, initialCountry, initialIsp })
   };
 
   return (
-    <div className="flex justify-center items-center gap-3 mb-4">
+    <div className="flex justify-center items-center w-full gap-3 mb-4">
       <div>
         <RadixSelect value={selectedCountry} onValueChange={(v) => { setSelectedCountry(v || undefined); setSelectedIsp(undefined); }}>
           <SelectTrigger size="default">

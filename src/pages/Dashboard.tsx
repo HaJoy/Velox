@@ -25,8 +25,20 @@ import {
 } from "recharts";
 import type { Measurement } from "@/types/measurement.d";
 import { Card } from "@/components/ui/card";
-import { calcAvgs, calcISPdata, formatChartData } from "@/lib/measurements/measurementCharts";
+import {
+  calcAvgs,
+  calcISPdata,
+  formatChartData,
+  type ISPMetric,
+} from "@/lib/measurements/measurementCharts";
 import Select from "@/components/Select";
+import {
+  Select as MetricSelect,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const downloadChartConfig = {
   downloadSpeed: {
@@ -49,8 +61,15 @@ const pingChartConfig = {
   },
 } satisfies ChartConfig;
 
-const renderXAxisTick = (props: any) => {
-  const { x, y, payload } = props;
+const renderXAxisTick = ({
+  x = 0,
+  y = 0,
+  payload,
+}: {
+  x?: number;
+  y?: number;
+  payload?: { value?: string | number };
+}) => {
   return (
     <text
       x={x}
@@ -78,6 +97,7 @@ const COLORS = [
 export const Dashboard = () => {
   const [measurements, setMeasurements] = useState<Measurement[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [ispSortMetric, setIspSortMetric] = useState<ISPMetric>("Descarga (Mbps)");
 
   // Funcion para obtener todos las mediciones de un pais e isp en especifico
   const getMeasurements = async (country?: string, isp?: string) => {
@@ -140,7 +160,7 @@ export const Dashboard = () => {
   const { avgDownloadSpeed, avgUploadSpeed, avgPing } = calcAvgs(measurements);
 
   // preparar los datos para la grafica Pie y de barras de ISPs
-  const { ispPieData, ispBarData} = calcISPdata(measurements);
+  const { ispPieData, ispBarData } = calcISPdata(measurements, ispSortMetric);
 
   // Componente KPI
   const KPICard = ({ label, value, unit }: { label: string; value: string | number; unit: string }) => (
@@ -152,17 +172,17 @@ export const Dashboard = () => {
   );
 
   return (
-    <div className="space-y-6 px-4 pb-8 md:px-0">
+    <div className="min-w-0 max-w-full space-y-6 px-4 pb-8 md:px-0 w-full">
       <Select onFilterChange={onFilterChange} initialCountry="Colombia" />
       {/* Primera fila: 3 KPIs */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3 w-full">
+      <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-3 w-full">
         <KPICard label="Descarga Promedio" value={avgDownloadSpeed} unit="Mbps" />
         <KPICard label="Subida Promedio" value={avgUploadSpeed} unit="Mbps" />
         <KPICard label="Ping Promedio" value={avgPing} unit="ms" />
       </div>
 
       {/* Segunda fila: Gráfica de Descarga (ancho completo) */}
-      <Card className="space-y-2 px-4 py-5 w-full bg-[#0b0b0f] md:px-5">
+      <Card className="min-w-0 max-w-full space-y-2 px-4 py-5 w-full bg-[#0b0b0f] md:px-5">
         <h2 className="text-xl font-semibold">Velocidad de Descarga vs Tiempo</h2>
         <ChartContainer config={downloadChartConfig} className="h-64 md:h-96">
           <LineChart data={chartData}>
@@ -183,9 +203,9 @@ export const Dashboard = () => {
       </Card>
 
       {/* Tercera fila: 2 Gráficas (Subida y Ping) */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 w-full">
+      <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 w-full">
         {/* Gráfica de Velocidad de Subida */}
-        <Card className="space-y-2 px-4 py-5 bg-[#0b0b0f] md:px-5">
+        <Card className="min-w-0 max-w-full space-y-2 px-4 py-5 bg-[#0b0b0f] md:px-5">
           <h2 className="text-xl font-semibold">Velocidad de Subida vs Tiempo</h2>
           <ChartContainer config={uploadChartConfig} className="h-64 md:h-72">
             <LineChart data={chartData}>
@@ -206,7 +226,7 @@ export const Dashboard = () => {
         </Card>
 
         {/* Gráfica de Ping */}
-        <Card className="space-y-2 px-4 py-5 bg-[#0b0b0f] md:px-5">
+        <Card className="min-w-0 max-w-full space-y-2 px-4 py-5 bg-[#0b0b0f] md:px-5">
           <h2 className="text-xl font-semibold">Ping vs Tiempo</h2>
           <ChartContainer config={pingChartConfig} className="h-64 md:h-72">
             <LineChart data={chartData}>
@@ -228,9 +248,9 @@ export const Dashboard = () => {
       </div>
 
       {/* Cuarta fila: Distribución de ISPs y Promedios por ISP */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 w-full">
+      <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 w-full">
         {/* Gráfica Pie de Distribución de ISPs */}
-        <Card className="space-y-2 px-4 py-5 bg-[#0b0b0f] md:px-5">
+        <Card className="min-w-0 max-w-full space-y-2 px-4 py-5 bg-[#0b0b0f] md:px-5">
           <h2 className="text-xl font-semibold">Distribución de ISPs</h2>
           <div className="flex justify-center h-64 md:h-72">
             <ResponsiveContainer width="100%" height="100%">
@@ -256,8 +276,23 @@ export const Dashboard = () => {
         </Card>
 
         {/* Gráfica de Barras: Promedios por ISP */}
-        <Card className="space-y-2 px-4 py-5 bg-[#0b0b0f] md:px-5">
-          <h2 className="text-xl font-semibold">Promedios por ISP</h2>
+        <Card className="min-w-0 max-w-full space-y-2 px-4 py-5 bg-[#0b0b0f] md:px-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-xl font-semibold">Promedios por ISP</h2>
+            <MetricSelect
+              value={ispSortMetric}
+              onValueChange={(value) => setIspSortMetric(value as ISPMetric)}
+            >
+              <SelectTrigger size="sm" aria-label="Ordenar ISPs por métrica">
+                <SelectValue placeholder="Ordenar por" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Descarga (Mbps)">Descarga</SelectItem>
+                <SelectItem value="Subida (Mbps)">Subida</SelectItem>
+                <SelectItem value="Ping (ms)">Ping</SelectItem>
+              </SelectContent>
+            </MetricSelect>
+          </div>
           <ChartContainer config={{}} className="h-64 md:h-72">
               <BarChart data={ispBarData} margin={{ bottom: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -272,7 +307,7 @@ export const Dashboard = () => {
                   }}
                 />
                 <YAxis />
-                <Tooltip labelStyle={{ color: "#000" }}/>
+                <Tooltip labelStyle={{ color: "#fff" }} contentStyle={{ backgroundColor: "#0009" }}/>
                 <Legend />
                 <Bar dataKey="Descarga (Mbps)" fill="#0080FF" />
                 <Bar dataKey="Subida (Mbps)" fill="#9900ff" />

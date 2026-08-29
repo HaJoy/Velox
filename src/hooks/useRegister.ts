@@ -21,8 +21,12 @@ export const useRegister = () => {
         const { data, error } = await signUp(email, password);
 
         if (error) {
-            console.error(error.message);
             setError(error.message || "Unknown error while trying to register.");
+            const errorMsg =
+          error.message == "User already registered"
+            ? "Ya hay un usuario con este correo electrónico."
+            : error.message;
+          return { success: false, error: errorMsg };
         }
 
       return { success: true, data: data };
