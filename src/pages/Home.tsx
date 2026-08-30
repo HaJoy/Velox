@@ -30,9 +30,9 @@ export const Home = () => {
   const {
     downloadSpeed,
     uploadSpeed,
-    pingAvg,
-    downloadPing,
-    uploadPing,
+    rttAvg,
+    downloadRtt,
+    uploadRtt,
     complete,
     testTime,
     isDownStream,
@@ -156,7 +156,7 @@ export const Home = () => {
                   </div>
                   <div className="flex justify-center items-center gap-2 text-sm text-muted-foreground mt-2">
                     <Download className="text-blue-500" />
-                    <span>{`${downloadPing && downloadPing !== Infinity ? downloadPing.toFixed(1) : 0} ms`}</span>
+                    <span>{`${downloadRtt && downloadRtt !== Infinity ? downloadRtt.toFixed(1) : 0} ms`}</span>
                   </div>
                 </div>
                 <div className="w-1/2">
@@ -165,7 +165,7 @@ export const Home = () => {
                     className={`flex justify-center items-center gap-2 text-sm mt-2 ${!complete ? "text-muted-foreground" : "font-bold"}`}
                   >
                     <Signal />
-                    <span>{`${pingAvg && pingAvg !== Infinity ? pingAvg.toFixed(1) : 0} ms`}</span>
+                    <span>{`${rttAvg && rttAvg !== Infinity ? rttAvg.toFixed(1) : 0} ms`}</span>
                   </div>
                 </div>
                 <div className="w-1/2 grid grid-cols-1 grid-rows-2">
@@ -175,7 +175,7 @@ export const Home = () => {
                   </div>
                   <div className="flex justify-center items-center gap-2 text-sm text-muted-foreground mt-2">
                     <Upload className="text-pink-300" />
-                    <span>{`${uploadPing && uploadPing !== Infinity ? uploadPing.toFixed(1) : 0} ms`}</span>
+                    <span>{`${uploadRtt && uploadRtt !== Infinity ? uploadRtt.toFixed(1) : 0} ms`}</span>
                   </div>
                 </div>
               </div>
