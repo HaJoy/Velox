@@ -22,9 +22,9 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
 
   const [downloadSpeed, setDownloadSpeed] = useState<number>(0);
   const [uploadSpeed, setUploadSpeed] = useState<number>(0);
-  const [pingAvg, setPingAvg] = useState<number>(Infinity);
-  const [downloadPing, setDownloadPing] = useState<number>(Infinity);
-  const [uploadPing, setUploadPing] = useState<number>(Infinity);
+  const [rttAvg, setRttAvg] = useState<number>(Infinity);
+  const [downloadRtt, setDownloadRtt] = useState<number>(Infinity);
+  const [uploadRtt, setUploadRtt] = useState<number>(Infinity);
   const [complete, setComplete] = useState<boolean>(true);
   const [testTime, setTestTime] = useState<number>(0);
   const [isDownStream, setIsDownStream] = useState<boolean>(true);
@@ -36,7 +36,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
     // Reiniciar variables de estado
     setDownloadSpeed(0);
     setUploadSpeed(0);
-    setPingAvg(0);
+    setRttAvg(0);
     setComplete(false);
     setTestTime(0);
     setDownloadComplete(false);
@@ -44,7 +44,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
 
     let currentDownloadSpeed = 0;
     let currentUploadSpeed = 0;
-    const arrayPings: number[] = [];
+    const arrayRtts: number[] = [];
     const startTime = Date.now();
 
     // Proceso de medicion
@@ -75,9 +75,9 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
             // Si el mensaje es del servidor se extrae el RTT medido
             if (isServerMeasurementMsg(data)) {
               const msg = data.Data.TCPInfo;
-              const downloadRTT = msg?.RTT ? msg.RTT / 1000 : Infinity; // Extrae el RTT
-              setDownloadPing(downloadRTT);
-              arrayPings.push(downloadRTT);
+              const downloadRTTmsg = msg?.RTT ? msg.RTT / 1000 : Infinity; // Extrae el RTT
+              setDownloadRtt(downloadRTTmsg);
+              arrayRtts.push(downloadRTTmsg);
             }
             // Si el mensaje es del cliente se extrae la velocidad de descarga
             if (isClientMeasurementMsg(data)) {
@@ -100,13 +100,13 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
 
             const clientGoodPut = data.LastClientMeasurement.MeanClientMbps ?? 0;
             const lastServerMsg = data.LastServerMeasurement.TCPInfo;
-            const downloadRtt = lastServerMsg?.RTT ? lastServerMsg.RTT / 1000 : Infinity;
+            const downloadRTTmsg = lastServerMsg?.RTT ? lastServerMsg.RTT / 1000 : Infinity;
 
             currentDownloadSpeed = parseFloat(clientGoodPut?.toFixed(2));
             setDownloadSpeed(currentDownloadSpeed);
             setDownloadComplete(true);
 
-            setDownloadPing(downloadRtt);
+            setDownloadRtt(downloadRTTmsg);
           } else {
             console.warn('The last measurement could not be found when completing the test. Using the last measurement during-test to prevent \'undefined\'');
           }
@@ -126,9 +126,9 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
               currentUploadSpeed = parseFloat(((measurementData.BytesReceived / measurementData.ElapsedTime) * 8).toFixed(2));
               setUploadSpeed(currentUploadSpeed);
 
-              const uploadRtt = measurementData.RTT ? measurementData.RTT / 1000 : Infinity;
-              setUploadPing(uploadRtt);
-              arrayPings.push(uploadRtt);
+              const uploadRTTmsg = measurementData.RTT ? measurementData.RTT / 1000 : Infinity;
+              setUploadRtt(uploadRTTmsg);
+              arrayRtts.push(uploadRTTmsg);
             }
           } else {
             console.error('The server response was not an object in this sample.')
@@ -142,11 +142,11 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
             const bytesReceived = msg ? msg.BytesReceived : 0;
             const elapsed = msg ? msg.ElapsedTime : 0;
             const throughput = elapsed > 0 ? (bytesReceived * 8) / elapsed : 0;
-            const uploadRTT = msg?.RTT ? msg.RTT / 1000 : Infinity;
+            const uploadRTTmsg = msg?.RTT ? msg.RTT / 1000 : Infinity;
 
             currentUploadSpeed = parseFloat(throughput.toFixed(2));
             setUploadSpeed(currentUploadSpeed);
-            setUploadPing(uploadRTT);
+            setUploadRtt(uploadRTTmsg);
             setUploadComplete(true);
           } else {
             // Si el if no se cumple, avisar.
@@ -170,16 +170,16 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
       setTestTime((Date.now() - startTime) / 1000);
       setComplete(true);
 
-      // Promedio de pings
-      const pingSum = arrayPings.reduce((acc, curr) => acc + curr, 0);
-      const pingCount = arrayPings.length;
-      const pingAverage = pingCount > 0 ? pingSum / pingCount : Infinity;
-      setPingAvg(pingAverage);
+      // Promedio de RTTs
+      const rttSum = arrayRtts.reduce((acc, curr) => acc + curr, 0);
+      const rttCount = arrayRtts.length;
+      const rttAverage = rttCount > 0 ? rttSum / rttCount : Infinity;
+      setRttAvg(rttAverage);
 
         const savedMeasurement = await createMeasurement({
           downloadSpeed: currentDownloadSpeed,
           uploadSpeed: currentUploadSpeed,
-          avgRTT: pingAverage,
+          avgRTT: rttAverage,
         });
 
         if (savedMeasurement) {
@@ -189,5 +189,5 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
       
     })
   };
-  return { downloadSpeed, uploadSpeed, pingAvg, downloadPing, uploadPing, complete, testTime, isDownStream, downloadComplete, uploadComplete, startTest };
+  return { downloadSpeed, uploadSpeed, rttAvg, downloadRtt, uploadRtt, complete, testTime, isDownStream, downloadComplete, uploadComplete, startTest };
 }
