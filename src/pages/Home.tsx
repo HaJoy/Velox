@@ -23,10 +23,11 @@ import { CURRENT_POLICY_VERSION } from "./PrivacyPage";
 
 // Este componente es toda la pagina de la aplicacion.
 export const Home = () => {
-  // Obtener las metricas a traves del custom hook.
+  
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-
+  
+  // Obtener las metricas a traves del custom hook.
   const {
     downloadSpeed,
     uploadSpeed,
