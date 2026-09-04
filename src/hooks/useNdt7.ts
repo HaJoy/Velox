@@ -162,21 +162,23 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
         }
       },
     )
-
     .then(async (exitcode: number) => {
       if (exitcode > 0) {
         console.error('An error has ocurred during test.');
       } else {
-      setTestTime((Date.now() - startTime) / 1000);
-      setComplete(true);
+        setTestTime((Date.now() - startTime) / 1000);
+        setComplete(true);
 
-      // Promedio de RTTs
-      const rttSum = arrayRtts.reduce((acc, curr) => acc + curr, 0);
-      const rttCount = arrayRtts.length;
-      const rttAverage = rttCount > 0 ? rttSum / rttCount : Infinity;
-      setRttAvg(rttAverage);
+        // Promedio de RTTs
+        const rttSum = arrayRtts.reduce((acc, curr) => acc + curr, 0);
+        const rttCount = arrayRtts.length;
+        let rttAverage = rttCount > 0 ? rttSum / rttCount : Infinity;
 
-        const savedMeasurement = await createMeasurement({
+        // Redondear RTT promedio a solo dos decimales
+        rttAverage = Math.round(rttAverage * 100) / 100;
+        setRttAvg(rttAverage);
+        
+        const savedMeasurement = await createMeasurement({ 
           downloadSpeed: currentDownloadSpeed,
           uploadSpeed: currentUploadSpeed,
           avgRTT: rttAverage,
@@ -186,7 +188,6 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
           onMeasurementSaved?.();
         }
       }
-      
     })
   };
   return { downloadSpeed, uploadSpeed, rttAvg, downloadRtt, uploadRtt, complete, testTime, isDownStream, downloadComplete, uploadComplete, startTest };
