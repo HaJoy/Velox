@@ -190,7 +190,7 @@ export const Dashboard = () => {
             <XAxis dataKey="date" tick={renderXAxisTick} />
             <YAxis label={{ value: "Mbps", angle: -90, position: "insideLeft", offset: 15 }} />
             <ChartTooltip content={<ChartTooltipContent />} />
-            <ChartLegend content={<ChartLegendContent />} wrapperStyle={{ paddingTop: 5 }} />
+            <ChartLegend content={<ChartLegendContent />} wrapperStyle={{ paddingTop: 25 }} />
             <Line
               type="monotone"
               dataKey="downloadSpeed"
@@ -213,7 +213,7 @@ export const Dashboard = () => {
               <XAxis dataKey="date" tick={renderXAxisTick} />
               <YAxis label={{ value: "Mbps", angle: -90, position: "insideLeft", offset: 15 }} />
               <ChartTooltip content={<ChartTooltipContent />} />
-              <ChartLegend content={<ChartLegendContent />} />
+              <ChartLegend content={<ChartLegendContent />} wrapperStyle={{ paddingTop: 25 }} />
               <Line
                 type="monotone"
                 dataKey="uploadSpeed"
@@ -234,7 +234,7 @@ export const Dashboard = () => {
               <XAxis dataKey="date" tick={renderXAxisTick} />
               <YAxis label={{ value: "ms", angle: -90, position: "insideLeft", offset: 15 }} />
               <ChartTooltip content={<ChartTooltipContent />} />
-              <ChartLegend content={<ChartLegendContent />} />
+              <ChartLegend content={<ChartLegendContent />} wrapperStyle={{ paddingTop: 25 }} />
               <Line
                 type="monotone"
                 dataKey="avgRTT"
