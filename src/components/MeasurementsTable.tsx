@@ -46,7 +46,7 @@ export const MeasurementsTable = ({ user, refreshKey }: { user?: User | null; re
     { label: "ISP", key: "isp" },
     { label: "Descarga (Mb/s)", key: "downloadSpeed" },
     { label: "Subida (Mb/s)", key: "uploadSpeed" },
-    { label: "Ping (ms)", key: "avgRTT" },
+    { label: "RTT (ms)", key: "avgRTT" },
     { label: "Fecha", key: "createdAt" },
   ];
 
@@ -84,7 +84,7 @@ export const MeasurementsTable = ({ user, refreshKey }: { user?: User | null; re
             <TableHead>ISP</TableHead>
             <TableHead>Descarga (Mb/s)</TableHead>
             <TableHead>Subida (Mb/s)</TableHead>
-            <TableHead>Ping (ms)</TableHead>
+            <TableHead>RTT (ms)</TableHead>
             <TableHead>Fecha</TableHead>
           </TableRow>
         </TableHeader>
