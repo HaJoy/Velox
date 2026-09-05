@@ -54,9 +54,9 @@ const uploadChartConfig = {
   },
 } satisfies ChartConfig;
 
-const pingChartConfig = {
+const rttChartConfig = {
   avgRTT: {
-    label: "Ping (ms)",
+    label: "RTT (ms)",
     color: "hsl(var(--destructive))",
   },
 } satisfies ChartConfig;
@@ -157,7 +157,7 @@ export const Dashboard = () => {
   const chartData = formatChartData(measurements);
 
   // Calcular promedios
-  const { avgDownloadSpeed, avgUploadSpeed, avgPing } = calcAvgs(measurements);
+  const { avgDownloadSpeed, avgUploadSpeed, avgRTT } = calcAvgs(measurements);
 
   // preparar los datos para la grafica Pie y de barras de ISPs
   const { ispPieData, ispBarData } = calcISPdata(measurements, ispSortMetric);
@@ -178,7 +178,7 @@ export const Dashboard = () => {
       <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-3 w-full">
         <KPICard label="Descarga Promedio" value={avgDownloadSpeed} unit="Mbps" />
         <KPICard label="Subida Promedio" value={avgUploadSpeed} unit="Mbps" />
-        <KPICard label="Ping Promedio" value={avgPing} unit="ms" />
+        <KPICard label="RTT Promedio" value={avgRTT} unit="ms" />
       </div>
 
       {/* Segunda fila: Gráfica de Descarga (ancho completo) */}
@@ -202,7 +202,7 @@ export const Dashboard = () => {
         </ChartContainer>
       </Card>
 
-      {/* Tercera fila: 2 Gráficas (Subida y Ping) */}
+      {/* Tercera fila: 2 Gráficas (Subida y RTT) */}
       <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 w-full">
         {/* Gráfica de Velocidad de Subida */}
         <Card className="min-w-0 max-w-full space-y-2 px-4 py-5 bg-[#0b0b0f] md:px-5">
@@ -225,10 +225,10 @@ export const Dashboard = () => {
           </ChartContainer>
         </Card>
 
-        {/* Gráfica de Ping */}
+        {/* Gráfica de RTT */}
         <Card className="min-w-0 max-w-full space-y-2 px-4 py-5 bg-[#0b0b0f] md:px-5">
-          <h2 className="text-xl font-semibold">Ping vs Tiempo</h2>
-          <ChartContainer config={pingChartConfig} className="h-64 md:h-72">
+          <h2 className="text-xl font-semibold">RTT vs Tiempo</h2>
+          <ChartContainer config={rttChartConfig} className="h-64 md:h-72">
             <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" tick={renderXAxisTick} />
@@ -289,7 +289,7 @@ export const Dashboard = () => {
               <SelectContent>
                 <SelectItem value="Descarga (Mbps)">Descarga</SelectItem>
                 <SelectItem value="Subida (Mbps)">Subida</SelectItem>
-                <SelectItem value="Ping (ms)">Ping</SelectItem>
+                <SelectItem value="RTT (ms)">RTT</SelectItem>
               </SelectContent>
             </MetricSelect>
           </div>
@@ -311,7 +311,7 @@ export const Dashboard = () => {
                 <Legend />
                 <Bar dataKey="Descarga (Mbps)" fill="#0080FF" />
                 <Bar dataKey="Subida (Mbps)" fill="#9900ff" />
-                <Bar dataKey="Ping (ms)" fill="#00ff95" />
+                <Bar dataKey="RTT (ms)" fill="#00ff95" />
               </BarChart>
           </ChartContainer>
         </Card>
