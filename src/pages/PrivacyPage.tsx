@@ -1,8 +1,5 @@
-
-
-import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Check, ExternalLink, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ExternalLink, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -72,7 +69,7 @@ export const PrivacyPage = () => {
             <CardContent className="leading-7 text-muted-foreground">
               <ul className="list-disc space-y-2 pl-5">
                 <li><strong className="text-foreground">Conexión:</strong> dirección IP pública, proveedor de internet (ISP), país o ubicación aproximada derivada de la IP y datos técnicos de red.</li>
-                <li><strong className="text-foreground">Medición:</strong> velocidades de descarga y subida, latencia, RTT, duración, fecha y resultado de la prueba.</li>
+                <li><strong className="text-foreground">Medición:</strong> velocidades de descarga y subida, RTT, duración, fecha y resultado de la prueba.</li>
                 <li><strong className="text-foreground">Cuenta:</strong> si te registras, identificador y correo electrónico necesarios para autenticarte y asociar tu historial. No recopilamos contraseñas en texto plano.</li>
               </ul>
               <p className="mt-4">No solicitamos datos sensibles ni utilizamos la información para publicidad personalizada, venta de perfiles o decisiones automatizadas.</p>
@@ -100,9 +97,8 @@ export const PrivacyPage = () => {
           <Card id="derechos" className="scroll-mt-24 border-white/10 bg-[#111116]">
             <CardHeader><CardTitle>5. Tus derechos y contacto</CardTitle></CardHeader>
             <CardContent className="space-y-4 leading-7 text-muted-foreground">
-              <p>Puedes solicitar acceso, corrección o eliminación de los datos asociados a tu cuenta, así como retirar tu consentimiento. Para hacerlo, contacta al responsable del proyecto a través del canal que se te haya proporcionado.</p>
+              <p>Puedes solicitar acceso, corrección o eliminación de los datos asociados a tu cuenta, así como retirar tu consentimiento. Para hacerlo, contacta al responsable del proyecto a través del correo electrónico <a className="privacy-email" href="mailto:hcano@cuc.edu.co">hcano@cuc.edu.co</a>.</p>
               <p>Retirar el consentimiento no afecta al tratamiento realizado antes de ese momento, pero impedirá iniciar nuevas mediciones que requieran estos datos.</p>
-              <p className="text-sm">Esta política debe adaptarse a la jurisdicción, responsable legal y datos de contacto reales del proyecto antes de publicarse en producción.</p>
             </CardContent>
           </Card>
         </div>

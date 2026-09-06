@@ -7,6 +7,7 @@
   height: 100vh;
 }
 
+/* Estilos del segundo root */
 .root-content {
   flex: 1;
   padding: 2rem;
@@ -15,6 +16,7 @@
   justify-items: center;
 }
 
+/* Estilos para el nombre Velox en el header */
 h1 {
   font-family: "Stack Sans Notch", "Raleway", system-ui, Avenir, Helvetica, Arial, sans-serif;
   background: #020024;
@@ -25,6 +27,7 @@ h1 {
   -webkit-background-clip: text;
 }
 
+/* Fondo oscuro con patron de puntos grises */
 body {
   background:
     radial-gradient(circle at 20% 20%, rgba(255,255,255,0.04), transparent 40%),
@@ -34,6 +37,11 @@ body {
   background-color: #0b0b0f;
 }
 
+/* 
+  Los estilos con este data-slot cambian el la apariencia
+  de la scrollbar en la tabla del historial de mediciones
+  del usuario. 
+*/
 div[data-slot="table-container"]::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -56,4 +64,18 @@ div[data-slot="table-container"]::-webkit-scrollbar-thumb:hover {
 div[data-slot="table-container"] {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+/* 
+  Estilos propios para el email de contacto en la pagina
+  de politica de privacidad.
+*/
+.privacy-email {
+  color: var(--color-cyan-400);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.privacy-email:hover {
+  color: var(--color-gray-200);
 }
