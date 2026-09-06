@@ -77,7 +77,7 @@ export const LoginForm = ({ onClose }: LoginFormProps) => {
                     aria-invalid={fieldState.invalid}
                   />
                   <FieldDescription>
-                    Por favor introduce tu correo electronico.
+                    Por favor introduce tu correo electrónico.
                   </FieldDescription>
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
