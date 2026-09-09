@@ -13,6 +13,7 @@ import {
   isServerMeasurementMsg
 } from "@/guards/ndt7.guard";
 import { createMeasurement } from "@/api/measurementService";
+import { toastError } from "@/lib/toast-utils";
 
 /**
  * Utiliza la API de NDT7 (M-lab) para realizar una prueba de velocidad de red.
@@ -45,7 +46,8 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
     let currentDownloadSpeed = 0;
     let currentUploadSpeed = 0;
     const arrayRtts: number[] = [];
-    const startTime = Date.now();
+    let startTime = 0;
+    let thereIsError = false;
 
     // Proceso de medicion
     ndt7.test(
@@ -63,9 +65,11 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
       // Segundo argumento: objeto con callbacks para cada momento
       // de la medicion
       {
-        // Muestra un log cuando la medicion de descarga comience
+        // Muestra un log y guarda el tiempo de inicio de la prueba
+        // cuando la medicion de descarga comience
         downloadStart: function () {
           console.log('Initializing download speed measurement...');
+          startTime = Date.now();
           setIsDownStream(true);
         },
         // Medir velocidad de descarga
@@ -156,15 +160,31 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
           }
           console.log('Upload speed measurement completed.');
         },
-        error: function (err: Error) {
-          console.log('Error while running upload test: ', err.message);
-          setComplete(false);
+
+        // Este callback se ejecuta si una de las fases de la prueba
+        // lanza error.
+        error: function (err: string | Error) {
+          setComplete(true);
+          console.error('Error while running test: ', err);
+          thereIsError = true; // Avisa a la aplicación que ocurrió un error.
+          // Notificar al usuario del error.
+          toastError({
+            title: "Ocurrió un error durante una de las fases de la prueba.",
+            description: "Esta medición no debe ser tomada en cuenta. Por favor inténtelo de nuevo más tarde.",
+            toasterId: "toaster-home",
+          });
         }
       },
     )
     .then(async (exitcode: number) => {
-      if (exitcode > 0) {
+      // Si ocurre un error al intentar conectar con un servidor
+      // no suma al exitcode, por eso la variable thereIsError.
+      if (exitcode !== 0 || thereIsError) {
         console.error('An error has ocurred during test.');
+        toastError({
+          title: "Ocurrió un error ejecutando la prueba, por favor, inténtelo de nuevo más tarde.",
+          toasterId: "toaster-home",
+        });
       } else {
         setTestTime((Date.now() - startTime) / 1000);
         setComplete(true);

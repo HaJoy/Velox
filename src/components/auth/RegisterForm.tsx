@@ -17,7 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { RotateCcwIcon } from "lucide-react";
 import { useRegister } from "@/hooks/useRegister";
-import { toast, Toaster } from "sonner";
+import { toastError } from "@/lib/toast-utils";
 
 interface RegisterFormProps {
   onClose: () => void;
@@ -35,19 +35,12 @@ export const RegisterForm = ({ onClose }: RegisterFormProps) => {
     const result = await register(data.email, data.password);
 
     if (!result?.success) {
-      toast.error(
-              (result?.error as string) ??
-                "Error al registrarse. Por favor, intentelo nuevamente.",
-              {
-                position: "top-center",
-                style: {
-                  backgroundColor: "#dc2626",
-                  color: "#fff",
-                  borderColor: "#dc2626",
-                },
-              },
-            );
-            return;
+      toastError({
+        title: (result?.error as string) ??
+          "Error al registrarse. Por favor, inténtelo nuevamente.",
+        toasterId: "toaster-auth",
+      });
+      return;
     }
     
     onClose();
@@ -128,7 +121,6 @@ export const RegisterForm = ({ onClose }: RegisterFormProps) => {
             </Button>
           </ButtonGroup>
         </FieldSet>
-        <Toaster />
       </form>
     </>
   );
