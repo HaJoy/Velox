@@ -17,7 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { RotateCcwIcon } from "lucide-react";
 import { useLogin } from "@/hooks/useLogin";
-import { toast, Toaster } from "sonner";
+import { toastError } from "@/lib/toast-utils";
 
 interface LoginFormProps {
   onClose: () => void;
@@ -35,18 +35,11 @@ export const LoginForm = ({ onClose }: LoginFormProps) => {
     const result = await login(data.email, data.password);
 
     if (!result?.success) {
-      toast.error(
-        (result?.error as string) ??
-          "Error al iniciar sesión. Por favor, intentelo nuevamente.",
-        {
-          position: "top-center",
-          style: {
-            backgroundColor: "#dc2626",
-            color: "#fff",
-            borderColor: "#dc2626",
-          },
-        },
-      );
+      toastError({
+        title: (result?.error as string) ??
+          "Error al iniciar sesión. Por favor, inténtelo nuevamente.",
+        toasterId: "toaster-auth",
+      });
       return;
     }
 
@@ -132,7 +125,6 @@ export const LoginForm = ({ onClose }: LoginFormProps) => {
             </Button>
           </ButtonGroup>
         </FieldSet>
-        <Toaster />
       </form>
     </>
   );

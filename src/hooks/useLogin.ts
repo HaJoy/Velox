@@ -22,7 +22,7 @@ export const useLogin = () => {
         setError(error.message || "Unknown error while trying to login.");
         const errorMsg =
           error.message == "Invalid login credentials"
-            ? "Credenciales no válidas"
+            ? "Credenciales no válidas."
             : error.message;
         return { success: false, error: errorMsg };
       }

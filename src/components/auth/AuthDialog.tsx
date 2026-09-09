@@ -1,15 +1,13 @@
-import { Button } from "@/components/ui/button"
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
 import { LoginForm } from "./LoginForm"
 import { RegisterForm } from "./RegisterForm"
+import { Toaster } from "sonner";
 
 interface AuthDialogProps {
   mode: 'login' | 'register' | null;
@@ -37,11 +35,7 @@ export const AuthDialog = ({ mode, onClose }: AuthDialogProps) => {
           {mode === 'login' && <LoginForm onClose={onClose} />}
           {mode === 'register' && <RegisterForm onClose={onClose} />}
         </div>
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="outline" onClick={onClose}>Cerrar</Button>
-          </DialogClose>
-        </DialogFooter>
+        <Toaster id="toaster-auth" />
       </DialogContent>
     </Dialog>
   )

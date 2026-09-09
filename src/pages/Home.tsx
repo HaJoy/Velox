@@ -18,8 +18,9 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Link } from "react-router-dom";
-import { toast } from "sonner";
+import { Toaster } from "sonner";
 import { CURRENT_POLICY_VERSION } from "./PrivacyPage";
+import { toastError } from "@/lib/toast-utils";
 
 // Este componente es toda la pagina de la aplicacion.
 export const Home = () => {
@@ -139,7 +140,7 @@ export const Home = () => {
   };
 
   return (
-    <div className="flex flex-col items-center w-full h-full min-w-[285px] max-w-[1280px]">
+    <div className="flex flex-col items-center w-full h-full min-w-[285px] max-w-7xl">
       <div className="flex justify-center w-full">
         <Card className="w-full bg-[#0b0b0f]">
           <CardHeader>
@@ -239,17 +240,10 @@ export const Home = () => {
                   onClick={() => {
                     // Comprobar por segunda vez que el consentimiento de privacidad
                     if (!userAceptedPolicy) {
-                      toast.error(
-                        "Por favor, primero acepta la política de privacidad.",
-                        {
-                          position: "top-center",
-                          style: {
-                            backgroundColor: "#dc2626",
-                            color: "#fff",
-                            borderColor: "#dc2626",
-                          },
-                        },
-                      );
+                      toastError({
+                        title: "Por favor, primero acepta la política de privacidad.",
+                        toasterId: "toaster-home",
+                      })
                       return;
                     }
 
@@ -274,6 +268,7 @@ export const Home = () => {
               )}
             </div>
           </CardContent>
+          <Toaster id="toaster-home" />
         </Card>
       </div>
     </div>
