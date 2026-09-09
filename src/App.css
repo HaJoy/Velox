@@ -2,14 +2,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
 #root {
-  max-width: 1280px;
+  display: flex;
+  flex-direction: column;
   height: 100vh;
-  margin: 0 auto;
+}
+
+/* Estilos del segundo root */
+.root-content {
+  flex: 1;
   padding: 2rem;
   text-align: center;
   font-family: "Montserrat", system-ui, Avenir, Helvetica, Arial, sans-serif;
+  justify-items: center;
 }
 
+/* Estilos para el nombre Velox en el header */
 h1 {
   font-family: "Stack Sans Notch", "Raleway", system-ui, Avenir, Helvetica, Arial, sans-serif;
   background: #020024;
@@ -20,8 +27,55 @@ h1 {
   -webkit-background-clip: text;
 }
 
+/* Fondo oscuro con patron de puntos grises */
 body {
-  background: #020024;
-  background: linear-gradient(218deg, rgba(2, 0, 36, 1) 52%, rgba(28, 0, 150, 1) 80%, rgba(0, 212, 255, 1) 100%);
-  background: -webkit-linear-gradient(218deg, rgba(2, 0, 36, 1) 52%, rgba(28, 0, 150, 1) 80%, rgba(0, 212, 255, 1) 100%);
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255,255,255,0.04), transparent 40%),
+    radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: cover, 40px 40px;
+  background-attachment: fixed;
+  background-color: #0b0b0f;
+}
+
+/* 
+  Los estilos con este data-slot cambian el la apariencia
+  de la scrollbar en la tabla del historial de mediciones
+  del usuario. 
+*/
+div[data-slot="table-container"]::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+div[data-slot="table-container"]::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+div[data-slot="table-container"]::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+div[data-slot="table-container"]::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Scroball Firefox */
+div[data-slot="table-container"] {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+/* 
+  Estilos propios para el email de contacto en la pagina
+  de politica de privacidad.
+*/
+.privacy-email {
+  color: var(--color-cyan-400);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.privacy-email:hover {
+  color: var(--color-gray-200);
 }

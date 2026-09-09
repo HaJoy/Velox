@@ -6,6 +6,8 @@
 export type TCPInfo = {
   BytesReceived: number;     // bytes
   ElapsedTime: number;       // seconds
+  MinRTT: number;
+  RTT: number;              // round-trip time in milliseconds
   [key: string]: unknown;
 };
 
@@ -23,6 +25,11 @@ export type LastClientMeasurement = {
 export type LastServerMeasurement = {
   TCPInfo?: TCPInfo;
   [key: string]: unknown;
+};
+
+export type CompleteMsg = {
+  LastClientMeasurement: LastClientMeasurement;
+  LastServerMeasurement: LastServerMeasurement;
 };
 
 /** Generic base for messages */
@@ -48,11 +55,7 @@ export interface ServerMeasurementMsg extends BaseNdt7Msg {
     [key: string]: unknown;
   };
   LastServerMeasurement?: LastServerMeasurement;
-}
-
-export interface CompleteMsg extends BaseNdt7Msg {
-  MsgType: "complete";
-}
+};
 
 /** Union of possible messages received in callbacks */
 export type Ndt7Message =
