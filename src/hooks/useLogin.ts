@@ -13,16 +13,19 @@ export const useLogin = () => {
   const [error, setError] = useState<string | null>(null);
 
   const login = async (email: string, password: string) => {
-    
     setIsLoading(true);
     setError(null);
     try {
-        const { data, error } = await signIn(email, password);
+      const { data, error } = await signIn(email, password);
 
-        if (error) {
-            console.error(error.message);
-            setError(error.message || "Unknown error while trying to login.");
-        }
+      if (error) {
+        setError(error.message || "Unknown error while trying to login.");
+        const errorMsg =
+          error.message == "Invalid login credentials"
+            ? "Credenciales no válidas."
+            : error.message;
+        return { success: false, error: errorMsg };
+      }
 
       return { success: true, data: data };
     } catch (err) {

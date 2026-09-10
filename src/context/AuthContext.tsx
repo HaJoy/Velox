@@ -7,23 +7,27 @@ type AuthContextType = {
   session: Session | null;
   user: User | null;
   logout: () => Promise<void>;
+  authLoading: boolean;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthContextProvider = ({ children }: { children: React.ReactNode; }) => {
   const [session, setSession] = useState<Session | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
 
     // Obtener sesion inicial
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      setAuthLoading(false);
     });
 
     // Escuchar cambios de sesion
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      setAuthLoading(false);
     });
 
     // Evitar duplicar los listeners al montar un componente
@@ -44,7 +48,7 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode; }
 
   return (
     <AuthContext.Provider
-      value={{ session, user: session?.user ?? null, logout: handleLogout }}
+      value={{ session, user: session?.user ?? null, logout: handleLogout, authLoading }}
     >
       {children}
     </AuthContext.Provider>

@@ -2,12 +2,17 @@ import { isGetOneMeasurementResponse } from "@/guards/measurement.guard";
 import { api } from "./axios";
 import { getIP, getISP } from "./ipService";
 import { isIpinfoResponse } from "@/guards/isp.guard";
-import type { Measurement } from "@/types/measurement";
+import type { GetAllMeasurementsResponse, Measurement } from "@/types/measurement";
 
-
-export const getAllMeasurements = async () => {
+/**
+ * Obtiene todas las mediciones de un pais en especifico.
+ * @param country Pais de referencia, si es nulo, la API usa a "Colombia" por defecto.
+ * @param isp ISP de referencia (opcional).
+ * @returns Objeto JSON de tipo `GetAllMeasurementResponse` con todas las mediciones encontradas o `{}` si no hay coincidencias.
+ */
+export const getAllMeasurements = async (country?: string, isp?: string): Promise<GetAllMeasurementsResponse | undefined> => {
   try {
-    const response = await api.get('/measurement');
+    const response = await api.get('/measurement', { params: { country, isp } });
     return response.data;
   } catch (error) {
     console.error('Error while fetching all measurements: ', error);
@@ -17,7 +22,7 @@ export const getAllMeasurements = async () => {
 type CreateMeasurementPayload = {
   downloadSpeed: number;
   uploadSpeed: number;
-  ping: number;
+  avgRTT: number;
 };
 
 export const createMeasurement = async (payload: CreateMeasurementPayload) => {

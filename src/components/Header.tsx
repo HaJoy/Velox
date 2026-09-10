@@ -28,10 +28,12 @@ export const Header = () => {
   const { user, logout } = useAuth();
 
   return (
-    <header className="flex justify-center border-b mb-2 sticky top-0 bg-[#0b0b0f]">
-      <NavigationMenu className="max-w-11/12">
+    <header className="flex justify-center border-b mb-2 px-8 py-1.5 sticky top-0 bg-[#0b0b0f] z-50">
+      <NavigationMenu className="max-w-[1500px]">
         <div className="w-full">
-          <NavigationMenuList className={`flex justify-between md:grid ${user ? `md:grid-cols-3` : `md:grid-cols-2`} items-center w-full`}>
+          <NavigationMenuList
+            className={`flex justify-between md:grid ${user ? `md:grid-cols-3` : `md:grid-cols-2`} items-center w-full`}
+          >
             {/* Brand */}
             <NavigationMenuItem className="justify-self-start">
               <h1 className="text-5xl select-none" lang="en">
@@ -60,19 +62,55 @@ export const Header = () => {
               {!user ? (
                 // Usuario no autenticado
                 <>
+                  {/* desktop */}
                   <Button
-                    className="cursor-pointer"
+                    className="hidden cursor-pointer md:flex"
                     onClick={() => setDialogMode("login")}
                   >
-                    Login
+                    Iniciar sesión
                   </Button>
                   <Button
                     variant="outline"
-                    className="cursor-pointer"
+                    className="hidden cursor-pointer md:flex"
                     onClick={() => setDialogMode("register")}
                   >
-                    Register
+                    Registrarse
                   </Button>
+
+                  {/* Mobile */}
+                  <div className="md:hidden">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" className="cursor-pointer">
+                          <Menu />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        sideOffset={8}
+                        align="end"
+                        className="w-40"
+                      >
+                        <DropdownMenuItem asChild>
+                          <Button
+                          variant={"link"}
+                            className="cursor-pointer w-full"
+                            onClick={() => setDialogMode("login")}
+                          >
+                            Iniciar sesión
+                          </Button>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Button
+                            variant="link"
+                            className="cursor-pointer w-full"
+                            onClick={() => setDialogMode("register")}
+                          >
+                            Registrarse
+                          </Button>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </>
               ) : (
                 // Usuario autenticado
@@ -84,7 +122,7 @@ export const Header = () => {
                       className="cursor-pointer"
                       onClick={() => setOpenAlertDialog(true)}
                     >
-                      Log out
+                      Cerrar sesión
                     </Button>
                   </div>
 
@@ -96,7 +134,11 @@ export const Header = () => {
                           <Menu />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent sideOffset={8} align="end" className="w-40">
+                      <DropdownMenuContent
+                        sideOffset={8}
+                        align="end"
+                        className="w-40"
+                      >
                         <DropdownMenuItem asChild>
                           <Link to="/">Inicio</Link>
                         </DropdownMenuItem>
@@ -104,9 +146,12 @@ export const Header = () => {
                           <Link to="/dashboard">Dashboard</Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem variant="destructive" onSelect={() => setOpenAlertDialog(true)}>
+                        <DropdownMenuItem
+                          variant="destructive"
+                          onSelect={() => setOpenAlertDialog(true)}
+                        >
                           <LogOut />
-                          Log out
+                          Cerrar sesión
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

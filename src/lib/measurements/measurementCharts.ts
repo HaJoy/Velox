@@ -14,16 +14,16 @@ export const formatChartData = (measurements: Measurement[]) => {
     time: new Date(measurement.createdAt).toLocaleTimeString(),
     downloadSpeed: measurement.downloadSpeed,
     uploadSpeed: measurement.uploadSpeed,
-    ping: measurement.ping,
+    avgRTT: measurement.avgRTT,
   }));
 
   return chartData;
 };
 
 /**
- * Calcula el promedio de velocidad de descarga, de subida, y ping
+ * Calcula el promedio de velocidad de descarga, de subida, y RTT
  * @param measurements 
- * @returns `{ avgDownloadSpeed, avgUploadSpeed, avgPing }` - El promedio de los tres valores.
+ * @returns `{ avgDownloadSpeed, avgUploadSpeed, avgRTT }` - El promedio de los tres valores.
  */
 export const calcAvgs = (measurements: Measurement[]) => {
   const avgDownloadSpeed =
@@ -42,14 +42,14 @@ export const calcAvgs = (measurements: Measurement[]) => {
         ).toFixed(2)
       : 0;
 
-  const avgPing =
+  const avgRTT =
     measurements.length > 0
       ? (
-          measurements.reduce((sum, m) => sum + m.ping, 0) / measurements.length
+          measurements.reduce((sum, m) => sum + m.avgRTT, 0) / measurements.length
         ).toFixed(2)
       : 0;
 
-  return { avgDownloadSpeed, avgUploadSpeed, avgPing };
+  return { avgDownloadSpeed, avgUploadSpeed, avgRTT };
 };
 
 /**
@@ -58,7 +58,12 @@ export const calcAvgs = (measurements: Measurement[]) => {
  * @returns `{ ispDistribution, ispPieData, ispAverages }` - Distribucion, datos
  * preaprados y promedios de ISPs
  */
-export const calcISPdata = (measurements: Measurement[]) => {
+export type ISPMetric = "Descarga (Mbps)" | "Subida (Mbps)" | "RTT (ms)";
+
+export const calcISPdata = (
+  measurements: Measurement[],
+  sortMetric: ISPMetric = "Descarga (Mbps)",
+) => {
 
   // Calcular distribución de ISPs
   const ispDistribution = measurements.reduce(
@@ -78,28 +83,31 @@ export const calcISPdata = (measurements: Measurement[]) => {
   const ispAverages = measurements.reduce(
     (
       acc: {
-        [key: string]: { download: number[]; upload: number[]; ping: number[] };
+        [key: string]: { download: number[]; upload: number[]; avgRTT: number[] };
       },
       m,
     ) => {
       if (!acc[m.isp]) {
-        acc[m.isp] = { download: [], upload: [], ping: [] };
+        acc[m.isp] = { download: [], upload: [], avgRTT: [] };
       }
       acc[m.isp].download.push(m.downloadSpeed);
       acc[m.isp].upload.push(m.uploadSpeed);
-      acc[m.isp].ping.push(m.ping);
+      acc[m.isp].avgRTT.push(m.avgRTT);
       return acc;
     },
     {},
   );
 
-    //Formatear datos para grafica de barras   
-  const ispBarData = Object.entries(ispAverages).map(([name, data]) => ({
-    name,
-    "Descarga (Mbps)": parseFloat((data.download.reduce((a, b) => a + b, 0) / data.download.length).toFixed(2)),
-    "Subida (Mbps)": parseFloat((data.upload.reduce((a, b) => a + b, 0) / data.upload.length).toFixed(2)),
-    "Ping (ms)": parseFloat((data.ping.reduce((a, b) => a + b, 0) / data.ping.length).toFixed(2)),
-  }));
+  // Formatear, ordenar y limitar los datos de la grafica de barras.
+  const ispBarData = Object.entries(ispAverages)
+    .map(([name, data]) => ({
+      name,
+      "Descarga (Mbps)": parseFloat((data.download.reduce((a, b) => a + b, 0) / data.download.length).toFixed(2)),
+      "Subida (Mbps)": parseFloat((data.upload.reduce((a, b) => a + b, 0) / data.upload.length).toFixed(2)),
+      "RTT (ms)": parseFloat((data.avgRTT.reduce((a, b) => a + b, 0) / data.avgRTT.length).toFixed(2)),
+    }))
+    .sort((a, b) => b[sortMetric] - a[sortMetric] || a.name.localeCompare(b.name))
+    .slice(0, 5);
 
   return { ispDistribution, ispPieData, ispAverages, ispBarData };
 };

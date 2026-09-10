@@ -26,7 +26,7 @@ export function isMeasurement(v: unknown): v is Measurement {
     isString(m.country) &&
     isNumber(m.downloadSpeed) &&
     isNumber(m.uploadSpeed) &&
-    isNumber(m.ping) &&
+    isNumber(m.avgRTT) &&
     isNumber(m.review) &&
     isString(m.userAgent)
   );

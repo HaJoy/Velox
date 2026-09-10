@@ -1,5 +1,5 @@
 import { getAllMeasurements } from "@/api/measurementService";
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   ChartContainer,
   ChartTooltip,
@@ -25,7 +25,20 @@ import {
 } from "recharts";
 import type { Measurement } from "@/types/measurement.d";
 import { Card } from "@/components/ui/card";
-import { calcAvgs, calcISPdata, formatChartData } from "@/lib/measurements/measurementCharts";
+import {
+  calcAvgs,
+  calcISPdata,
+  formatChartData,
+  type ISPMetric,
+} from "@/lib/measurements/measurementCharts";
+import Select from "@/components/Select";
+import {
+  Select as MetricSelect,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const downloadChartConfig = {
   downloadSpeed: {
@@ -41,15 +54,22 @@ const uploadChartConfig = {
   },
 } satisfies ChartConfig;
 
-const pingChartConfig = {
-  ping: {
-    label: "Ping (ms)",
+const rttChartConfig = {
+  avgRTT: {
+    label: "RTT (ms)",
     color: "hsl(var(--destructive))",
   },
 } satisfies ChartConfig;
 
-const renderXAxisTick = (props: any) => {
-  const { x, y, payload } = props;
+const renderXAxisTick = ({
+  x = 0,
+  y = 0,
+  payload,
+}: {
+  x?: number;
+  y?: number;
+  payload?: { value?: string | number };
+}) => {
   return (
     <text
       x={x}
@@ -77,46 +97,58 @@ const COLORS = [
 export const Dashboard = () => {
   const [measurements, setMeasurements] = useState<Measurement[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [ispSortMetric, setIspSortMetric] = useState<ISPMetric>("Descarga (Mbps)");
 
-  useEffect(() => {
-    const getMeasurements = async () => {
-      try {
-        const response = await getAllMeasurements();
-        // Ordenar por fecha para mejor visualización en gráficas
-        const measurementsArray = response.measurements || [];
-        const sortedMeasurements = measurementsArray.sort(
-          (a: Measurement, b: Measurement) => {
-            return (
-              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-            );
-          },
-        );
-        setMeasurements(sortedMeasurements);
-      } catch (error) {
-        console.error(
-          "Error trying to fetch measurements from Dashboard: ",
-          error,
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Funcion para obtener todos las mediciones de un pais e isp en especifico
+  const getMeasurements = async (country?: string, isp?: string) => {
+    setLoading(true);
+    try {
+      const response = await getAllMeasurements(country, isp);
+      // Ordenar por fecha para mejor visualización en gráficas
+      const measurementsArray = response?.measurements || [];
+      const sortedMeasurements = measurementsArray.sort(
+        (a: Measurement, b: Measurement) => {
+          return (
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
+        },
+      );
+      setMeasurements(sortedMeasurements);
+    } catch (error) {
+      console.error(
+        "Error trying to fetch measurements from Dashboard: ",
+        error,
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    getMeasurements();
-  }, []);
+  const onFilterChange = useCallback(
+    (filters: { country?: string; isp?: string }) => {
+      getMeasurements(filters.country, filters.isp);
+    },
+    [],
+  );
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        Cargando datos...
+      <div className="space-y-6 px-4 pb-8 md:px-0">
+        <Select onFilterChange={onFilterChange} initialCountry="Colombia" />
+        <div className="flex items-center justify-center h-screen">
+          Cargando datos...
+        </div>
       </div>
     );
   }
 
   if (measurements.length === 0) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        No hay mediciones disponibles
+      <div className="space-y-6 px-4 pb-8 md:px-0">
+        <Select onFilterChange={onFilterChange} initialCountry="Colombia" />
+        <div className="flex items-center justify-center h-screen">
+          No hay mediciones disponibles
+        </div>
       </div>
     );
   }
@@ -125,10 +157,10 @@ export const Dashboard = () => {
   const chartData = formatChartData(measurements);
 
   // Calcular promedios
-  const { avgDownloadSpeed, avgUploadSpeed, avgPing } = calcAvgs(measurements);
+  const { avgDownloadSpeed, avgUploadSpeed, avgRTT } = calcAvgs(measurements);
 
   // preparar los datos para la grafica Pie y de barras de ISPs
-  const { ispPieData, ispBarData} = calcISPdata(measurements);
+  const { ispPieData, ispBarData } = calcISPdata(measurements, ispSortMetric);
 
   // Componente KPI
   const KPICard = ({ label, value, unit }: { label: string; value: string | number; unit: string }) => (
@@ -140,16 +172,17 @@ export const Dashboard = () => {
   );
 
   return (
-    <div className="space-y-6 px-4 pb-8 md:px-0">
+    <div className="min-w-0 max-w-full space-y-6 px-4 pb-8 md:px-0 w-full">
+      <Select onFilterChange={onFilterChange} initialCountry="Colombia" />
       {/* Primera fila: 3 KPIs */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3 w-full">
+      <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-3 w-full">
         <KPICard label="Descarga Promedio" value={avgDownloadSpeed} unit="Mbps" />
         <KPICard label="Subida Promedio" value={avgUploadSpeed} unit="Mbps" />
-        <KPICard label="Ping Promedio" value={avgPing} unit="ms" />
+        <KPICard label="RTT Promedio" value={avgRTT} unit="ms" />
       </div>
 
       {/* Segunda fila: Gráfica de Descarga (ancho completo) */}
-      <Card className="space-y-2 px-4 py-5 w-full bg-[#0b0b0f] md:px-5">
+      <Card className="min-w-0 max-w-full space-y-2 px-4 py-5 w-full bg-[#0b0b0f] md:px-5">
         <h2 className="text-xl font-semibold">Velocidad de Descarga vs Tiempo</h2>
         <ChartContainer config={downloadChartConfig} className="h-64 md:h-96">
           <LineChart data={chartData}>
@@ -157,7 +190,7 @@ export const Dashboard = () => {
             <XAxis dataKey="date" tick={renderXAxisTick} />
             <YAxis label={{ value: "Mbps", angle: -90, position: "insideLeft", offset: 15 }} />
             <ChartTooltip content={<ChartTooltipContent />} />
-            <ChartLegend content={<ChartLegendContent />} wrapperStyle={{ paddingTop: 5 }} />
+            <ChartLegend content={<ChartLegendContent />} wrapperStyle={{ paddingTop: 25 }} />
             <Line
               type="monotone"
               dataKey="downloadSpeed"
@@ -169,10 +202,10 @@ export const Dashboard = () => {
         </ChartContainer>
       </Card>
 
-      {/* Tercera fila: 2 Gráficas (Subida y Ping) */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 w-full">
+      {/* Tercera fila: 2 Gráficas (Subida y RTT) */}
+      <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 w-full">
         {/* Gráfica de Velocidad de Subida */}
-        <Card className="space-y-2 px-4 py-5 bg-[#0b0b0f] md:px-5">
+        <Card className="min-w-0 max-w-full space-y-2 px-4 py-5 bg-[#0b0b0f] md:px-5">
           <h2 className="text-xl font-semibold">Velocidad de Subida vs Tiempo</h2>
           <ChartContainer config={uploadChartConfig} className="h-64 md:h-72">
             <LineChart data={chartData}>
@@ -180,7 +213,7 @@ export const Dashboard = () => {
               <XAxis dataKey="date" tick={renderXAxisTick} />
               <YAxis label={{ value: "Mbps", angle: -90, position: "insideLeft", offset: 15 }} />
               <ChartTooltip content={<ChartTooltipContent />} />
-              <ChartLegend content={<ChartLegendContent />} />
+              <ChartLegend content={<ChartLegendContent />} wrapperStyle={{ paddingTop: 25 }} />
               <Line
                 type="monotone"
                 dataKey="uploadSpeed"
@@ -192,19 +225,19 @@ export const Dashboard = () => {
           </ChartContainer>
         </Card>
 
-        {/* Gráfica de Ping */}
-        <Card className="space-y-2 px-4 py-5 bg-[#0b0b0f] md:px-5">
-          <h2 className="text-xl font-semibold">Ping vs Tiempo</h2>
-          <ChartContainer config={pingChartConfig} className="h-64 md:h-72">
+        {/* Gráfica de RTT */}
+        <Card className="min-w-0 max-w-full space-y-2 px-4 py-5 bg-[#0b0b0f] md:px-5">
+          <h2 className="text-xl font-semibold">RTT vs Tiempo</h2>
+          <ChartContainer config={rttChartConfig} className="h-64 md:h-72">
             <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" tick={renderXAxisTick} />
               <YAxis label={{ value: "ms", angle: -90, position: "insideLeft", offset: 15 }} />
               <ChartTooltip content={<ChartTooltipContent />} />
-              <ChartLegend content={<ChartLegendContent />} />
+              <ChartLegend content={<ChartLegendContent />} wrapperStyle={{ paddingTop: 25 }} />
               <Line
                 type="monotone"
-                dataKey="ping"
+                dataKey="avgRTT"
                 stroke="#00ff95"
                 dot={false}
                 strokeWidth={2}
@@ -215,9 +248,9 @@ export const Dashboard = () => {
       </div>
 
       {/* Cuarta fila: Distribución de ISPs y Promedios por ISP */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 w-full">
+      <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 w-full">
         {/* Gráfica Pie de Distribución de ISPs */}
-        <Card className="space-y-2 px-4 py-5 bg-[#0b0b0f] md:px-5">
+        <Card className="min-w-0 max-w-full space-y-2 px-4 py-5 bg-[#0b0b0f] md:px-5">
           <h2 className="text-xl font-semibold">Distribución de ISPs</h2>
           <div className="flex justify-center h-64 md:h-72">
             <ResponsiveContainer width="100%" height="100%">
@@ -243,21 +276,43 @@ export const Dashboard = () => {
         </Card>
 
         {/* Gráfica de Barras: Promedios por ISP */}
-        <Card className="space-y-2 px-4 py-5 bg-[#0b0b0f] md:px-5">
-          <h2 className="text-xl font-semibold">Promedios por ISP</h2>
+        <Card className="min-w-0 max-w-full space-y-2 px-4 py-5 bg-[#0b0b0f] md:px-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-xl font-semibold">Promedios por ISP</h2>
+            <MetricSelect
+              value={ispSortMetric}
+              onValueChange={(value) => setIspSortMetric(value as ISPMetric)}
+            >
+              <SelectTrigger size="sm" aria-label="Ordenar ISPs por métrica">
+                <SelectValue placeholder="Ordenar por" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Descarga (Mbps)">Descarga</SelectItem>
+                <SelectItem value="Subida (Mbps)">Subida</SelectItem>
+                <SelectItem value="RTT (ms)">RTT</SelectItem>
+              </SelectContent>
+            </MetricSelect>
+          </div>
           <ChartContainer config={{}} className="h-64 md:h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={ispBarData}>
+              <BarChart data={ispBarData} margin={{ bottom: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                <XAxis
+                  dataKey="name"
+                  textAnchor="middle"
+                  tick={ window.innerWidth > 680 ? { fontSize: 10 } : false}
+                  height={60}
+                  tickFormatter={(nombreIsp: string) => {
+                    const parsedIsp = nombreIsp.split(' ').slice(1).join(' ');
+                    return parsedIsp;
+                  }}
+                />
                 <YAxis />
-                <Tooltip />
+                <Tooltip labelStyle={{ color: "#fff" }} contentStyle={{ backgroundColor: "#0009" }}/>
                 <Legend />
                 <Bar dataKey="Descarga (Mbps)" fill="#0080FF" />
                 <Bar dataKey="Subida (Mbps)" fill="#9900ff" />
-                <Bar dataKey="Ping (ms)" fill="#00ff95" />
+                <Bar dataKey="RTT (ms)" fill="#00ff95" />
               </BarChart>
-            </ResponsiveContainer>
           </ChartContainer>
         </Card>
       </div>

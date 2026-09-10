@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase/client";
 import axios from "axios";
+import axiosRetry from "axios-retry";
 
 const getBaseUrl = () => {
     const explicit = import.meta.env.VITE_API_URL as string | undefined;
@@ -23,4 +24,13 @@ api.interceptors.request.use(async (config) => {
     }
 
     return config;
+});
+
+axiosRetry(api, {
+    retries: 3,
+    retryDelay: axiosRetry.exponentialDelay,
+    retryCondition: axiosRetry.isNetworkOrIdempotentRequestError,
+    onRetry: (retryCount, error, requestConfig) => {
+        console.log(`Failed to fetch information. Retrying request ${retryCount}...`);
+    }
 });

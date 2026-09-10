@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { RotateCcwIcon } from "lucide-react";
 import { useLogin } from "@/hooks/useLogin";
+import { toastError } from "@/lib/toast-utils";
 
 interface LoginFormProps {
   onClose: () => void;
@@ -32,14 +33,26 @@ export const LoginForm = ({ onClose }: LoginFormProps) => {
 
   const handleLogin = async (data: LoginFormValues) => {
     const result = await login(data.email, data.password);
-    if (result?.success) {
-      onClose();
+
+    if (!result?.success) {
+      toastError({
+        title: (result?.error as string) ??
+          "Error al iniciar sesión. Por favor, inténtelo nuevamente.",
+        toasterId: "toaster-auth",
+      });
+      return;
     }
+
+    onClose();
   };
 
   return (
     <>
-      <form id="login-form"className="flex flex-col justify-center" onSubmit={form.handleSubmit(handleLogin)}>
+      <form
+        id="login-form"
+        className="flex flex-col justify-center"
+        onSubmit={form.handleSubmit(handleLogin)}
+      >
         <FieldSet className="w-full flex flex-col items-center">
           <FieldGroup>
             {/* Input email */}
@@ -48,7 +61,7 @@ export const LoginForm = ({ onClose }: LoginFormProps) => {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="email">Email</FieldLabel>
+                  <FieldLabel htmlFor="email">Correo electrónico</FieldLabel>
                   <Input
                     {...field}
                     id="email"
@@ -57,7 +70,7 @@ export const LoginForm = ({ onClose }: LoginFormProps) => {
                     aria-invalid={fieldState.invalid}
                   />
                   <FieldDescription>
-                    Por favor introduce tu correo electronico.
+                    Por favor introduce tu correo electrónico.
                   </FieldDescription>
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
@@ -113,7 +126,6 @@ export const LoginForm = ({ onClose }: LoginFormProps) => {
           </ButtonGroup>
         </FieldSet>
       </form>
-      {error && <p className="text-red-500 mt-2">{error}</p>}
     </>
   );
 };

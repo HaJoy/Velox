@@ -20,7 +20,7 @@ export interface Measurement {
     /* quantitative results */
     downloadSpeed: number;
     uploadSpeed: number;
-    ping: number;
+    avgRTT: number;
     review: number;
 
     /* metadata */

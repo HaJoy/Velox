@@ -46,7 +46,7 @@ export const MeasurementsTable = ({ user, refreshKey }: { user?: User | null; re
     { label: "ISP", key: "isp" },
     { label: "Descarga (Mb/s)", key: "downloadSpeed" },
     { label: "Subida (Mb/s)", key: "uploadSpeed" },
-    { label: "Ping (ms)", key: "ping" },
+    { label: "RTT (ms)", key: "avgRTT" },
     { label: "Fecha", key: "createdAt" },
   ];
 
@@ -56,7 +56,7 @@ export const MeasurementsTable = ({ user, refreshKey }: { user?: User | null; re
     isp: m.isp ?? "N/A",
     downloadSpeed: m.downloadSpeed ?? 0,
     uploadSpeed: m.uploadSpeed ?? 0,
-    ping: m.ping ?? 0,
+    avgRTT: m.avgRTT ?? 0,
     createdAt: new Date(m.createdAt).toLocaleString("es-ES", {
       dateStyle: "medium",
       timeStyle: "short",
@@ -84,7 +84,7 @@ export const MeasurementsTable = ({ user, refreshKey }: { user?: User | null; re
             <TableHead>ISP</TableHead>
             <TableHead>Descarga (Mb/s)</TableHead>
             <TableHead>Subida (Mb/s)</TableHead>
-            <TableHead>Ping (ms)</TableHead>
+            <TableHead>RTT (ms)</TableHead>
             <TableHead>Fecha</TableHead>
           </TableRow>
         </TableHeader>
@@ -94,7 +94,7 @@ export const MeasurementsTable = ({ user, refreshKey }: { user?: User | null; re
             const isp = m.isp ?? "N/A";
             const download = m.downloadSpeed ?? 0;
             const upload = m.uploadSpeed ?? 0;
-            const ping = m.ping ?? 0;
+            const avgRTT = m.avgRTT ?? 0;
             const date = new Date(m.createdAt).toLocaleString("es-ES", {
               dateStyle: "medium",
               timeStyle: "short",
@@ -107,7 +107,7 @@ export const MeasurementsTable = ({ user, refreshKey }: { user?: User | null; re
                 <TableCell>{isp}</TableCell>
                 <TableCell>{download}</TableCell>
                 <TableCell>{upload}</TableCell>
-                <TableCell>{ping}</TableCell>
+                <TableCell>{avgRTT}</TableCell>
                 <TableCell>{date}</TableCell>
               </TableRow>
             );
