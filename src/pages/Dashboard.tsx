@@ -251,7 +251,10 @@ export const Dashboard = () => {
       <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 w-full">
         {/* Gráfica Pie de Distribución de ISPs */}
         <Card className="min-w-0 max-w-full space-y-2 px-4 py-5 bg-[#0b0b0f] md:px-5">
-          <h2 className="text-xl font-semibold">Distribución de ISPs</h2>
+          <div className="flex flex-col gap-2">
+            <h2 className="text-xl font-semibold">Distribución de ISPs</h2>
+            <p className="text-sm">Pasa el cursor o toca sobre la gráfica para ver el nombre de los ISPs.</p>
+          </div>
           <div className="flex justify-center h-64 md:h-72">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -269,7 +272,7 @@ export const Dashboard = () => {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip itemStyle={{ color: "#fff" }} contentStyle={{ backgroundColor: "#0009" }} />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -278,7 +281,10 @@ export const Dashboard = () => {
         {/* Gráfica de Barras: Promedios por ISP */}
         <Card className="min-w-0 max-w-full space-y-2 px-4 py-5 bg-[#0b0b0f] md:px-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-xl font-semibold">Promedios por ISP</h2>
+            <div className="flex flex-col gap-2 text-start max-w-1/2">
+              <h2 className="text-xl font-semibold">Promedios por ISP</h2>
+              <p className="text-sm">Pasa el cursor o toca sobre la gráfica para ver el nombre de los ISPs.</p>
+            </div>
             <MetricSelect
               value={ispSortMetric}
               onValueChange={(value) => setIspSortMetric(value as ISPMetric)}
@@ -294,25 +300,26 @@ export const Dashboard = () => {
             </MetricSelect>
           </div>
           <ChartContainer config={{}} className="h-64 md:h-72">
-              <BarChart data={ispBarData} margin={{ bottom: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="name"
-                  textAnchor="middle"
-                  tick={ window.innerWidth > 680 ? { fontSize: 10 } : false}
-                  height={60}
-                  tickFormatter={(nombreIsp: string) => {
-                    const parsedIsp = nombreIsp.split(' ').slice(1).join(' ');
-                    return parsedIsp;
-                  }}
-                />
-                <YAxis />
-                <Tooltip labelStyle={{ color: "#fff" }} contentStyle={{ backgroundColor: "#0009" }}/>
-                <Legend />
-                <Bar dataKey="Descarga (Mbps)" fill="#0080FF" />
-                <Bar dataKey="Subida (Mbps)" fill="#9900ff" />
-                <Bar dataKey="RTT (ms)" fill="#00ff95" />
-              </BarChart>
+            <BarChart data={ispBarData} margin={{ bottom: 20 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis
+                label={{ value: "ISP" }}
+                dataKey="name"
+                textAnchor="middle"
+                tick={false}
+                height={60}
+                tickFormatter={(nombreIsp: string) => {
+                  const parsedIsp = nombreIsp.split(' ').slice(1).join(' ');
+                  return parsedIsp;
+                }}
+              />
+              <YAxis label={{ value: "Promedio", angle: -90, position: "insideLeft" }} />
+              <Tooltip labelStyle={{ color: "#fff" }} contentStyle={{ backgroundColor: "#0009" }}/>
+              <Legend />
+              <Bar dataKey="Descarga (Mbps)" fill="#0080FF" />
+              <Bar dataKey="Subida (Mbps)" fill="#9900ff" />
+              <Bar dataKey="RTT (ms)" fill="#00ff95" />
+            </BarChart>
           </ChartContainer>
         </Card>
       </div>
