@@ -1,3 +1,17 @@
+
+// Type for response when a server is chosen.
+export type ChosenServerResponse = {
+  hostname: string;
+  location: { // This is the only necesary for now.
+    city: string;
+    country: string;
+  };
+  machine: string;
+  urls: {
+    [key: string]: string;
+  }
+};
+
 /**
  * Types for messages emitted by @m-lab/ndt7 workers (download / upload).
  * Keep these conservative (optional fields) because messages vary by MsgType/Source.

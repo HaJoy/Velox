@@ -6,6 +6,7 @@
  */
 
 import type {
+  ChosenServerResponse,
   TCPInfo,
   ClientData,
   ClientMeasurementMsg,
@@ -23,6 +24,28 @@ import type {
  */
 export const isObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null;
+
+/**
+ * Comprueba si `v` cumple con la estructura de la respuesta del servidor
+ * elegido.
+ * @param v unknown
+ * @returns `true` si cumple con la interfaz `chosenServerResponse`, `false` si no.
+ */
+export function isChosenServerResponse(v: unknown): v is ChosenServerResponse {
+  if (!isObject(v)) return false;
+  if (
+    typeof v.hostname !== "string" ||
+    typeof v.machine !== "string" ||
+    !isObject(v.location) ||
+    typeof v.location.city !== "string" ||
+    typeof v.location.country !== "string" ||
+    !isObject(v.urls)
+  ) {
+    return false;
+  }
+
+  return Object.values(v.urls).every((url) => typeof url === "string");
+}
 
 /**
  * Comprueba si `v` es un objeto y cumple con la interfaz `TCPInfo`.
