@@ -1,11 +1,13 @@
 import { useState } from "react";
 import ndt7 from "@m-lab/ndt7";
 import type {
+  ChosenServerResponse,
   ClientMeasurementMsg,
   CompleteMsg,
   ServerMeasurementMsg
 } from "@/types/ndt7";
 import {
+  isChosenServerResponse,
   isClientMeasurementMsg,
   isCompleteMsg,
   isLastClientMeasurement,
@@ -26,6 +28,8 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
   const [rttAvg, setRttAvg] = useState<number>(Infinity);
   const [downloadRtt, setDownloadRtt] = useState<number>(Infinity);
   const [uploadRtt, setUploadRtt] = useState<number>(Infinity);
+  const [serverChosenCity, setServerChosenCity] = useState<string>("");
+  const [serverChosenCountry, setServerChosenCountry] = useState<string>("");
   const [complete, setComplete] = useState<boolean>(true);
   const [testTime, setTestTime] = useState<number>(0);
   const [isDownStream, setIsDownStream] = useState<boolean>(true);
@@ -65,6 +69,30 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
       // Segundo argumento: objeto con callbacks para cada momento
       // de la medicion
       {
+        // Extraer la informacion del servidor de prueba seleccionado
+        serverChosen: function (server: ChosenServerResponse) {
+          if (isChosenServerResponse(server)) {
+            // Ciudad del servidor
+            const serverCity = server.location.city;
+
+            /**
+             * Pais del servidor
+             * NDT7 da el pais como su codigo ISO, por lo que se
+             * requiere de convertirlo a lenguaje natural
+           */ 
+
+            // Cargar nombre de paises en español
+            const regionNames = new Intl.DisplayNames(["es"], { type: "region" });
+            // Encontrar el nombre del pais del servidor seleccionado
+            const serverCountry = regionNames.of(server.location.country);
+
+            setServerChosenCity(serverCity);
+            setServerChosenCountry(serverCountry || server.location.country);
+
+          } else {
+            console.warn("Unexpected response after selecting the server.");
+          }
+        },
         // Muestra un log y guarda el tiempo de inicio de la prueba
         // cuando la medicion de descarga comience
         downloadStart: function () {
@@ -210,5 +238,19 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
       }
     })
   };
-  return { downloadSpeed, uploadSpeed, rttAvg, downloadRtt, uploadRtt, complete, testTime, isDownStream, downloadComplete, uploadComplete, startTest };
+  return {
+    downloadSpeed,
+    uploadSpeed,
+    rttAvg,
+    downloadRtt,
+    uploadRtt,
+    serverChosenCity,
+    serverChosenCountry,
+    complete,
+    testTime,
+    isDownStream,
+    downloadComplete,
+    uploadComplete,
+    startTest,
+  };
 }

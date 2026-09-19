@@ -35,6 +35,8 @@ export const Home = () => {
     rttAvg,
     downloadRtt,
     uploadRtt,
+    serverChosenCity,
+    serverChosenCountry,
     complete,
     testTime,
     isDownStream,
@@ -203,11 +205,22 @@ export const Home = () => {
               {/* Tiempo que duro la prueba */}
               <h3>Duración: {`${testTime.toFixed(1) || 0} segundos`}</h3>
 
-              {/* Direccion IP e ISP del usuario */}
-              <div>
-                <div className="text-sm md:text-base">
+              <div className="flex flex-col gap-2 w-full md:flex-row md:justify-evenly">
+                {/* Direccion IP e ISP del usuario */}
+                <div className="text-start text-sm sm:text-center md:text-base md:text-start">
                   <p>IP: {ipErrorMsg ? ipErrorMsg : publicIp}</p>
                   <p>Proveedor: {ispErrorMsg ? ispErrorMsg : userIsp}</p>
+                </div>
+                {/* Ubicacion del servidor de prueba */}
+                <div>
+                  <p>Ubicación del servidor:</p> 
+                  <p className={serverChosenCity && serverChosenCountry ? "" : "text-muted-foreground"}>
+                    {
+                      serverChosenCity && serverChosenCountry ?
+                    `${serverChosenCity}, ${serverChosenCountry}` :
+                    "Esperando a que la prueba comience."
+                    }
+                  </p>
                 </div>
               </div>
                   
