@@ -57,7 +57,9 @@ export function isTCPInfo(v: unknown): v is TCPInfo {
   const maybe = v as Record<string, unknown>;
   return (
     typeof maybe.BytesReceived === "number" &&
-    typeof maybe.ElapsedTime === "number"
+    typeof maybe.ElapsedTime === "number" &&
+    typeof maybe.minRTT === "number" &&
+    typeof maybe.RTT === "number"
   );
 }
 

@@ -23,6 +23,10 @@ type CreateMeasurementPayload = {
   downloadSpeed: number;
   uploadSpeed: number;
   avgRTT: number;
+  minRTT: number;
+  networkLimitedPercent: number;
+  clientLimitedPercent: number;
+  serverLimitedPercent: number;
 };
 
 export const createMeasurement = async (payload: CreateMeasurementPayload) => {

@@ -21,7 +21,13 @@ export interface Measurement {
     downloadSpeed: number;
     uploadSpeed: number;
     avgRTT: number;
+    minRTT:number;
     review: number;
+
+    /* bottleneck stats */
+    networkLimitedPercent: number;
+    clientLimitedPercent: number;
+    serverLimitedPercent: number;
 
     /* metadata */
     userAgent: string;
