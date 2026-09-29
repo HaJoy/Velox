@@ -123,6 +123,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
         },
         // Medir velocidad de descarga
         downloadMeasurement: function (data: ClientMeasurementMsg | ServerMeasurementMsg) {
+          
           if (isNdt7Message(data)) {
             // Estos if controlan lo que se debe hacer segun el mensaje recibido
             // Si el mensaje es del servidor se extrae el RTT medido
