@@ -6,9 +6,10 @@ import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
 import ReactSpeedometer from "react-d3-speedometer";
 import { MeasurementsTable } from "@/components/MeasurementsTable";
+import { BottleneckModal } from "@/components/BottleneckModal";
 import { isIpinfoResponse } from "@/guards/isp.guard";
 import { isGetOneMeasurementResponse } from "@/guards/measurement.guard";
-import { Download, Signal, Upload } from "lucide-react";
+import { Download, Network, Signal, Upload } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Field,
@@ -27,6 +28,7 @@ export const Home = () => {
   
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [isBottleneckModalOpen, setIsBottleneckModalOpen] = useState(false);
   
   // Obtener las metricas a traves del custom hook.
   const {
@@ -165,15 +167,25 @@ export const Home = () => {
                     <span>{`${downloadRtt && downloadRtt !== Infinity ? downloadRtt.toFixed(1) : 0} ms`}</span>
                   </div>
                 </div>
-                <div className="w-1/2">
-                  <h2>RTT promedio</h2>
-                  <div
-                    className={`flex justify-center items-center gap-2 text-sm mt-2 ${!complete ? "text-muted-foreground" : "font-bold"}`}
+                {complete && 
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className=" text-center hover:cursor-pointer"
+                    aria-label="Abrir análisis del cuello de botella"
+                    onClick={() => setIsBottleneckModalOpen(true)}
                   >
-                    <Signal />
-                    <span>{`${rttAvg && rttAvg !== Infinity ? rttAvg.toFixed(1) : 0} ms`}</span>
-                  </div>
-                </div>
+                    <Network />
+                    Más métricas
+                    {/* <h2>RTT promedio</h2>
+                    <div
+                      className={`flex justify-center items-center gap-2 text-sm mt-2 ${!complete ? "text-muted-foreground" : "font-bold"}`}
+                    >
+                      <Signal />
+                      <span>{`${rttAvg && rttAvg !== Infinity ? rttAvg.toFixed(1) : 0} ms`}</span>
+                    </div> */}
+                  </Button>
+                }
                 <div className="w-1/2 grid grid-cols-1 grid-rows-2">
                   <div>
                     <h2>Subida</h2>
@@ -286,6 +298,11 @@ export const Home = () => {
           <Toaster id="toaster-home" />
         </Card>
       </div>
+      <BottleneckModal
+        bottleneck={bottleneck}
+        open={isBottleneckModalOpen}
+        onOpenChange={setIsBottleneckModalOpen}
+      />
     </div>
   );
 };
