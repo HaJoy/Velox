@@ -49,23 +49,49 @@ const noteList: { title?: string; content: ReactNode }[] = [
           El cuello de botella es donde más se congestionaron los datos durante
           la prueba de descarga. Un cuello de botella alto en:
         </p>
+        <br />
         <ul>
           <li>
             <strong>Red: </strong>es normal. Cuando realizas la prueba de
             velocidad la conexión entre tu dispositivo y el servidor de pruebas
             seleccionado se satura de datos para asi medir el rendimiento.
           </li>
+          <br />
           <li>
             <strong>Cliente: </strong>tu dispostivo de interconexion
             (generalmente router) o el medio que usas para conectarte (como una
             antena Wi-Fi) no pudo procesar los datos lo suficientemente rapido,
             provocando una congestión de datos.
           </li>
+          <br />
           <li>
             <strong>Servidor: </strong>el servidor de pruebas seleccionado no
             está enviando los datos a un ritmo esperado, puede que el servidor
             no haya sido configurado correctamente. Este es un caso raro donde
-            la causa no tu red.
+            la causa no es tu red.
+          </li>
+        </ul>
+      </>
+    ),
+  },
+
+  // Nota RTT
+  {
+    title: "Round-Trip Time (RTT)",
+    content: (
+      <>
+        <p>Tiempo que tarda los datos de tu red en ir y volver del servidor.</p>
+        <br />
+        <ul>
+          <li>
+            <strong>Mínimo: </strong>el RTT más bajo obtenido durante toda la
+            prueba. Puede usarse como latencia en reposo{" "}
+            <b>pero es solo una aproximación.</b>
+          </li>
+          <br />
+          <li>
+            <strong>Promedio: </strong>el promedio de RTT bajo carga obtenido
+            durante toda la prueba.
           </li>
         </ul>
       </>
@@ -89,7 +115,7 @@ export const BottleneckModal = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[350px] md:gap-5">
           {/* Lado izquierdo: Mas metricas */}
           <div>
             <span className="text-lg font-bold">Cuello de botella</span>
@@ -99,7 +125,7 @@ export const BottleneckModal = ({
                   Principal limitación:{" "}
                   <strong>{locationLabels[bottleneck.location]}</strong>
                 </p>
-                <div className="flex flex-col gap-4">
+                <div className="custom-scrollbar flex flex-col gap-4 overflow-auto">
                   {metrics.map(({ key, label, icon: Icon }) => {
                     const percentage = bottleneck[key];
                     const boundedPercentage = Math.min(
@@ -147,9 +173,9 @@ export const BottleneckModal = ({
           </div>
 
           {/* Lado derecho: Anotaciones */}
-          <div>
+          <div className="flex max-h-[350px] min-h-0 flex-col overflow-hidden">
             <span className="text-lg font-bold">Anotaciones</span>
-            <div className="mt-3 flex flex-col gap-4">
+            <div className="custom-scrollbar mt-3 min-h-0 flex-1 overflow-y-auto flex flex-col gap-4">
               {noteList.map((note, index) => (
                 <Note key={index} title={note.title}>
                   {note.content}
@@ -165,7 +191,7 @@ export const BottleneckModal = ({
 
 const Note = ({ title, children }: { title?: string; children: ReactNode }) => {
   return (
-    <div className="md:border-l-2 md:border-cyan-400 md:pl-3">
+    <div className="note-container md:border-l-2 md:border-cyan-400 md:px-3">
       {title && <span className="font-semibold">{title}</span>}
       <div className="text-sm text-muted-foreground">{children}</div>
     </div>
