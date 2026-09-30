@@ -176,7 +176,7 @@ export const Home = () => {
                     onClick={() => setIsBottleneckModalOpen(true)}
                   >
                     <Network />
-                    Más métricas
+                    <span className="hidden md:inline">Más métricas</span>
                     {/* <h2>RTT promedio</h2>
                     <div
                       className={`flex justify-center items-center gap-2 text-sm mt-2 ${!complete ? "text-muted-foreground" : "font-bold"}`}

@@ -106,16 +106,16 @@ export const BottleneckModal = ({
 }: BottleneckModalProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="!max-w-fit">
+      <DialogContent className="md:!max-w-fit">
         <DialogHeader>
           <DialogTitle>Otras métricas de rendimiento</DialogTitle>
-          <DialogDescription className="max-w-2/3">
+          <DialogDescription className="md:max-w-2/3">
             Aquí puedes ver el cuello de botella durante la prueba de descarga,
             también el RTT mínimo y promedio de toda la prueba.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[350px] md:gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[350px] overflow-y-auto md:gap-5">
           {/* Lado izquierdo: Mas metricas */}
           <div>
             <span className="text-lg font-bold">Cuello de botella</span>
@@ -173,9 +173,9 @@ export const BottleneckModal = ({
           </div>
 
           {/* Lado derecho: Anotaciones */}
-          <div className="flex max-h-[350px] min-h-0 flex-col overflow-hidden">
+          <div className="flex md:max-h-[350px] min-h-0 flex-col md:overflow-hidden">
             <span className="text-lg font-bold">Anotaciones</span>
-            <div className="custom-scrollbar mt-3 min-h-0 flex-1 overflow-y-auto flex flex-col gap-4">
+            <div className="custom-scrollbar mt-3 min-h-0 flex-1 md:overflow-y-auto flex flex-col gap-4">
               {noteList.map((note, index) => (
                 <Note key={index} title={note.title}>
                   {note.content}

@@ -62,10 +62,12 @@ body {
   scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
 
-/* Estilos de notas en el modal Bottleneck.tsx */
-.note-container {
-  background: linear-gradient(to right, #22d3ee22 0%, rgba(0, 0, 0, 0) 3%);;
-}  
+/* Gradiente de notas en el modal Bottleneck.tsx (solo para desktop) */
+@media (min-width: 768px) {
+  .note-container {
+    background: linear-gradient(to right, #22d3ee22 0%, rgba(0, 0, 0, 0) 3%);;
+  }  
+}
 
 /* 
   Estilos propios para el email de contacto en la pagina
