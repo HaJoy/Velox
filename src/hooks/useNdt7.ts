@@ -132,6 +132,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
             if (isServerMeasurementMsg(data)) {
               const msg = data.Data.TCPInfo;
               updateMinRTT(msg.MinRTT);
+              console.log(currentMinRTT)
               const downloadRTTmsg = msg?.RTT ? msg.RTT / 1000 : Infinity; // Extrae el RTT
               setDownloadRtt(downloadRTTmsg);
               arrayRtts.push(downloadRTTmsg);
@@ -260,19 +261,19 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
         rttAverage = Math.round(rttAverage * 100) / 100;
         setRttAvg(rttAverage);
         
-        // const savedMeasurement = await createMeasurement({ 
-        //   downloadSpeed: currentDownloadSpeed,
-        //   uploadSpeed: currentUploadSpeed,
-        //   avgRTT: rttAverage,
-        //   minRTT: currentMinRTT,
-        //   networkLimitedPercent: bottleneckAux?.networkPercent ?? 0,
-        //   clientLimitedPercent: bottleneckAux?.clientPercent ?? 0,
-        //   serverLimitedPercent: bottleneckAux?.serverPercent ?? 0,
-        // });
+        const savedMeasurement = await createMeasurement({ 
+          downloadSpeed: currentDownloadSpeed,
+          uploadSpeed: currentUploadSpeed,
+          avgRTT: rttAverage,
+          minRTT: currentMinRTT,
+          networkLimitedPercent: bottleneckAux?.networkPercent ?? 0,
+          clientLimitedPercent: bottleneckAux?.clientPercent ?? 0,
+          serverLimitedPercent: bottleneckAux?.serverPercent ?? 0,
+        });
 
-        // if (savedMeasurement) {
-        //   onMeasurementSaved?.();
-        // }
+        if (savedMeasurement) {
+          onMeasurementSaved?.();
+        }
       }
     })
   };

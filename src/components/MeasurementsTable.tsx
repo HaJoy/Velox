@@ -46,7 +46,11 @@ export const MeasurementsTable = ({ user, refreshKey }: { user?: User | null; re
     { label: "ISP", key: "isp" },
     { label: "Descarga (Mb/s)", key: "downloadSpeed" },
     { label: "Subida (Mb/s)", key: "uploadSpeed" },
-    { label: "RTT (ms)", key: "avgRTT" },
+    { label: "RTT promedio (ms)", key: "avgRTT" },
+    { label: "RTT mínimo (ms)", key: "minRTT" },
+    { label: "Congestión de red (%)", key: "networkLimitedPercent" },
+    { label: "Congestión del cliente (%)", key: "clientLimitedPercent" },
+    { label: "Congestión del servidor (%)", key: "serverLimitedPercent" },
     { label: "Fecha", key: "createdAt" },
   ];
 
@@ -57,6 +61,10 @@ export const MeasurementsTable = ({ user, refreshKey }: { user?: User | null; re
     downloadSpeed: m.downloadSpeed ?? 0,
     uploadSpeed: m.uploadSpeed ?? 0,
     avgRTT: m.avgRTT ?? 0,
+    minRTT: m.minRTT ?? 0,
+    networkLimitedPercent: m.networkLimitedPercent ?? 0,
+    clientLimitedPercent: m.clientLimitedPercent ?? 0,
+    serverLimitedPercent: m.serverLimitedPercent ?? 0,
     createdAt: new Date(m.createdAt).toLocaleString("es-ES", {
       dateStyle: "medium",
       timeStyle: "short",
@@ -78,13 +86,17 @@ export const MeasurementsTable = ({ user, refreshKey }: { user?: User | null; re
       </div>
       <Table>
         <TableHeader className="sticky top-0 z-10 bg-[#0b0b0f]">
-          <TableRow>
+          <TableRow className="[&_th]:text-center">
             <TableHead>#</TableHead>
             <TableHead>IP</TableHead>
             <TableHead>ISP</TableHead>
             <TableHead>Descarga (Mb/s)</TableHead>
             <TableHead>Subida (Mb/s)</TableHead>
-            <TableHead>RTT (ms)</TableHead>
+            <TableHead>RTT promedio (ms)</TableHead>
+            <TableHead>RTT mínimo (ms)</TableHead>
+            <TableHead>Congestión de red (%)</TableHead>
+            <TableHead>Congestión del cliente (%)</TableHead>
+            <TableHead>Congestión del servidor (%)</TableHead>
             <TableHead>Fecha</TableHead>
           </TableRow>
         </TableHeader>
@@ -95,20 +107,28 @@ export const MeasurementsTable = ({ user, refreshKey }: { user?: User | null; re
             const download = m.downloadSpeed ?? 0;
             const upload = m.uploadSpeed ?? 0;
             const avgRTT = m.avgRTT ?? 0;
+            const minRTT = m.minRTT ?? 0;
+            const networkLimitedPercent = m.networkLimitedPercent ?? 0;
+            const clientLimitedPercent = m.clientLimitedPercent ?? 0;
+            const serverLimitedPercent = m.serverLimitedPercent ?? 0;
             const date = new Date(m.createdAt).toLocaleString("es-ES", {
               dateStyle: "medium",
               timeStyle: "short",
             });
 
             return (
-              <TableRow key={idx}>
+              <TableRow key={idx} className="[&_td]:whitespace-normal">
                 <TableCell className="font-bold">{idx + 1}</TableCell>
                 <TableCell>{ip}</TableCell>
                 <TableCell>{isp}</TableCell>
                 <TableCell>{download}</TableCell>
                 <TableCell>{upload}</TableCell>
                 <TableCell>{avgRTT}</TableCell>
-                <TableCell>{date}</TableCell>
+                <TableCell>{minRTT}</TableCell>
+                <TableCell>{networkLimitedPercent}</TableCell>
+                <TableCell>{clientLimitedPercent}</TableCell>
+                <TableCell>{serverLimitedPercent}</TableCell>
+                <TableCell className="!whitespace-nowrap">{date}</TableCell>
               </TableRow>
             );
           })}
