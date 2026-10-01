@@ -69,6 +69,16 @@ body {
   }  
 }
 
+/* Redondea de bordes superiores para cartas de RTT (heredado, bottleneck.tsx) */
+.rtt-card-name {
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+}
+.rtt-card-value {
+  border-bottom-left-radius: inherit;
+  border-bottom-right-radius: inherit;
+}
+
 /* 
   Estilos propios para el email de contacto en la pagina
   de politica de privacidad.

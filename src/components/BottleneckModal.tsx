@@ -8,9 +8,12 @@ import {
 import type { BottleneckResult } from "@/lib/measurements/bottleneck";
 import { Network, Server, UserRound } from "lucide-react";
 import type { ReactNode } from "react";
+import { Card } from "./ui/card";
 
 interface BottleneckModalProps {
   bottleneck: BottleneckResult | null;
+  minRTT: number;
+  avgRTT: number;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -101,12 +104,14 @@ const noteList: { title?: string; content: ReactNode }[] = [
 
 export const BottleneckModal = ({
   bottleneck,
+  minRTT,
+  avgRTT,
   open,
   onOpenChange,
 }: BottleneckModalProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="md:!max-w-fit">
+      <DialogContent className="md:!max-w-full md:!w-5xl">
         <DialogHeader>
           <DialogTitle>Otras métricas de rendimiento</DialogTitle>
           <DialogDescription className="md:max-w-2/3">
@@ -115,61 +120,73 @@ export const BottleneckModal = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[350px] overflow-y-auto md:gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-[3fr_2fr] gap-3 max-h-[350px] overflow-y-auto md:overflow-y-hidden md:gap-5">
           {/* Lado izquierdo: Mas metricas */}
-          <div>
-            <span className="text-lg font-bold">Cuello de botella</span>
-            {bottleneck ? (
-              <div className="flex flex-col gap-5 my-3">
-                <p>
-                  Principal limitación:{" "}
-                  <strong>{locationLabels[bottleneck.location]}</strong>
-                </p>
-                <div className="custom-scrollbar flex flex-col gap-4 overflow-auto">
-                  {metrics.map(({ key, label, icon: Icon }) => {
-                    const percentage = bottleneck[key];
-                    const boundedPercentage = Math.min(
-                      100,
-                      Math.max(0, percentage),
-                    );
+          <div className="custom-scrollbar flex flex-col gap-3 md:overflow-y-auto md:p-5">
+            {/* Cuello de botella */}
+            <div>
+              <span className="text-lg font-bold">Cuello de botella</span>
+              {bottleneck ? (
+                <div className="flex flex-col gap-5 my-3">
+                  <p>
+                    Principal limitación:{" "}
+                    <strong>{locationLabels[bottleneck.location]}</strong>
+                  </p>
+                  <div className="custom-scrollbar flex flex-col gap-4 overflow-auto">
+                    {metrics.map(({ key, label, icon: Icon }) => {
+                      const percentage = bottleneck[key];
+                      const boundedPercentage = Math.min(
+                        100,
+                        Math.max(0, percentage),
+                      );
 
-                    return (
-                      <div key={key} className="flex flex-col gap-1.5">
-                        <div className="flex justify-between gap-4 text-sm">
-                          <span className="flex items-center gap-2">
-                            <Icon
-                              className="h-4 w-4 text-muted-foreground"
-                              aria-hidden="true"
-                            />
-                            {label}
-                          </span>
-                          <span className="font-medium">
-                            {percentage.toFixed(1)}%
-                          </span>
-                        </div>
-                        <div
-                          className="h-2 overflow-hidden rounded-full bg-muted"
-                          role="progressbar"
-                          aria-label={`${label}: ${percentage.toFixed(1)}%`}
-                          aria-valuemin={0}
-                          aria-valuemax={100}
-                          aria-valuenow={boundedPercentage}
-                        >
+                      return (
+                        <div key={key} className="flex flex-col gap-1.5">
+                          <div className="flex justify-between gap-4 text-sm">
+                            <span className="flex items-center gap-2">
+                              <Icon
+                                className="h-4 w-4 text-muted-foreground"
+                                aria-hidden="true"
+                              />
+                              {label}
+                            </span>
+                            <span className="font-medium">
+                              {percentage.toFixed(1)}%
+                            </span>
+                          </div>
                           <div
-                            className="h-full rounded-full bg-primary"
-                            style={{ width: `${boundedPercentage}%` }}
-                          />
+                            className="h-2 overflow-hidden rounded-full bg-muted"
+                            role="progressbar"
+                            aria-label={`${label}: ${percentage.toFixed(1)}%`}
+                            aria-valuemin={0}
+                            aria-valuemax={100}
+                            aria-valuenow={boundedPercentage}
+                          >
+                            <div
+                              className="h-full rounded-full bg-primary"
+                              style={{ width: `${boundedPercentage}%` }}
+                            />
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  No hay datos de cuello de botella para mostrar.
+                </p>
+              )}
+            </div>
+
+            {/* Metricas de RTT */}
+            <div className="flex flex-col gap-2">
+              <span className="text-lg font-bold">Round-Trip Time</span>
+              <div className="flex gap-2 w-full">
+                <RTTMiniCards statName="RTT Mínimo" value={minRTT} />
+                <RTTMiniCards statName="RTT Promedio" value={avgRTT} />
               </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                No hay datos de cuello de botella para mostrar.
-              </p>
-            )}
+            </div>
           </div>
 
           {/* Lado derecho: Anotaciones */}
@@ -195,5 +212,34 @@ const Note = ({ title, children }: { title?: string; children: ReactNode }) => {
       {title && <span className="font-semibold">{title}</span>}
       <div className="text-sm text-muted-foreground">{children}</div>
     </div>
+  );
+};
+
+const RTTMiniCards = ({
+  statName,
+  value,
+}: {
+  statName: string;
+  value: number;
+}) => {
+  // Controlar que los RTTs no sean "Infinity"
+  if (value === Infinity) {
+    value = 0;
+  }
+
+  return (
+    <Card className="flex flex-col text-center w-1/2 max-h-fit py-0 gap-0">
+      <div className="rtt-card-name h-full py-2">
+        <span className="text-sm">{statName}</span>
+      </div>
+      <div className="rtt-card-value bg-[#0b0b0f] h-full py-2">
+        {/* Debido a que es fisicamente imposible tener un RTT de 0 ms entonces
+            si el valor es 0 quiere decir que no hay datos de RTT para mostrar.
+        */}
+        <span className="text-lg font-bold">
+          {value == 0 ? "--" : `${value} ms`}
+        </span>
+      </div>
+    </Card>
   );
 };

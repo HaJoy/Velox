@@ -300,6 +300,8 @@ export const Home = () => {
       </div>
       <BottleneckModal
         bottleneck={bottleneck}
+        minRTT={minRTT}
+        avgRTT={rttAvg}
         open={isBottleneckModalOpen}
         onOpenChange={setIsBottleneckModalOpen}
       />
