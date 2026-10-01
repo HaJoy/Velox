@@ -10,7 +10,7 @@ import { Network, Server, UserRound } from "lucide-react";
 import type { ReactNode } from "react";
 import { Card } from "./ui/card";
 
-interface BottleneckModalProps {
+interface MetricsDetailsModalProps {
   bottleneck: BottleneckResult | null;
   minRTT: number;
   avgRTT: number;
@@ -102,13 +102,24 @@ const noteList: { title?: string; content: ReactNode }[] = [
   },
 ];
 
-export const BottleneckModal = ({
+/**
+ * Modal que muestra mas metricas de resultado para las pruebas.
+ * Usado en `Home.tsx`
+ * @param {BottleneckResult} bottleneck El objeto con los resultados del cuello de botella medido
+ * durante la prueba de descarga. 
+ * @param {number} minRTT RTT minimo medido.
+ * @param {number} avgRTT RTT promedio medido.
+ * @param {boolean} open Controla si el modal esta o no abierto.
+ * @param {(open: boolean) => void} onOpenChange Funcion que controla la apertura y cierre del modal.
+ * @returns {JSX.Element} Modal con la informacion dada.
+ */
+export const MetricsDetailsModal = ({
   bottleneck,
   minRTT,
   avgRTT,
   open,
   onOpenChange,
-}: BottleneckModalProps) => {
+}: MetricsDetailsModalProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="md:!max-w-full md:!w-5xl">

@@ -6,7 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
 import ReactSpeedometer from "react-d3-speedometer";
 import { MeasurementsTable } from "@/components/MeasurementsTable";
-import { BottleneckModal } from "@/components/BottleneckModal";
+import { MetricsDetailsModal } from "@/components/MetricsDetailsModal";
 import { isIpinfoResponse } from "@/guards/isp.guard";
 import { isGetOneMeasurementResponse } from "@/guards/measurement.guard";
 import { Download, Network, Signal, Upload } from "lucide-react";
@@ -28,7 +28,7 @@ export const Home = () => {
   
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [isBottleneckModalOpen, setIsBottleneckModalOpen] = useState(false);
+  const [isMetricsDetailsModalOpen, setIsMetricsDetailsModalOpen] = useState(false);
   
   // Obtener las metricas a traves del custom hook.
   const {
@@ -173,7 +173,7 @@ export const Home = () => {
                     variant="outline"
                     className=" text-center hover:cursor-pointer"
                     aria-label="Abrir análisis del cuello de botella"
-                    onClick={() => setIsBottleneckModalOpen(true)}
+                    onClick={() => setIsMetricsDetailsModalOpen(true)}
                   >
                     <Network />
                     <span className="hidden md:inline">Más métricas</span>
@@ -298,12 +298,12 @@ export const Home = () => {
           <Toaster id="toaster-home" />
         </Card>
       </div>
-      <BottleneckModal
+      <MetricsDetailsModal
         bottleneck={bottleneck}
         minRTT={minRTT}
         avgRTT={rttAvg}
-        open={isBottleneckModalOpen}
-        onOpenChange={setIsBottleneckModalOpen}
+        open={isMetricsDetailsModalOpen}
+        onOpenChange={setIsMetricsDetailsModalOpen}
       />
     </div>
   );
