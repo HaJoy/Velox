@@ -257,9 +257,19 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
         const rttCount = arrayRtts.length;
         let rttAverage = rttCount > 0 ? rttSum / rttCount : Infinity;
 
-        // Redondear RTT promedio a solo dos decimales
+        // Redondear metricas medidas
+        // RTTs (dos decimales)
         rttAverage = Math.round(rttAverage * 100) / 100;
+        currentMinRTT = Math.round(currentMinRTT * 100) / 100;
         setRttAvg(rttAverage);
+        setMinRTT(currentMinRTT);
+        // Cuellos de botella (si existe, un decimal)
+        if (bottleneckAux) {
+          bottleneckAux.networkPercent = Math.round(bottleneckAux.networkPercent * 10) / 10;
+          bottleneckAux.clientPercent = Math.round(bottleneckAux.clientPercent * 10) / 10;
+          bottleneckAux.serverPercent = Math.round(bottleneckAux.serverPercent * 10) / 10;
+        }
+        
         
         const savedMeasurement = await createMeasurement({ 
           downloadSpeed: currentDownloadSpeed,
