@@ -11,10 +11,22 @@ import { useEffect, useState } from "react";
 import { CSVLink } from "react-csv";
 import { deleteMeasurement, getUserHistory } from "@/api/measurementService";
 import type { User } from "@supabase/supabase-js";
-import { Download } from "lucide-react";
+import { Download, Trash2 } from "lucide-react";
 import { toastError } from "@/lib/toast-utils";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "./ui/context-menu";
 
-export const MeasurementsTable = ({ user, refreshKey }: { user?: User | null; refreshKey?: number }) => {
+export const MeasurementsTable = ({
+  user,
+  refreshKey,
+}: {
+  user?: User | null;
+  refreshKey?: number;
+}) => {
   const [measurements, setMeasurements] = useState<Measurement[]>([]);
 
   // Cargar las mediciones
@@ -25,7 +37,10 @@ export const MeasurementsTable = ({ user, refreshKey }: { user?: User | null; re
         // Ordenar de más antiguo a más reciente (fecha ascendente)
         const sorted = (data.measurementHistory ?? [])
           .slice()
-          .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+          .sort(
+            (a, b) =>
+              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+          );
         setMeasurements(sorted);
       } catch (err) {
         console.error("Failed to load user history:", err);
@@ -84,14 +99,17 @@ export const MeasurementsTable = ({ user, refreshKey }: { user?: User | null; re
     if (!response.measurement) {
       toastError({
         title: "Error al intentar eliminar la medición",
-        description: "Ocurrió un error al intentar eliminar la medición, inténtelo de nuevo más tarde.",
+        description:
+          "Ocurrió un error al intentar eliminar la medición, inténtelo de nuevo más tarde.",
         toasterId: "toaster-home",
-      })
+      });
       return;
     }
-    
-    return;
-  }
+
+    setMeasurements((current) =>
+      current.filter((measurement) => measurement._id !== id),
+    );
+  };
 
   return (
     <div className="mt-6 w-full">
@@ -140,19 +158,32 @@ export const MeasurementsTable = ({ user, refreshKey }: { user?: User | null; re
             });
 
             return (
-              <TableRow key={id} className="[&_td]:whitespace-normal">
-                <TableCell className="font-bold">{idx + 1}</TableCell>
-                <TableCell>{ip}</TableCell>
-                <TableCell>{isp}</TableCell>
-                <TableCell>{download}</TableCell>
-                <TableCell>{upload}</TableCell>
-                <TableCell>{avgRTT}</TableCell>
-                <TableCell>{minRTT}</TableCell>
-                <TableCell>{networkLimitedPercent}</TableCell>
-                <TableCell>{clientLimitedPercent}</TableCell>
-                <TableCell>{serverLimitedPercent}</TableCell>
-                <TableCell className="!whitespace-nowrap">{date}</TableCell>
-              </TableRow>
+              <ContextMenu key={id}>
+                <ContextMenuTrigger asChild>
+                  <TableRow className="[&_td]:whitespace-normal">
+                    <TableCell className="font-bold">{idx + 1}</TableCell>
+                    <TableCell>{ip}</TableCell>
+                    <TableCell>{isp}</TableCell>
+                    <TableCell>{download}</TableCell>
+                    <TableCell>{upload}</TableCell>
+                    <TableCell>{avgRTT}</TableCell>
+                    <TableCell>{minRTT}</TableCell>
+                    <TableCell>{networkLimitedPercent}</TableCell>
+                    <TableCell>{clientLimitedPercent}</TableCell>
+                    <TableCell>{serverLimitedPercent}</TableCell>
+                    <TableCell className="!whitespace-nowrap">{date}</TableCell>
+                  </TableRow>
+                </ContextMenuTrigger>
+                <ContextMenuContent>
+                  <ContextMenuItem
+                    variant="destructive"
+                    onSelect={() => void handleDelete(id)}
+                  >
+                    <Trash2 />
+                    Borrar medición
+                  </ContextMenuItem>
+                </ContextMenuContent>
+              </ContextMenu>
             );
           })}
         </TableBody>
