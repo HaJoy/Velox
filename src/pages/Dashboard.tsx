@@ -56,8 +56,12 @@ const uploadChartConfig = {
 
 const rttChartConfig = {
   avgRTT: {
-    label: "RTT (ms)",
-    color: "hsl(var(--destructive))",
+    label: "RTT promedio (ms)",
+    color: "#00ff95",
+  },
+  minRTT: {
+    label: "RTT mínimo (ms)",
+    color: "#00bfff",
   },
 } satisfies ChartConfig;
 
@@ -239,6 +243,14 @@ export const Dashboard = () => {
                 type="monotone"
                 dataKey="avgRTT"
                 stroke="#00ff95"
+                dot={false}
+                strokeWidth={2}
+              />
+              <Line
+                type="monotone"
+                dataKey="minRTT"
+                stroke="#00bfff"
+                strokeDasharray="5 5"
                 dot={false}
                 strokeWidth={2}
               />
