@@ -6,6 +6,10 @@
 
 // core record representing a single measurement
 export interface Measurement {
+
+    /* measurement MongoDB ID (ObjectId) */
+    _id: string;
+
     /* who performed the test (nullable when anonymous) */
     user: string | null;
 

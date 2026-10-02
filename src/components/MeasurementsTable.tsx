@@ -9,13 +9,15 @@ import {
 } from "./ui/table";
 import { useEffect, useState } from "react";
 import { CSVLink } from "react-csv";
-import { getUserHistory } from "@/api/measurementService";
+import { deleteMeasurement, getUserHistory } from "@/api/measurementService";
 import type { User } from "@supabase/supabase-js";
 import { Download } from "lucide-react";
+import { toastError } from "@/lib/toast-utils";
 
 export const MeasurementsTable = ({ user, refreshKey }: { user?: User | null; refreshKey?: number }) => {
   const [measurements, setMeasurements] = useState<Measurement[]>([]);
 
+  // Cargar las mediciones
   useEffect(() => {
     const loadHistory = async () => {
       try {
@@ -36,10 +38,12 @@ export const MeasurementsTable = ({ user, refreshKey }: { user?: User | null; re
     }
   }, [user, refreshKey]);
 
+  // Caso no hay mediciones
   if (!measurements || measurements.length === 0) {
     return null;
   }
 
+  // Cabeceras de la tabla
   const csvHeaders = [
     { label: "#", key: "index" },
     { label: "IP", key: "userIP" },
@@ -54,6 +58,7 @@ export const MeasurementsTable = ({ user, refreshKey }: { user?: User | null; re
     { label: "Fecha", key: "createdAt" },
   ];
 
+  // Datos del CSV para ser exportado
   const csvData = measurements.map((m, idx) => ({
     index: idx + 1,
     userIP: m.userIP ?? "N/A",
@@ -70,6 +75,23 @@ export const MeasurementsTable = ({ user, refreshKey }: { user?: User | null; re
       timeStyle: "short",
     }),
   }));
+
+  // Handler para eliminar una medicion
+  const handleDelete = async (id: string) => {
+    const response = await deleteMeasurement(id);
+
+    // Notificar al usuario si ocurre un error (la medicion devuelta es null)
+    if (!response.measurement) {
+      toastError({
+        title: "Error al intentar eliminar la medición",
+        description: "Ocurrió un error al intentar eliminar la medición, inténtelo de nuevo más tarde.",
+        toasterId: "toaster-home",
+      })
+      return;
+    }
+    
+    return;
+  }
 
   return (
     <div className="mt-6 w-full">
@@ -102,6 +124,7 @@ export const MeasurementsTable = ({ user, refreshKey }: { user?: User | null; re
         </TableHeader>
         <TableBody>
           {measurements.map((m: Measurement, idx: number) => {
+            const id = m._id;
             const ip = m.userIP ?? "N/A";
             const isp = m.isp ?? "N/A";
             const download = m.downloadSpeed ?? 0;
@@ -117,7 +140,7 @@ export const MeasurementsTable = ({ user, refreshKey }: { user?: User | null; re
             });
 
             return (
-              <TableRow key={idx} className="[&_td]:whitespace-normal">
+              <TableRow key={id} className="[&_td]:whitespace-normal">
                 <TableCell className="font-bold">{idx + 1}</TableCell>
                 <TableCell>{ip}</TableCell>
                 <TableCell>{isp}</TableCell>

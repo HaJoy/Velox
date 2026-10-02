@@ -29,6 +29,11 @@ type CreateMeasurementPayload = {
   serverLimitedPercent: number;
 };
 
+/**
+ * Crea un documento de la medicion en MongoDB.
+ * @param payload objeto con las metricas.
+ * @returns void.
+ */
 export const createMeasurement = async (payload: CreateMeasurementPayload) => {
 
     try {
@@ -74,6 +79,10 @@ type userHistoryResponse = {
   measurementHistory: Measurement[];
 };
 
+/**
+ * Obtiene el historial de mediciones del usuario autenticado.
+ * @returns `userHistoryResponse` objeto con mensaje de respuesta y array de tipo `Measurement[]`
+ */
 export const getUserHistory = async (): Promise<userHistoryResponse> => {
 
   try {
@@ -90,6 +99,10 @@ type CountryISPData = {
   countries: { [key: string]: string[] };
 };
 
+/**
+ * Obtiene los paises actualmente existentes en las mediciones con sus respectivos ISPs.
+ * @returns `CountryISPData` objeto con mensaje de respuesta y objeto de tipo `{ [key: string]: string[] }`.
+ */
 export const getCountriesAndIsps = async (): Promise<CountryISPData> => {
   try {
     const response = await api.get('/measurement/countries');
@@ -99,3 +112,23 @@ export const getCountriesAndIsps = async (): Promise<CountryISPData> => {
     throw error;
   }
 };
+
+type DeleteMeasurementResponse = {
+  message: string;
+  measurement: Measurement | null;
+};
+
+/**
+ * Elimina la medicion con la `id` especificada.
+ * @param id id de la medicion a eliminar.
+ * @returns `DeleteMeasurementResponse` objeto con mensaje de respuesta y la medicion eliminada.
+ */
+export const deleteMeasurement = async (id: string): Promise<DeleteMeasurementResponse> => {
+  try {
+    const response = await api.delete(`/measurement/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error trying to delete measurement: ', error);
+    return { message: 'Error trying to delete measurement: ', measurement: null };
+  }
+}
