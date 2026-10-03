@@ -142,10 +142,10 @@ export const MeasurementsTable = ({
   // Estado error
   if (historyError) {
     return (
-      <div className="flex justify-center items-center">
-        <div className="flex flex-col justify-center items-center">
+      <div className="flex justify-center items-center py-9">
+        <div className="flex flex-col justify-center items-center gap-5">
           <span className="text-muted-foreground text-sm">Ocurrió un error al cargar las mediciones</span>
-          <Button variant={"outline"} onClick={() => location.reload()}>
+          <Button className="hover:cursor-pointer" variant={"outline"} onClick={() => location.reload()}>
             Recargar la página
           </Button>
         </div>
