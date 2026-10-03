@@ -19,6 +19,11 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "./ui/context-menu";
+import { Spinner } from "./ui/spinner";
+import { Button } from "./ui/button";
+
+const waitForHistoryTestDelay = () =>
+  new Promise<void>((resolve) => setTimeout(resolve, 5000));
 
 export const MeasurementsTable = ({
   user,
@@ -28,11 +33,15 @@ export const MeasurementsTable = ({
   refreshKey?: number;
 }) => {
   const [measurements, setMeasurements] = useState<Measurement[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState(false); // No hace falta decirle el error al usuario.
 
   // Cargar las mediciones
   useEffect(() => {
     const loadHistory = async () => {
+      setHistoryLoading(true);
       try {
+        await waitForHistoryTestDelay();
         const data = await getUserHistory();
         // Ordenar de más antiguo a más reciente (fecha ascendente)
         const sorted = (data.measurementHistory ?? [])
@@ -44,7 +53,15 @@ export const MeasurementsTable = ({
         setMeasurements(sorted);
       } catch (err) {
         console.error("Failed to load user history:", err);
+        toastError({
+          title: "Error al intentar cargar el historial de mediciones",
+          description: "Ocurrió un error al intentar cargar el historial de mediciones, por favor, intenta recargar la página.",
+          toasterId: "toaster-home",
+        });
         setMeasurements([]);
+        setHistoryError(true);
+      } finally {
+        setHistoryLoading(false);
       }
     };
 
@@ -111,7 +128,34 @@ export const MeasurementsTable = ({
     );
   };
 
+  // Returns dependiendo del estado
+  // Estado cargando
+  if (historyLoading) {
+    return (
+      <div className="flex justify-center items-center py-9 gap-2">
+        <Spinner />
+        <span className="text-muted-foreground text-sm">Cargando historial de mediciones...</span>
+      </div>
+    );
+  }
+
+  // Estado error
+  if (historyError) {
+    return (
+      <div className="flex justify-center items-center">
+        <div className="flex flex-col justify-center items-center">
+          <span className="text-muted-foreground text-sm">Ocurrió un error al cargar las mediciones</span>
+          <Button variant={"outline"} onClick={() => location.reload()}>
+            Recargar la página
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Estado de exito
   return (
+    // Comprobar primero el estado de carga
     <div className="mt-6 w-full">
       <div className="mb-4 flex justify-end">
         <CSVLink

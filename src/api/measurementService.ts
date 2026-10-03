@@ -74,7 +74,7 @@ export const createMeasurement = async (payload: CreateMeasurementPayload) => {
     }
 }
 
-type userHistoryResponse = {
+type UserHistoryResponse = {
   message: string;
   measurementHistory: Measurement[];
 };
@@ -83,7 +83,7 @@ type userHistoryResponse = {
  * Obtiene el historial de mediciones del usuario autenticado.
  * @returns `userHistoryResponse` objeto con mensaje de respuesta y array de tipo `Measurement[]`
  */
-export const getUserHistory = async (): Promise<userHistoryResponse> => {
+export const getUserHistory = async (): Promise<UserHistoryResponse> => {
 
   try {
     const response = await api.get(`/measurement/history`);

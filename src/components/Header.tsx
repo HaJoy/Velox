@@ -62,7 +62,7 @@ export const Header = () => {
             {authLoading ? (
               <div className="justify-self-end">
                 {/* Desktop */}
-                <div className="hidden md:flex md:gap-2">
+                <div className="hidden md:flex md:gap-2 md:items-center">
                   <Spinner />
                   <span className="text-muted-foreground text-sm">
                     Comprobando sesión...
