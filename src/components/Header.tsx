@@ -18,6 +18,7 @@ import { useAuth } from "@/context/AuthContext";
 import { ConfirmDialog } from "./AlertDialog";
 import { Link } from "react-router-dom";
 import { LogOut, Menu } from "lucide-react";
+import { Spinner } from "./ui/spinner";
 
 export const Header = () => {
   const [dialogMode, setDialogMode] = useState<"login" | "register" | null>(
@@ -25,7 +26,7 @@ export const Header = () => {
   );
   const [openAlertDialog, setOpenAlertDialog] = useState<boolean>(false);
 
-  const { user, logout } = useAuth();
+  const { user, logout, authLoading } = useAuth();
 
   return (
     <header className="flex justify-center border-b mb-2 px-8 py-1.5 sticky top-0 bg-[#0b0b0f] z-50">
@@ -58,107 +59,124 @@ export const Header = () => {
             )}
 
             {/* Botones de sesion */}
-            <NavigationMenuItem className="flex gap-2 justify-self-end items-center">
-              {!user ? (
-                // Usuario no autenticado
-                <>
-                  {/* desktop */}
-                  <Button
-                    className="hidden cursor-pointer md:flex"
-                    onClick={() => setDialogMode("login")}
-                  >
-                    Iniciar sesión
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="hidden cursor-pointer md:flex"
-                    onClick={() => setDialogMode("register")}
-                  >
-                    Registrarse
-                  </Button>
+            {authLoading ? (
+              <div className="justify-self-end">
+                {/* Desktop */}
+                <div className="hidden md:flex md:gap-2">
+                  <Spinner />
+                  <span className="text-muted-foreground text-sm">
+                    Comprobando sesión...
+                  </span>
+                </div>
 
-                  {/* Mobile */}
-                  <div className="md:hidden">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="cursor-pointer">
-                          <Menu />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent
-                        sideOffset={8}
-                        align="end"
-                        className="w-40"
-                      >
-                        <DropdownMenuItem asChild>
-                          <Button
-                          variant={"link"}
-                            className="cursor-pointer w-full"
-                            onClick={() => setDialogMode("login")}
-                          >
-                            Iniciar sesión
-                          </Button>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Button
-                            variant="link"
-                            className="cursor-pointer w-full"
-                            onClick={() => setDialogMode("register")}
-                          >
-                            Registrarse
-                          </Button>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </>
-              ) : (
-                // Usuario autenticado
-                <>
-                  {/* Desktop */}
-                  <div className="hidden md:flex gap-2">
+                {/* Mobile */}
+                <div className="md:hidden">
+                  <Spinner />
+                </div>
+              </div>
+            ) : (
+              <NavigationMenuItem className="flex gap-2 justify-self-end items-center">
+                {!user ? (
+                  // Usuario no autenticado
+                  <>
+                    {/* desktop */}
+                    <Button
+                      className="hidden cursor-pointer md:flex"
+                      onClick={() => setDialogMode("login")}
+                    >
+                      Iniciar sesión
+                    </Button>
                     <Button
                       variant="outline"
-                      className="cursor-pointer"
-                      onClick={() => setOpenAlertDialog(true)}
+                      className="hidden cursor-pointer md:flex"
+                      onClick={() => setDialogMode("register")}
                     >
-                      Cerrar sesión
+                      Registrarse
                     </Button>
-                  </div>
 
-                  {/* Mobile */}
-                  <div className="md:hidden">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="cursor-pointer">
-                          <Menu />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent
-                        sideOffset={8}
-                        align="end"
-                        className="w-40"
-                      >
-                        <DropdownMenuItem asChild>
-                          <Link to="/">Inicio</Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link to="/dashboard">Dashboard</Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          variant="destructive"
-                          onSelect={() => setOpenAlertDialog(true)}
+                    {/* Mobile */}
+                    <div className="md:hidden">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" className="cursor-pointer">
+                            <Menu />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          sideOffset={8}
+                          align="end"
+                          className="w-40"
                         >
-                          <LogOut />
-                          Cerrar sesión
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </>
-              )}
-            </NavigationMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Button
+                              variant={"link"}
+                              className="cursor-pointer w-full"
+                              onClick={() => setDialogMode("login")}
+                            >
+                              Iniciar sesión
+                            </Button>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Button
+                              variant="link"
+                              className="cursor-pointer w-full"
+                              onClick={() => setDialogMode("register")}
+                            >
+                              Registrarse
+                            </Button>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </>
+                ) : (
+                  // Usuario autenticado
+                  <>
+                    {/* Desktop */}
+                    <div className="hidden md:flex gap-2">
+                      <Button
+                        variant="outline"
+                        className="cursor-pointer"
+                        onClick={() => setOpenAlertDialog(true)}
+                      >
+                        Cerrar sesión
+                      </Button>
+                    </div>
+
+                    {/* Mobile */}
+                    <div className="md:hidden">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" className="cursor-pointer">
+                            <Menu />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          sideOffset={8}
+                          align="end"
+                          className="w-40"
+                        >
+                          <DropdownMenuItem asChild>
+                            <Link to="/">Inicio</Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link to="/dashboard">Dashboard</Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            variant="destructive"
+                            onSelect={() => setOpenAlertDialog(true)}
+                          >
+                            <LogOut />
+                            Cerrar sesión
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </>
+                )}
+              </NavigationMenuItem>
+            )}
           </NavigationMenuList>
         </div>
       </NavigationMenu>
