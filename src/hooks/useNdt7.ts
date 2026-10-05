@@ -132,7 +132,6 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
             if (isServerMeasurementMsg(data)) {
               const msg = data.Data.TCPInfo;
               updateMinRTT(msg.MinRTT);
-              console.log(currentMinRTT)
               const downloadRTTmsg = msg?.RTT ? msg.RTT / 1000 : Infinity; // Extrae el RTT
               setDownloadRtt(downloadRTTmsg);
               arrayRtts.push(downloadRTTmsg);
@@ -248,6 +247,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
           title: "Ocurrió un error ejecutando la prueba, por favor, inténtelo de nuevo más tarde.",
           toasterId: "toaster-home",
         });
+        setComplete(true);
       } else {
         setTestTime((Date.now() - startTime) / 1000);
         setComplete(true);
