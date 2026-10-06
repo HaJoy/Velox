@@ -49,22 +49,32 @@ const noteList: { title?: string; content: ReactNode }[] = [
     content: (
       <>
         <p>
-          El cuello de botella es donde más se congestionaron los datos durante
-          la prueba de descarga. Un cuello de botella alto en:
+          El cuello de botella muestra en qué estuvo "ocupada" la conexión entre
+          el cliente (tu dispositivo) y el servidor de pruebas durante la prueba
+          de decarga, en este caso, el cuello de botella es el porcentaje del
+          tiempo que el envío de datos estuvo limitado. Un cuello de botella
+          alto en:
         </p>
         <br />
         <ul>
           <li>
             <strong>Red: </strong>es normal. Cuando realizas la prueba de
             velocidad la conexión entre tu dispositivo y el servidor de pruebas
-            seleccionado se satura de datos para asi medir el rendimiento.
+            seleccionado se satura de datos para asi medir el rendimiento. Es
+            inversamente proporcional al cuello de botella en el cliente o
+            servidor: un 100% aquí quiere decir que se usó todo el ancho de
+            banda disponible durante toda la prueba.
           </li>
           <br />
           <li>
             <strong>Cliente: </strong>tu dispostivo de interconexion
             (generalmente router) o el medio que usas para conectarte (como una
-            antena Wi-Fi) no pudo procesar los datos lo suficientemente rapido,
-            provocando una congestión de datos.
+            antena Wi-Fi) no pudo procesar los datos lo suficientemente rápido,
+            provocando una congestión de datos. Por ejemplo, si este porcentaje
+            es mayor a los otros quiere decir que el cliente estuvo procesando
+            datos la mayor parte del tiempo, impidiendo la recepción de nuevos
+            datos, pues la ventana de recepción estaba llena, lo que puede ser
+            la causa de una baja velocidad.
           </li>
           <br />
           <li>
@@ -106,7 +116,7 @@ const noteList: { title?: string; content: ReactNode }[] = [
  * Modal que muestra mas metricas de resultado para las pruebas.
  * Usado en `Home.tsx`
  * @param {BottleneckResult} bottleneck El objeto con los resultados del cuello de botella medido
- * durante la prueba de descarga. 
+ * durante la prueba de descarga.
  * @param {number} minRTT RTT minimo medido.
  * @param {number} avgRTT RTT promedio medido.
  * @param {boolean} open Controla si el modal esta o no abierto.
