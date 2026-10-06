@@ -12,7 +12,7 @@ const sections = [
   { id: "derechos", label: "Tus derechos" },
 ];
 
-export const CURRENT_POLICY_VERSION = "05-10-2026";
+export const CURRENT_POLICY_VERSION = "06-10-2026";
 
 export const PrivacyPage = () => {
 
@@ -35,7 +35,7 @@ export const PrivacyPage = () => {
             <span className="text-sm font-semibold uppercase tracking-widest">Transparencia de datos</span>
           </div>
           <h2 className="mb-4 text-3xl font-bold tracking-tight md:text-5xl">Política de privacidad</h2>
-          <p className="max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">Última actualización: 5 de octubre de 2026. Esta política explica qué información utiliza Velox al medir tu conexión y con qué finalidad.</p>
+          <p className="max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">Última actualización: 6 de octubre de 2026. Esta política explica qué información utiliza Velox al medir tu conexión y con qué finalidad.</p>
         </div>
         <div className="border-l-2 border-cyan-400/60 pl-4 text-sm text-muted-foreground">
           <p className="font-semibold text-foreground">En resumen</p>
@@ -89,9 +89,9 @@ export const PrivacyPage = () => {
           <Card id="ipinfo" className="scroll-mt-24 border-white/10 bg-[#111116]">
             <CardHeader><CardTitle>4. Consulta de IP con IPinfo</CardTitle></CardHeader>
             <CardContent className="space-y-4 leading-7 text-muted-foreground">
-              <p>Cuando necesita identificar tu proveedor de internet (ISP) y tu país, el backend de Velox puede enviar tu dirección IP pública a la API de IPinfo. IPinfo devuelve el ISP y el país aproximado asociados a esa IP; este país puede no coincidir con tu país de residencia. Usamos esos datos para mostrar información sobre la conexión y contextualizar las mediciones.</p>
+              <p>Cuando necesita identificar tu proveedor de internet (ISP) y tu país, Velox puede enviar tu dirección IP pública a la API de IPinfo. IPinfo devuelve el ISP y el país aproximado asociados a esa IP; este país puede no coincidir con tu país de residencia. Usamos esos datos para mostrar información sobre la conexión y contextualizar las mediciones.</p>
               <p>IPinfo declara que no almacena las direcciones IP consultadas a través de su API ni la información devuelta para esas consultas. Esta declaración se refiere al almacenamiento por parte de IPinfo: Velox puede conservar tu IP pública, ISP y país junto con los resultados de medición, según se describe en esta política.</p>
-              <a className="inline-flex items-center gap-2 text-cyan-400 hover:underline" href="https://ipinfo.io/privacy-policy" target="_blank" rel="noreferrer">Política de privacidad de IPinfo <ExternalLink aria-hidden="true" size={15} /></a>
+              <a className="inline-flex items-center gap-2 text-cyan-400 hover:underline" href="https://support.ipinfo.io/hc/en-us/articles/30792479974930-Does-IPinfo-s-data-fall-under-GDPR-or-any-other-privacy-protection-law" target="_blank" rel="noreferrer">Artículo del centro de ayuda de IPinfo <ExternalLink aria-hidden="true" size={15} /></a>
             </CardContent>
           </Card>
 
