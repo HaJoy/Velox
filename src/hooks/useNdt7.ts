@@ -49,6 +49,8 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
     setUploadSpeed(0);
     setRttAvg(0);
     setMinRTT(Infinity);
+    setDownloadRtt(0);
+    setUploadRtt(0);
     setBottleneck(null);
     setComplete(false);
     setTestTime(0);
@@ -123,6 +125,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
         },
         // Medir velocidad de descarga
         downloadMeasurement: function (data: ClientMeasurementMsg | ServerMeasurementMsg) {
+          
           if (isNdt7Message(data)) {
             // Estos if controlan lo que se debe hacer segun el mensaje recibido
             // Si el mensaje es del servidor se extrae el RTT medido
@@ -244,6 +247,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
           title: "Ocurrió un error ejecutando la prueba, por favor, inténtelo de nuevo más tarde.",
           toasterId: "toaster-home",
         });
+        setComplete(true);
       } else {
         setTestTime((Date.now() - startTime) / 1000);
         setComplete(true);
@@ -253,9 +257,19 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
         const rttCount = arrayRtts.length;
         let rttAverage = rttCount > 0 ? rttSum / rttCount : Infinity;
 
-        // Redondear RTT promedio a solo dos decimales
+        // Redondear metricas medidas
+        // RTTs (dos decimales)
         rttAverage = Math.round(rttAverage * 100) / 100;
+        currentMinRTT = Math.round(currentMinRTT * 100) / 100;
         setRttAvg(rttAverage);
+        setMinRTT(currentMinRTT);
+        // Cuellos de botella (si existe, un decimal)
+        if (bottleneckAux) {
+          bottleneckAux.networkPercent = Math.round(bottleneckAux.networkPercent * 10) / 10;
+          bottleneckAux.clientPercent = Math.round(bottleneckAux.clientPercent * 10) / 10;
+          bottleneckAux.serverPercent = Math.round(bottleneckAux.serverPercent * 10) / 10;
+        }
+        
         
         const savedMeasurement = await createMeasurement({ 
           downloadSpeed: currentDownloadSpeed,

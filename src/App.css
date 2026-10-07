@@ -37,33 +37,46 @@ body {
   background-color: #0b0b0f;
 }
 
-/* 
-  Los estilos con este data-slot cambian el la apariencia
-  de la scrollbar en la tabla del historial de mediciones
-  del usuario. 
-*/
-div[data-slot="table-container"]::-webkit-scrollbar {
+/* Estilos reutilizables para elementos con desplazamiento */
+.custom-scrollbar::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
-div[data-slot="table-container"]::-webkit-scrollbar-track {
+.custom-scrollbar::-webkit-scrollbar-track {
   background-color: transparent;
 }
 
-div[data-slot="table-container"]::-webkit-scrollbar-thumb {
+.custom-scrollbar::-webkit-scrollbar-thumb {
   background-color: rgba(255, 255, 255, 0.2);
   border-radius: 4px;
 }
 
-div[data-slot="table-container"]::-webkit-scrollbar-thumb:hover {
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background-color: rgba(255, 255, 255, 0.4);
 }
 
-/* Scroball Firefox */
-div[data-slot="table-container"] {
+/* Firefox */
+.custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+/* Gradiente de notas en el modal Bottleneck.tsx (solo para desktop) */
+@media (min-width: 768px) {
+  .note-container {
+    background: linear-gradient(to right, #22d3ee22 0%, rgba(0, 0, 0, 0) 3%);;
+  }  
+}
+
+/* Redondea de bordes superiores para cartas de RTT (heredado, bottleneck.tsx) */
+.rtt-card-name {
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+}
+.rtt-card-value {
+  border-bottom-left-radius: inherit;
+  border-bottom-right-radius: inherit;
 }
 
 /* 

@@ -15,6 +15,7 @@ export const formatChartData = (measurements: Measurement[]) => {
     downloadSpeed: measurement.downloadSpeed,
     uploadSpeed: measurement.uploadSpeed,
     avgRTT: measurement.avgRTT,
+    minRTT: measurement.minRTT,
   }));
 
   return chartData;
