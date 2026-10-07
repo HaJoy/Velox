@@ -16,6 +16,7 @@ import {
 } from "@/guards/ndt7.guard";
 import { createMeasurement } from "@/api/measurementService";
 import { toastError } from "@/lib/toast-utils";
+import { calculateBottleneck, type BottleneckResult } from "@/lib/measurements/bottleneck";
 
 /**
  * Utiliza la API de NDT7 (M-lab) para realizar una prueba de velocidad de red.
@@ -23,11 +24,16 @@ import { toastError } from "@/lib/toast-utils";
  */
 export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => void } = {}) => {
 
+  // Estados de metricas de red
   const [downloadSpeed, setDownloadSpeed] = useState<number>(0);
   const [uploadSpeed, setUploadSpeed] = useState<number>(0);
   const [rttAvg, setRttAvg] = useState<number>(Infinity);
   const [downloadRtt, setDownloadRtt] = useState<number>(Infinity);
   const [uploadRtt, setUploadRtt] = useState<number>(Infinity);
+  const [minRTT, setMinRTT] = useState<number>(Infinity);
+  const [bottleneck, setBottleneck] = useState<BottleneckResult | null>(null);
+
+  // Estados de informacion para la prueba
   const [serverChosenCity, setServerChosenCity] = useState<string>("");
   const [serverChosenCountry, setServerChosenCountry] = useState<string>("");
   const [complete, setComplete] = useState<boolean>(true);
@@ -42,6 +48,10 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
     setDownloadSpeed(0);
     setUploadSpeed(0);
     setRttAvg(0);
+    setMinRTT(Infinity);
+    setDownloadRtt(0);
+    setUploadRtt(0);
+    setBottleneck(null);
     setComplete(false);
     setTestTime(0);
     setDownloadComplete(false);
@@ -50,8 +60,21 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
     let currentDownloadSpeed = 0;
     let currentUploadSpeed = 0;
     const arrayRtts: number[] = [];
+    let currentMinRTT = Infinity;
     let startTime = 0;
     let thereIsError = false;
+    let lastDownloadTCPInfo: ServerMeasurementMsg["Data"]["TCPInfo"];
+    let bottleneckAux: BottleneckResult | null = null;
+
+    // Compara y actualiza el minRTT
+    const updateMinRTT = (value?: number) => {
+      if (!value) return;
+      const measuredMinRTT = value / 1000;
+      if (measuredMinRTT < currentMinRTT) {
+        currentMinRTT = measuredMinRTT;
+        setMinRTT(measuredMinRTT);
+      }
+    };
 
     // Proceso de medicion
     ndt7.test(
@@ -102,14 +125,19 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
         },
         // Medir velocidad de descarga
         downloadMeasurement: function (data: ClientMeasurementMsg | ServerMeasurementMsg) {
+          
           if (isNdt7Message(data)) {
             // Estos if controlan lo que se debe hacer segun el mensaje recibido
             // Si el mensaje es del servidor se extrae el RTT medido
             if (isServerMeasurementMsg(data)) {
               const msg = data.Data.TCPInfo;
+              updateMinRTT(msg.MinRTT);
               const downloadRTTmsg = msg?.RTT ? msg.RTT / 1000 : Infinity; // Extrae el RTT
               setDownloadRtt(downloadRTTmsg);
               arrayRtts.push(downloadRTTmsg);
+              
+              // Guardar el TCPInfor mas reciente para calcular cuello de botella
+              lastDownloadTCPInfo = msg;
             }
             // Si el mensaje es del cliente se extrae la velocidad de descarga
             if (isClientMeasurementMsg(data)) {
@@ -133,12 +161,16 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
             const clientGoodPut = data.LastClientMeasurement.MeanClientMbps ?? 0;
             const lastServerMsg = data.LastServerMeasurement.TCPInfo;
             const downloadRTTmsg = lastServerMsg?.RTT ? lastServerMsg.RTT / 1000 : Infinity;
-
+            
             currentDownloadSpeed = parseFloat(clientGoodPut?.toFixed(2));
             setDownloadSpeed(currentDownloadSpeed);
             setDownloadComplete(true);
-
             setDownloadRtt(downloadRTTmsg);
+            updateMinRTT(lastServerMsg?.MinRTT);
+            
+            // Calcular cuello de botella
+            bottleneckAux = calculateBottleneck(lastServerMsg ?? lastDownloadTCPInfo)
+            setBottleneck(bottleneckAux);
           } else {
             console.warn('The last measurement could not be found when completing the test. Using the last measurement during-test to prevent \'undefined\'');
           }
@@ -157,8 +189,9 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
               const measurementData = data.Data.TCPInfo;
               currentUploadSpeed = parseFloat(((measurementData.BytesReceived / measurementData.ElapsedTime) * 8).toFixed(2));
               setUploadSpeed(currentUploadSpeed);
-
+              
               const uploadRTTmsg = measurementData.RTT ? measurementData.RTT / 1000 : Infinity;
+              updateMinRTT(measurementData.MinRTT);
               setUploadRtt(uploadRTTmsg);
               arrayRtts.push(uploadRTTmsg);
             }
@@ -175,10 +208,11 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
             const elapsed = msg ? msg.ElapsedTime : 0;
             const throughput = elapsed > 0 ? (bytesReceived * 8) / elapsed : 0;
             const uploadRTTmsg = msg?.RTT ? msg.RTT / 1000 : Infinity;
-
+            
             currentUploadSpeed = parseFloat(throughput.toFixed(2));
             setUploadSpeed(currentUploadSpeed);
             setUploadRtt(uploadRTTmsg);
+            updateMinRTT(msg?.MinRTT);
             setUploadComplete(true);
           } else {
             // Si el if no se cumple, avisar.
@@ -213,6 +247,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
           title: "Ocurrió un error ejecutando la prueba, por favor, inténtelo de nuevo más tarde.",
           toasterId: "toaster-home",
         });
+        setComplete(true);
       } else {
         setTestTime((Date.now() - startTime) / 1000);
         setComplete(true);
@@ -222,14 +257,28 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
         const rttCount = arrayRtts.length;
         let rttAverage = rttCount > 0 ? rttSum / rttCount : Infinity;
 
-        // Redondear RTT promedio a solo dos decimales
+        // Redondear metricas medidas
+        // RTTs (dos decimales)
         rttAverage = Math.round(rttAverage * 100) / 100;
+        currentMinRTT = Math.round(currentMinRTT * 100) / 100;
         setRttAvg(rttAverage);
+        setMinRTT(currentMinRTT);
+        // Cuellos de botella (si existe, un decimal)
+        if (bottleneckAux) {
+          bottleneckAux.networkPercent = Math.round(bottleneckAux.networkPercent * 10) / 10;
+          bottleneckAux.clientPercent = Math.round(bottleneckAux.clientPercent * 10) / 10;
+          bottleneckAux.serverPercent = Math.round(bottleneckAux.serverPercent * 10) / 10;
+        }
+        
         
         const savedMeasurement = await createMeasurement({ 
           downloadSpeed: currentDownloadSpeed,
           uploadSpeed: currentUploadSpeed,
           avgRTT: rttAverage,
+          minRTT: currentMinRTT,
+          networkLimitedPercent: bottleneckAux?.networkPercent ?? 0,
+          clientLimitedPercent: bottleneckAux?.clientPercent ?? 0,
+          serverLimitedPercent: bottleneckAux?.serverPercent ?? 0,
         });
 
         if (savedMeasurement) {
@@ -242,8 +291,10 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
     downloadSpeed,
     uploadSpeed,
     rttAvg,
+    minRTT,
     downloadRtt,
     uploadRtt,
+    bottleneck,
     serverChosenCity,
     serverChosenCountry,
     complete,

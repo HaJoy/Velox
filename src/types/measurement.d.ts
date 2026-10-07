@@ -6,6 +6,10 @@
 
 // core record representing a single measurement
 export interface Measurement {
+
+    /* measurement MongoDB ID (ObjectId) */
+    _id: string;
+
     /* who performed the test (nullable when anonymous) */
     user: string | null;
 
@@ -21,7 +25,13 @@ export interface Measurement {
     downloadSpeed: number;
     uploadSpeed: number;
     avgRTT: number;
+    minRTT:number;
     review: number;
+
+    /* bottleneck stats */
+    networkLimitedPercent: number;
+    clientLimitedPercent: number;
+    serverLimitedPercent: number;
 
     /* metadata */
     userAgent: string;
