@@ -136,7 +136,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
               setDownloadRtt(downloadRTTmsg);
               arrayRtts.push(downloadRTTmsg);
               
-              // Guardar el TCPInfor mas reciente para calcular cuello de botella
+              // Guardar el TCPInfo mas reciente para calcular cuello de botella
               lastDownloadTCPInfo = msg;
             }
             // Si el mensaje es del cliente se extrae la velocidad de descarga

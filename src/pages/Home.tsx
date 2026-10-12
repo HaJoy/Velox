@@ -156,7 +156,8 @@ export const Home = () => {
           <CardContent>
             <div className="flex flex-col gap-10">
               <div className="flex justify-center gap-8 w-full md:text-base">
-                {/* Mediciones de velocidad */}
+
+                {/* Velocidad de descarga */}
                 <div className="w-1/2 grid grid-cols-1 grid-rows-2">
                   <div>
                     <h2>Descarga</h2>
@@ -167,6 +168,8 @@ export const Home = () => {
                     <span>{`${downloadRtt && downloadRtt !== Infinity ? downloadRtt.toFixed(1) : 0} ms`}</span>
                   </div>
                 </div>
+
+                {/* Boton para abrir un modal con mas metricas (desaparece si hay una prueba en curso) */}
                 {complete && 
                   <Button
                     type="button"
@@ -177,15 +180,10 @@ export const Home = () => {
                   >
                     <Network />
                     <span className="hidden md:inline">Más métricas</span>
-                    {/* <h2>RTT promedio</h2>
-                    <div
-                      className={`flex justify-center items-center gap-2 text-sm mt-2 ${!complete ? "text-muted-foreground" : "font-bold"}`}
-                    >
-                      <Signal />
-                      <span>{`${rttAvg && rttAvg !== Infinity ? rttAvg.toFixed(1) : 0} ms`}</span>
-                    </div> */}
                   </Button>
                 }
+
+                {/* Velocidad de subida */}
                 <div className="w-1/2 grid grid-cols-1 grid-rows-2">
                   <div>
                     <h2>Subida</h2>
