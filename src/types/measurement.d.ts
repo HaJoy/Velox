@@ -26,7 +26,13 @@ export interface Measurement {
     uploadSpeed: number;
     avgRTT: number;
     minRTT:number;
+    jitter: number;
     review: number;
+
+    /* Retransmision stats */
+    bytesSent: number;
+    bytesRetrans: number;
+    retransPercent: number;
 
     /* bottleneck stats */
     networkLimitedPercent: number;

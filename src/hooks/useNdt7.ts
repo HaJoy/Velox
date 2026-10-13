@@ -17,6 +17,7 @@ import {
 import { createMeasurement } from "@/api/measurementService";
 import { toastError } from "@/lib/toast-utils";
 import { calculateBottleneck, type BottleneckResult } from "@/lib/measurements/bottleneck";
+import { calcJitter } from "@/lib/measurements/rttVariance";
 
 /**
  * Utiliza la API de NDT7 (M-lab) para realizar una prueba de velocidad de red.
@@ -31,6 +32,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
   const [downloadRtt, setDownloadRtt] = useState<number>(Infinity);
   const [uploadRtt, setUploadRtt] = useState<number>(Infinity);
   const [minRTT, setMinRTT] = useState<number>(Infinity);
+  const [jitter, setJitter] = useState<number>(Infinity);
   const [bottleneck, setBottleneck] = useState<BottleneckResult | null>(null);
 
   // Estados de informacion para la prueba
@@ -61,6 +63,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
     let currentUploadSpeed = 0;
     const arrayRtts: number[] = [];
     let currentMinRTT = Infinity;
+    let auxJitter = Infinity;
     let startTime = 0;
     let thereIsError = false;
     let lastDownloadTCPInfo: ServerMeasurementMsg["Data"]["TCPInfo"];
@@ -257,12 +260,18 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
         const rttCount = arrayRtts.length;
         let rttAverage = rttCount > 0 ? rttSum / rttCount : Infinity;
 
+        // Jitter
+        auxJitter = calcJitter(arrayRtts);
+
         // Redondear metricas medidas
         // RTTs (dos decimales)
         rttAverage = Math.round(rttAverage * 100) / 100;
         currentMinRTT = Math.round(currentMinRTT * 100) / 100;
+        auxJitter = Math.round(auxJitter * 100) / 100;
         setRttAvg(rttAverage);
         setMinRTT(currentMinRTT);
+        setJitter(auxJitter);
+
         // Cuellos de botella (si existe, un decimal)
         if (bottleneckAux) {
           bottleneckAux.networkPercent = Math.round(bottleneckAux.networkPercent * 10) / 10;
@@ -276,6 +285,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
           uploadSpeed: currentUploadSpeed,
           avgRTT: rttAverage,
           minRTT: currentMinRTT,
+          jitter: auxJitter,
           networkLimitedPercent: bottleneckAux?.networkPercent ?? 0,
           clientLimitedPercent: bottleneckAux?.clientPercent ?? 0,
           serverLimitedPercent: bottleneckAux?.serverPercent ?? 0,
