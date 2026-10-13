@@ -24,6 +24,7 @@ type CreateMeasurementPayload = {
   uploadSpeed: number;
   avgRTT: number;
   minRTT: number;
+  maxRTT: number;
   jitter: number;
   networkLimitedPercent: number;
   clientLimitedPercent: number;

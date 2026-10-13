@@ -25,7 +25,8 @@ export interface Measurement {
     downloadSpeed: number;
     uploadSpeed: number;
     avgRTT: number;
-    minRTT:number;
+    minRTT: number;
+    maxRTT: number;
     jitter: number;
     review: number;
 

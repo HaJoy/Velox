@@ -32,6 +32,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
   const [downloadRtt, setDownloadRtt] = useState<number>(Infinity);
   const [uploadRtt, setUploadRtt] = useState<number>(Infinity);
   const [minRTT, setMinRTT] = useState<number>(Infinity);
+  const [maxRTT, setMaxRTT] = useState<number>(0);
   const [jitter, setJitter] = useState<number>(Infinity);
   const [bottleneck, setBottleneck] = useState<BottleneckResult | null>(null);
 
@@ -51,6 +52,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
     setUploadSpeed(0);
     setRttAvg(0);
     setMinRTT(Infinity);
+    setMaxRTT(0);
     setDownloadRtt(0);
     setUploadRtt(0);
     setBottleneck(null);
@@ -63,6 +65,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
     let currentUploadSpeed = 0;
     const arrayRtts: number[] = [];
     let currentMinRTT = Infinity;
+    let currentMaxRTT = 0;
     let auxJitter = Infinity;
     let startTime = 0;
     let thereIsError = false;
@@ -76,6 +79,15 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
       if (measuredMinRTT < currentMinRTT) {
         currentMinRTT = measuredMinRTT;
         setMinRTT(measuredMinRTT);
+      }
+    };
+
+    // Compar y actualiza el maxRTT
+    const updateMaxRTT = (value?: number) => {
+      if (value === undefined || !Number.isFinite(value)) return;
+      const measuredMaxRTT = value / 1000;
+      if (measuredMaxRTT > currentMaxRTT) {
+        currentMaxRTT = measuredMaxRTT;
       }
     };
 
@@ -135,6 +147,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
             if (isServerMeasurementMsg(data)) {
               const msg = data.Data.TCPInfo;
               updateMinRTT(msg.MinRTT);
+              updateMaxRTT(msg.RTT);
               const downloadRTTmsg = msg?.RTT ? msg.RTT / 1000 : Infinity; // Extrae el RTT
               setDownloadRtt(downloadRTTmsg);
               arrayRtts.push(downloadRTTmsg);
@@ -170,6 +183,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
             setDownloadComplete(true);
             setDownloadRtt(downloadRTTmsg);
             updateMinRTT(lastServerMsg?.MinRTT);
+            updateMaxRTT(lastServerMsg?.RTT);
             
             // Calcular cuello de botella
             bottleneckAux = calculateBottleneck(lastServerMsg ?? lastDownloadTCPInfo)
@@ -195,6 +209,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
               
               const uploadRTTmsg = measurementData.RTT ? measurementData.RTT / 1000 : Infinity;
               updateMinRTT(measurementData.MinRTT);
+              updateMaxRTT(measurementData.RTT);
               setUploadRtt(uploadRTTmsg);
               arrayRtts.push(uploadRTTmsg);
             }
@@ -216,6 +231,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
             setUploadSpeed(currentUploadSpeed);
             setUploadRtt(uploadRTTmsg);
             updateMinRTT(msg?.MinRTT);
+            updateMaxRTT(msg?.RTT);
             setUploadComplete(true);
           } else {
             // Si el if no se cumple, avisar.
@@ -267,9 +283,11 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
         // RTTs (dos decimales)
         rttAverage = Math.round(rttAverage * 100) / 100;
         currentMinRTT = Math.round(currentMinRTT * 100) / 100;
+        currentMaxRTT = Math.round(currentMaxRTT * 100) / 100;
         auxJitter = Math.round(auxJitter * 100) / 100;
         setRttAvg(rttAverage);
         setMinRTT(currentMinRTT);
+        setMaxRTT(currentMaxRTT);
         setJitter(auxJitter);
 
         // Cuellos de botella (si existe, un decimal)
@@ -285,6 +303,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
           uploadSpeed: currentUploadSpeed,
           avgRTT: rttAverage,
           minRTT: currentMinRTT,
+          maxRTT: currentMaxRTT,
           jitter: auxJitter,
           networkLimitedPercent: bottleneckAux?.networkPercent ?? 0,
           clientLimitedPercent: bottleneckAux?.clientPercent ?? 0,
@@ -302,6 +321,8 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
     uploadSpeed,
     rttAvg,
     minRTT,
+    maxRTT,
+    jitter,
     downloadRtt,
     uploadRtt,
     bottleneck,
