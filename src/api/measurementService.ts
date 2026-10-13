@@ -26,6 +26,9 @@ type CreateMeasurementPayload = {
   minRTT: number;
   maxRTT: number;
   jitter: number;
+  bytesSent: number;
+  bytesRetrans: number;
+  retransPercent: number;
   networkLimitedPercent: number;
   clientLimitedPercent: number;
   serverLimitedPercent: number;

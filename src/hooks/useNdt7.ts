@@ -17,7 +17,7 @@ import {
 import { createMeasurement } from "@/api/measurementService";
 import { toastError } from "@/lib/toast-utils";
 import { calculateBottleneck, type BottleneckResult } from "@/lib/measurements/bottleneck";
-import { calcJitter } from "@/lib/measurements/rttVariance";
+import { calcJitter } from "@/lib/measurements/calcJitter";
 
 /**
  * Utiliza la API de NDT7 (M-lab) para realizar una prueba de velocidad de red.
@@ -34,6 +34,9 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
   const [minRTT, setMinRTT] = useState<number>(Infinity);
   const [maxRTT, setMaxRTT] = useState<number>(0);
   const [jitter, setJitter] = useState<number>(Infinity);
+  const [bytesSent, setBytesSent] = useState<number>(0);
+  const [bytesRetrans, setBytesRetrans] = useState<number>(0);
+  const [retransPercent, setRetransPercent] = useState<number>(0);
   const [bottleneck, setBottleneck] = useState<BottleneckResult | null>(null);
 
   // Estados de informacion para la prueba
@@ -66,6 +69,9 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
     const arrayRtts: number[] = [];
     let currentMinRTT = Infinity;
     let currentMaxRTT = 0;
+    let auxBytesSent = 0;
+    let auxBytesRetrans = 0;
+    let auxRetransPercent = 0;
     let auxJitter = Infinity;
     let startTime = 0;
     let thereIsError = false;
@@ -145,6 +151,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
             // Estos if controlan lo que se debe hacer segun el mensaje recibido
             // Si el mensaje es del servidor se extrae el RTT medido
             if (isServerMeasurementMsg(data)) {
+              console.log(data);
               const msg = data.Data.TCPInfo;
               updateMinRTT(msg.MinRTT);
               updateMaxRTT(msg.RTT);
@@ -174,16 +181,28 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
             isLastClientMeasurement(data.LastClientMeasurement) &&
             isLastServerMeasurement(data.LastServerMeasurement)) {
 
+            // Mensajes
             const clientGoodPut = data.LastClientMeasurement.MeanClientMbps ?? 0;
             const lastServerMsg = data.LastServerMeasurement.TCPInfo;
-            const downloadRTTmsg = lastServerMsg?.RTT ? lastServerMsg.RTT / 1000 : Infinity;
             
+            // Velocidad de descarga
             currentDownloadSpeed = parseFloat(clientGoodPut?.toFixed(2));
             setDownloadSpeed(currentDownloadSpeed);
+
+            // RTTs
+            const downloadRTTmsg = lastServerMsg?.RTT ? lastServerMsg.RTT / 1000 : Infinity;
             setDownloadComplete(true);
             setDownloadRtt(downloadRTTmsg);
             updateMinRTT(lastServerMsg?.MinRTT);
             updateMaxRTT(lastServerMsg?.RTT);
+
+            // Retransmision
+            auxBytesSent = lastServerMsg?.BytesSent ?? 0;
+            auxBytesRetrans = lastServerMsg?.BytesRetrans ?? 0;
+            auxRetransPercent = auxBytesSent > 0 ? auxBytesRetrans / auxBytesSent * 100 : 0; 
+            setBytesSent(auxBytesSent);
+            setBytesRetrans(auxBytesRetrans);
+            setRetransPercent(auxRetransPercent);
             
             // Calcular cuello de botella
             bottleneckAux = calculateBottleneck(lastServerMsg ?? lastDownloadTCPInfo)
@@ -279,7 +298,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
         // Jitter
         auxJitter = calcJitter(arrayRtts);
 
-        // Redondear metricas medidas
+        // ----- Redondear metricas medidas -----
         // RTTs (dos decimales)
         rttAverage = Math.round(rttAverage * 100) / 100;
         currentMinRTT = Math.round(currentMinRTT * 100) / 100;
@@ -289,6 +308,9 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
         setMinRTT(currentMinRTT);
         setMaxRTT(currentMaxRTT);
         setJitter(auxJitter);
+
+        // Retransmision (un decimal)
+        auxRetransPercent = Math.round(auxRetransPercent * 10) / 10;
 
         // Cuellos de botella (si existe, un decimal)
         if (bottleneckAux) {
@@ -305,6 +327,9 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
           minRTT: currentMinRTT,
           maxRTT: currentMaxRTT,
           jitter: auxJitter,
+          bytesSent: auxBytesSent,
+          bytesRetrans: auxBytesRetrans,
+          retransPercent: auxRetransPercent,
           networkLimitedPercent: bottleneckAux?.networkPercent ?? 0,
           clientLimitedPercent: bottleneckAux?.clientPercent ?? 0,
           serverLimitedPercent: bottleneckAux?.serverPercent ?? 0,
@@ -325,6 +350,9 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
     jitter,
     downloadRtt,
     uploadRtt,
+    bytesSent,
+    bytesRetrans,
+    retransPercent,
     bottleneck,
     serverChosenCity,
     serverChosenCountry,
