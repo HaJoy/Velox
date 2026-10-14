@@ -36,8 +36,13 @@ export const Home = () => {
     uploadSpeed,
     rttAvg,
     minRTT,
+    maxRTT,
+    jitter,
     downloadRtt,
     uploadRtt,
+    bytesSent,
+    bytesRetrans,
+    retransPercent,
     bottleneck,
     serverChosenCity,
     serverChosenCountry,
@@ -298,8 +303,13 @@ export const Home = () => {
       </div>
       <MetricsDetailsModal
         bottleneck={bottleneck}
-        minRTT={minRTT}
         avgRTT={rttAvg}
+        minRTT={minRTT}
+        maxRTT={maxRTT}
+        jitter={jitter}
+        bytesSent={bytesSent}
+        bytesRetrans={bytesRetrans}
+        retransPercent={retransPercent}
         open={isMetricsDetailsModalOpen}
         onOpenChange={setIsMetricsDetailsModalOpen}
       />

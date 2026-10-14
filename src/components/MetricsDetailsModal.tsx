@@ -6,14 +6,20 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { BottleneckResult } from "@/lib/measurements/bottleneck";
-import { Network, Server, UserRound } from "lucide-react";
+import { Network, RefreshCw, Server, UserRound } from "lucide-react";
 import type { ReactNode } from "react";
 import { Card } from "./ui/card";
+import { formatBytes } from "@/lib/measurements/unitConversion";
 
 interface MetricsDetailsModalProps {
   bottleneck: BottleneckResult | null;
-  minRTT: number;
   avgRTT: number;
+  minRTT: number;
+  maxRTT: number;
+  jitter: number;
+  bytesSent: number;
+  bytesRetrans: number;
+  retransPercent: number;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -125,8 +131,13 @@ const noteList: { title?: string; content: ReactNode }[] = [
  */
 export const MetricsDetailsModal = ({
   bottleneck,
-  minRTT,
   avgRTT,
+  minRTT,
+  maxRTT,
+  jitter,
+  bytesSent,
+  bytesRetrans,
+  retransPercent,
   open,
   onOpenChange,
 }: MetricsDetailsModalProps) => {
@@ -203,9 +214,53 @@ export const MetricsDetailsModal = ({
             {/* Metricas de RTT */}
             <div className="flex flex-col gap-2">
               <span className="text-lg font-bold">Round-Trip Time</span>
-              <div className="flex gap-2 w-full">
-                <RTTMiniCards statName="RTT Mínimo" value={minRTT} />
-                <RTTMiniCards statName="RTT Promedio" value={avgRTT} />
+              <div className="grid grid-cols-2 md:flex gap-2 w-full">
+                <RTTMiniCards gridClassName="order-1" statName="RTT Mínimo" value={minRTT} />
+                <RTTMiniCards gridClassName="order-3" statName="RTT Promedio" value={avgRTT} />
+                <RTTMiniCards gridClassName="order-2" statName="RTT Máximo" value={maxRTT} />
+                <RTTMiniCards gridClassName="order-4" statName="Jitter" value={jitter} />
+              </div>
+            </div>
+
+            {/* Metricas de retransmision (se muestran las metricas en megabytes, MB) */}
+            <div className="flex flex-col gap-2">
+              <span className="text-lg font-bold">Retrasmisión</span>
+              <div className="flex flex-col gap-2 w-full">
+                <div className="flex flex-col justify-between md:flex-row md:items-center">
+                  <div>
+                    Bytes enviados: <strong>{formatBytes(bytesSent)}</strong>
+                  </div>
+                  <div>
+                    Bytes retransmitidos: <strong>{formatBytes(bytesRetrans)}</strong>
+                  </div>
+                </div>
+
+                {/* Barra de progreso para mostrar retransmision */}
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex justify-between gap-4 text-sm">
+                    <span className="flex items-center gap-2">
+                      <RefreshCw
+                        className="h-4 w-4 text-muted-foreground"
+                        aria-hidden="true"
+                      />
+                      Tasa de retransmisión
+                    </span>
+                    <span className="font-medium">{retransPercent.toFixed(1)}%</span>
+                  </div>
+                  <div
+                    className="h-2 overflow-hidden rounded-full bg-muted"
+                    role="progressbar"
+                    aria-label={`Tasa de retransmisión: ${retransPercent.toFixed(1)}%`}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={parseFloat(retransPercent.toFixed(1))}
+                  >
+                    <div
+                      className="h-full rounded-full bg-primary"
+                      style={{ width: `${retransPercent.toFixed(1)}%` }}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -239,9 +294,11 @@ const Note = ({ title, children }: { title?: string; children: ReactNode }) => {
 const RTTMiniCards = ({
   statName,
   value,
+  gridClassName,
 }: {
   statName: string;
   value: number;
+  gridClassName?: string;
 }) => {
   // Controlar que los RTTs no sean "Infinity"
   if (value === Infinity) {
@@ -249,7 +306,7 @@ const RTTMiniCards = ({
   }
 
   return (
-    <Card className="flex flex-col text-center w-1/2 max-h-fit py-0 gap-0">
+    <Card className={`${gridClassName ?? ""} md:order-1 flex flex-col text-center max-h-fit py-0 gap-0 md:w-1/2`}>
       <div className="rtt-card-name h-full py-2">
         <span className="text-sm">{statName}</span>
       </div>

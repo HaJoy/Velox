@@ -151,7 +151,6 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
             // Estos if controlan lo que se debe hacer segun el mensaje recibido
             // Si el mensaje es del servidor se extrae el RTT medido
             if (isServerMeasurementMsg(data)) {
-              console.log(data);
               const msg = data.Data.TCPInfo;
               updateMinRTT(msg.MinRTT);
               updateMaxRTT(msg.RTT);
