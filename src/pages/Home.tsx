@@ -9,7 +9,7 @@ import { MeasurementsTable } from "@/components/MeasurementsTable";
 import { MetricsDetailsModal } from "@/components/MetricsDetailsModal";
 import { isIpinfoResponse } from "@/guards/isp.guard";
 import { isGetOneMeasurementResponse } from "@/guards/measurement.guard";
-import { Download, Network, Signal, Upload } from "lucide-react";
+import { Download, Network, Upload } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Field,
@@ -41,6 +41,8 @@ export const Home = () => {
     minRTT,
     maxRTT,
     jitter,
+    varRTT,
+    desvRTT,
     downloadRtt,
     uploadRtt,
     bytesSent,
@@ -310,6 +312,8 @@ export const Home = () => {
         minRTT={minRTT}
         maxRTT={maxRTT}
         jitter={jitter}
+        varRTT={varRTT}
+        desvRTT={desvRTT}
         bytesSent={bytesSent}
         bytesRetrans={bytesRetrans}
         retransPercent={retransPercent}

@@ -17,7 +17,7 @@ import {
 import { createMeasurement } from "@/api/measurementService";
 import { toastError } from "@/lib/toast-utils";
 import { calculateBottleneck, type BottleneckResult } from "@/lib/measurements/bottleneck";
-import { calcJitter } from "@/lib/measurements/calcJitter";
+import { calcJitter, calcVarDesv } from "@/lib/measurements/calcJitter";
 
 /**
  * Utiliza la API de NDT7 (M-lab) para realizar una prueba de velocidad de red.
@@ -34,6 +34,8 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
   const [minRTT, setMinRTT] = useState<number>(Infinity);
   const [maxRTT, setMaxRTT] = useState<number>(0);
   const [jitter, setJitter] = useState<number>(Infinity);
+  const [varRTT, setVarRTT] = useState<number>(0);
+  const [desvRTT, setDesvRTT] = useState<number>(0);
   const [bytesSent, setBytesSent] = useState<number>(0);
   const [bytesRetrans, setBytesRetrans] = useState<number>(0);
   const [retransPercent, setRetransPercent] = useState<number>(0);
@@ -295,16 +297,24 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
         // Jitter
         auxJitter = calcJitter(arrayRtts);
 
+        // Varianza y desviacion estandar de RTTs
+        let {sampleVariance: auxVarRTT, stdDev: auxDesvRTT} = calcVarDesv(arrayRtts);
+        console.log(auxVarRTT, auxDesvRTT);
+
         // ----- Redondear metricas medidas -----
         // RTTs (dos decimales)
         rttAverage = Math.round(rttAverage * 100) / 100;
         currentMinRTT = Math.round(currentMinRTT * 100) / 100;
         currentMaxRTT = Math.round(currentMaxRTT * 100) / 100;
         auxJitter = Math.round(auxJitter * 100) / 100;
+        auxVarRTT = Math.round(auxVarRTT * 100) / 100;
+        auxDesvRTT = Math.round(auxDesvRTT * 100) / 100;
         setRttAvg(rttAverage);
         setMinRTT(currentMinRTT);
         setMaxRTT(currentMaxRTT);
         setJitter(auxJitter);
+        setVarRTT(auxVarRTT);
+        setDesvRTT(auxDesvRTT);
 
         // Retransmision (un decimal)
         auxRetransPercent = Math.round(auxRetransPercent * 10) / 10;
@@ -345,6 +355,8 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
     minRTT,
     maxRTT,
     jitter,
+    varRTT,
+    desvRTT,
     downloadRtt,
     uploadRtt,
     bytesSent,
