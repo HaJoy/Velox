@@ -22,9 +22,6 @@ import {
 import { Spinner } from "./ui/spinner";
 import { Button } from "./ui/button";
 
-const waitForHistoryTestDelay = () =>
-  new Promise<void>((resolve) => setTimeout(resolve, 5000));
-
 export const MeasurementsTable = ({
   user,
   refreshKey,
@@ -41,7 +38,6 @@ export const MeasurementsTable = ({
     const loadHistory = async () => {
       setHistoryLoading(true);
       try {
-        await waitForHistoryTestDelay();
         const data = await getUserHistory();
         // Ordenar de más antiguo a más reciente (fecha ascendente)
         const sorted = (data.measurementHistory ?? [])
@@ -84,6 +80,11 @@ export const MeasurementsTable = ({
     { label: "Subida (Mb/s)", key: "uploadSpeed" },
     { label: "RTT promedio (ms)", key: "avgRTT" },
     { label: "RTT mínimo (ms)", key: "minRTT" },
+    { label: "RTT máximo (ms)", key: "maxRTT" },
+    { label: "Jitter (ms)", key: "jitter" },
+    { label: "Bytes enviados", key: "bytesSent" },
+    { label: "Bytes retransmitidos", key: "bytesRetrans" },
+    { label: "Retransmisión (%)", key: "retransPercent" },
     { label: "Congestión de red (%)", key: "networkLimitedPercent" },
     { label: "Congestión del cliente (%)", key: "clientLimitedPercent" },
     { label: "Congestión del servidor (%)", key: "serverLimitedPercent" },
@@ -99,6 +100,11 @@ export const MeasurementsTable = ({
     uploadSpeed: m.uploadSpeed ?? 0,
     avgRTT: m.avgRTT ?? 0,
     minRTT: m.minRTT ?? 0,
+    maxRTT: m.maxRTT ?? 0,
+    jitter: m.jitter ?? 0,
+    bytesSent: m.bytesSent ?? 0,
+    bytesRetrans: m.bytesRetrans ?? 0,
+    retransPercent: m.retransPercent ?? 0,
     networkLimitedPercent: m.networkLimitedPercent ?? 0,
     clientLimitedPercent: m.clientLimitedPercent ?? 0,
     serverLimitedPercent: m.serverLimitedPercent ?? 0,
@@ -178,6 +184,11 @@ export const MeasurementsTable = ({
             <TableHead>Subida (Mb/s)</TableHead>
             <TableHead>RTT promedio (ms)</TableHead>
             <TableHead>RTT mínimo (ms)</TableHead>
+            <TableHead>RTT máximo (ms)</TableHead>
+            <TableHead>Jitter (ms)</TableHead>
+            <TableHead>Bytes enviados</TableHead>
+            <TableHead>Bytes retransmitidos</TableHead>
+            <TableHead>Retransmisión (%)</TableHead>
             <TableHead>Congestión de red (%)</TableHead>
             <TableHead>Congestión del cliente (%)</TableHead>
             <TableHead>Congestión del servidor (%)</TableHead>
@@ -193,6 +204,11 @@ export const MeasurementsTable = ({
             const upload = m.uploadSpeed ?? 0;
             const avgRTT = m.avgRTT ?? 0;
             const minRTT = m.minRTT ?? 0;
+            const maxRTT = m.maxRTT ?? 0;
+            const jitter = m.jitter ?? 0;
+            const bytesSent = m.bytesSent ?? 0;
+            const bytesRetrans = m.bytesRetrans ?? 0;
+            const retransPercent = m.retransPercent ?? 0;
             const networkLimitedPercent = m.networkLimitedPercent ?? 0;
             const clientLimitedPercent = m.clientLimitedPercent ?? 0;
             const serverLimitedPercent = m.serverLimitedPercent ?? 0;
@@ -212,6 +228,11 @@ export const MeasurementsTable = ({
                     <TableCell>{upload}</TableCell>
                     <TableCell>{avgRTT}</TableCell>
                     <TableCell>{minRTT}</TableCell>
+                    <TableCell>{maxRTT}</TableCell>
+                    <TableCell>{jitter}</TableCell>
+                    <TableCell>{bytesSent}</TableCell>
+                    <TableCell>{bytesRetrans}</TableCell>
+                    <TableCell>{retransPercent}</TableCell>
                     <TableCell>{networkLimitedPercent}</TableCell>
                     <TableCell>{clientLimitedPercent}</TableCell>
                     <TableCell>{serverLimitedPercent}</TableCell>
