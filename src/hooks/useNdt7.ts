@@ -263,15 +263,9 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
         // Este callback se ejecuta si una de las fases de la prueba
         // lanza error.
         error: function (err: string | Error) {
-          setComplete(true);
           console.error('Error while running test: ', err);
           thereIsError = true; // Avisa a la aplicación que ocurrió un error.
-          // Notificar al usuario del error.
-          toastError({
-            title: "Ocurrió un error durante una de las fases de la prueba.",
-            description: "Esta medición no debe ser tomada en cuenta. Por favor inténtelo de nuevo más tarde.",
-            toasterId: "toaster-home",
-          });
+          setComplete(true);
         }
       },
     )
@@ -280,14 +274,18 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
       // no suma al exitcode, por eso la variable thereIsError.
       if (exitcode !== 0 || thereIsError) {
         console.error('An error has ocurred during test.');
+        // Notificar al usuario del error.
         toastError({
-          title: "Ocurrió un error ejecutando la prueba, por favor, inténtelo de nuevo más tarde.",
+          title: "Ocurrió un error durante una de las fases de la prueba.",
+          description: "Esta medición no debe ser tomada en cuenta. Por favor inténtelo de nuevo más tarde.",
           toasterId: "toaster-home",
         });
         setComplete(true);
+        setIsDownStream(true); // Devuelve el color del velocimetro a su estado inicial
       } else {
         setTestTime((Date.now() - startTime) / 1000);
         setComplete(true);
+        setIsDownStream(true);
 
         // Promedio de RTTs
         const rttSum = arrayRtts.reduce((acc, curr) => acc + curr, 0);

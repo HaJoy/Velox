@@ -20,6 +20,7 @@ interface MetricsDetailsModalProps {
   bytesSent: number;
   bytesRetrans: number;
   retransPercent: number;
+  testTime: number;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -138,6 +139,7 @@ export const MetricsDetailsModal = ({
   bytesSent,
   bytesRetrans,
   retransPercent,
+  testTime,
   open,
   onOpenChange,
 }: MetricsDetailsModalProps) => {
@@ -155,6 +157,9 @@ export const MetricsDetailsModal = ({
         <div className="grid grid-cols-1 md:grid-cols-[3fr_2fr] gap-3 max-h-[350px] overflow-y-auto md:overflow-y-hidden md:gap-5">
           {/* Lado izquierdo: Mas metricas */}
           <div className="custom-scrollbar flex flex-col gap-3 md:overflow-y-auto md:p-5">
+            {/* Duracion de la prueba */}
+            <p>Duración de la prueba: {`${testTime.toFixed(1) || 0} segundos`}</p>
+
             {/* Cuello de botella */}
             <div>
               <span className="text-lg font-bold">Cuello de botella</span>
