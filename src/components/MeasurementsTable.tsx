@@ -12,7 +12,7 @@ import { CSVLink } from "react-csv";
 import { deleteMeasurement, getUserHistory } from "@/api/measurementService";
 import type { User } from "@supabase/supabase-js";
 import { Download, Trash2 } from "lucide-react";
-import { toastError } from "@/lib/toast-utils";
+import { toastError, toastNotification } from "@/lib/toast-utils";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -21,6 +21,7 @@ import {
 } from "./ui/context-menu";
 import { Spinner } from "./ui/spinner";
 import { Button } from "./ui/button";
+import { isAxiosError } from "axios";
 
 export const MeasurementsTable = ({
   user,
@@ -120,19 +121,29 @@ export const MeasurementsTable = ({
 
   // Handler para eliminar una medicion
   const handleDelete = async (id: string) => {
-    const response = await deleteMeasurement(id);
-
-    // Notificar al usuario si ocurre un error (la medicion devuelta es null)
-    if (!response.measurement) {
-      toastError({
-        title: "Error al intentar eliminar la medición",
-        description:
-          "Ocurrió un error al intentar eliminar la medición, inténtelo de nuevo más tarde.",
+    try {
+      // Mostrar una notificacion al usuario mientras se borra la medicion.
+      // Notese que tiene los tres estados de la llamada.
+      await toastNotification(deleteMeasurement(id), {
+        loadingMsg: "Eliminando medición...",
+        successMsg: "Medición eliminada.",
+        errorMsg:
+          "No se pudo eliminar la medición, por favor inténtalo de nuevo más tarde.",
         toasterId: "toaster-home",
       });
+    } catch (error) {
+      // Si ocurre un error, logear a consola y terminar la operacion.
+      // No hace falta notificarle al usuario, el toast de arriba ya
+      // lo hace.
+      if (isAxiosError(error)) {
+        console.error("Error trying to delete measurement: ", error.message);
+        return
+      }
+      console.error("Unknown error while trying to delete measurement: ", error);
       return;
     }
 
+    // Actualizar la lista de mediciones
     setMeasurements((current) =>
       current.filter((measurement) => measurement._id !== id),
     );

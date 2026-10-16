@@ -131,11 +131,6 @@ type DeleteMeasurementResponse = {
  * @returns `DeleteMeasurementResponse` objeto con mensaje de respuesta y la medicion eliminada.
  */
 export const deleteMeasurement = async (id: string): Promise<DeleteMeasurementResponse> => {
-  try {
     const response = await api.delete(`/measurement/${id}`);
     return response.data;
-  } catch (error) {
-    console.error('Error trying to delete measurement: ', error);
-    return { message: 'Error trying to delete measurement: ', measurement: null };
-  }
 }
