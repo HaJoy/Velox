@@ -20,8 +20,10 @@ export type ChosenServerResponse = {
 export type TCPInfo = {
   BytesReceived: number;     // bytes
   ElapsedTime: number;       // seconds
-  MinRTT: number;
   RTT: number;              // round-trip time in milliseconds
+  MinRTT: number;           // minimum round-trip time in miliseconds
+  BytesSent: number;        // total bytes sent from server to client
+  BytesRetrans: number;     // bytes retransmited
   BusyTime?: number;        // usec, busy time sending data
   RWndLimited?: number;     // usec, limited time by client reception window
   SndBufLimited?: number;   // usec, limited time by server send buffer

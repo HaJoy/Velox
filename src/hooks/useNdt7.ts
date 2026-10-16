@@ -17,6 +17,7 @@ import {
 import { createMeasurement } from "@/api/measurementService";
 import { toastError } from "@/lib/toast-utils";
 import { calculateBottleneck, type BottleneckResult } from "@/lib/measurements/bottleneck";
+import { calcJitter, calcVarDesv } from "@/lib/measurements/calcJitter";
 
 /**
  * Utiliza la API de NDT7 (M-lab) para realizar una prueba de velocidad de red.
@@ -31,6 +32,13 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
   const [downloadRtt, setDownloadRtt] = useState<number>(Infinity);
   const [uploadRtt, setUploadRtt] = useState<number>(Infinity);
   const [minRTT, setMinRTT] = useState<number>(Infinity);
+  const [maxRTT, setMaxRTT] = useState<number>(0);
+  const [jitter, setJitter] = useState<number>(Infinity);
+  const [varRTT, setVarRTT] = useState<number>(0);
+  const [desvRTT, setDesvRTT] = useState<number>(0);
+  const [bytesSent, setBytesSent] = useState<number>(0);
+  const [bytesRetrans, setBytesRetrans] = useState<number>(0);
+  const [retransPercent, setRetransPercent] = useState<number>(0);
   const [bottleneck, setBottleneck] = useState<BottleneckResult | null>(null);
 
   // Estados de informacion para la prueba
@@ -49,6 +57,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
     setUploadSpeed(0);
     setRttAvg(0);
     setMinRTT(Infinity);
+    setMaxRTT(0);
     setDownloadRtt(0);
     setUploadRtt(0);
     setBottleneck(null);
@@ -61,6 +70,11 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
     let currentUploadSpeed = 0;
     const arrayRtts: number[] = [];
     let currentMinRTT = Infinity;
+    let currentMaxRTT = 0;
+    let auxBytesSent = 0;
+    let auxBytesRetrans = 0;
+    let auxRetransPercent = 0;
+    let auxJitter = Infinity;
     let startTime = 0;
     let thereIsError = false;
     let lastDownloadTCPInfo: ServerMeasurementMsg["Data"]["TCPInfo"];
@@ -73,6 +87,15 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
       if (measuredMinRTT < currentMinRTT) {
         currentMinRTT = measuredMinRTT;
         setMinRTT(measuredMinRTT);
+      }
+    };
+
+    // Compar y actualiza el maxRTT
+    const updateMaxRTT = (value?: number) => {
+      if (value === undefined || !Number.isFinite(value)) return;
+      const measuredMaxRTT = value / 1000;
+      if (measuredMaxRTT > currentMaxRTT) {
+        currentMaxRTT = measuredMaxRTT;
       }
     };
 
@@ -132,11 +155,12 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
             if (isServerMeasurementMsg(data)) {
               const msg = data.Data.TCPInfo;
               updateMinRTT(msg.MinRTT);
+              updateMaxRTT(msg.RTT);
               const downloadRTTmsg = msg?.RTT ? msg.RTT / 1000 : Infinity; // Extrae el RTT
               setDownloadRtt(downloadRTTmsg);
               arrayRtts.push(downloadRTTmsg);
               
-              // Guardar el TCPInfor mas reciente para calcular cuello de botella
+              // Guardar el TCPInfo mas reciente para calcular cuello de botella
               lastDownloadTCPInfo = msg;
             }
             // Si el mensaje es del cliente se extrae la velocidad de descarga
@@ -158,15 +182,28 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
             isLastClientMeasurement(data.LastClientMeasurement) &&
             isLastServerMeasurement(data.LastServerMeasurement)) {
 
+            // Mensajes
             const clientGoodPut = data.LastClientMeasurement.MeanClientMbps ?? 0;
             const lastServerMsg = data.LastServerMeasurement.TCPInfo;
-            const downloadRTTmsg = lastServerMsg?.RTT ? lastServerMsg.RTT / 1000 : Infinity;
             
+            // Velocidad de descarga
             currentDownloadSpeed = parseFloat(clientGoodPut?.toFixed(2));
             setDownloadSpeed(currentDownloadSpeed);
+
+            // RTTs
+            const downloadRTTmsg = lastServerMsg?.RTT ? lastServerMsg.RTT / 1000 : Infinity;
             setDownloadComplete(true);
             setDownloadRtt(downloadRTTmsg);
             updateMinRTT(lastServerMsg?.MinRTT);
+            updateMaxRTT(lastServerMsg?.RTT);
+
+            // Retransmision
+            auxBytesSent = lastServerMsg?.BytesSent ?? 0;
+            auxBytesRetrans = lastServerMsg?.BytesRetrans ?? 0;
+            auxRetransPercent = auxBytesSent > 0 ? auxBytesRetrans / auxBytesSent * 100 : 0; 
+            setBytesSent(auxBytesSent);
+            setBytesRetrans(auxBytesRetrans);
+            setRetransPercent(auxRetransPercent);
             
             // Calcular cuello de botella
             bottleneckAux = calculateBottleneck(lastServerMsg ?? lastDownloadTCPInfo)
@@ -192,6 +229,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
               
               const uploadRTTmsg = measurementData.RTT ? measurementData.RTT / 1000 : Infinity;
               updateMinRTT(measurementData.MinRTT);
+              updateMaxRTT(measurementData.RTT);
               setUploadRtt(uploadRTTmsg);
               arrayRtts.push(uploadRTTmsg);
             }
@@ -213,6 +251,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
             setUploadSpeed(currentUploadSpeed);
             setUploadRtt(uploadRTTmsg);
             updateMinRTT(msg?.MinRTT);
+            updateMaxRTT(msg?.RTT);
             setUploadComplete(true);
           } else {
             // Si el if no se cumple, avisar.
@@ -226,15 +265,9 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
         // Este callback se ejecuta si una de las fases de la prueba
         // lanza error.
         error: function (err: string | Error) {
-          setComplete(true);
           console.error('Error while running test: ', err);
           thereIsError = true; // Avisa a la aplicación que ocurrió un error.
-          // Notificar al usuario del error.
-          toastError({
-            title: "Ocurrió un error durante una de las fases de la prueba.",
-            description: "Esta medición no debe ser tomada en cuenta. Por favor inténtelo de nuevo más tarde.",
-            toasterId: "toaster-home",
-          });
+          setComplete(true);
         }
       },
     )
@@ -243,26 +276,48 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
       // no suma al exitcode, por eso la variable thereIsError.
       if (exitcode !== 0 || thereIsError) {
         console.error('An error has ocurred during test.');
+        // Notificar al usuario del error.
         toastError({
-          title: "Ocurrió un error ejecutando la prueba, por favor, inténtelo de nuevo más tarde.",
+          title: "Ocurrió un error durante una de las fases de la prueba.",
+          description: "Esta medición no debe ser tomada en cuenta. Por favor inténtelo de nuevo más tarde.",
           toasterId: "toaster-home",
         });
         setComplete(true);
+        setIsDownStream(true); // Devuelve el color del velocimetro a su estado inicial
       } else {
         setTestTime((Date.now() - startTime) / 1000);
         setComplete(true);
+        setIsDownStream(true);
 
         // Promedio de RTTs
         const rttSum = arrayRtts.reduce((acc, curr) => acc + curr, 0);
         const rttCount = arrayRtts.length;
         let rttAverage = rttCount > 0 ? rttSum / rttCount : Infinity;
 
-        // Redondear metricas medidas
+        // Jitter
+        auxJitter = calcJitter(arrayRtts);
+
+        // Varianza y desviacion estandar de RTTs
+        let {sampleVariance: auxVarRTT, stdDev: auxDesvRTT} = calcVarDesv(arrayRtts);
+
+        // ----- Redondear metricas medidas -----
         // RTTs (dos decimales)
         rttAverage = Math.round(rttAverage * 100) / 100;
         currentMinRTT = Math.round(currentMinRTT * 100) / 100;
+        currentMaxRTT = Math.round(currentMaxRTT * 100) / 100;
+        auxJitter = Math.round(auxJitter * 100) / 100;
+        auxVarRTT = Math.round(auxVarRTT * 100) / 100;
+        auxDesvRTT = Math.round(auxDesvRTT * 100) / 100;
         setRttAvg(rttAverage);
         setMinRTT(currentMinRTT);
+        setMaxRTT(currentMaxRTT);
+        setJitter(auxJitter);
+        setVarRTT(auxVarRTT);
+        setDesvRTT(auxDesvRTT);
+
+        // Retransmision (un decimal)
+        auxRetransPercent = Math.round(auxRetransPercent * 10) / 10;
+
         // Cuellos de botella (si existe, un decimal)
         if (bottleneckAux) {
           bottleneckAux.networkPercent = Math.round(bottleneckAux.networkPercent * 10) / 10;
@@ -276,6 +331,13 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
           uploadSpeed: currentUploadSpeed,
           avgRTT: rttAverage,
           minRTT: currentMinRTT,
+          maxRTT: currentMaxRTT,
+          jitter: auxJitter,
+          varRTT: auxVarRTT,
+          desvRTT: auxDesvRTT,
+          bytesSent: auxBytesSent,
+          bytesRetrans: auxBytesRetrans,
+          retransPercent: auxRetransPercent,
           networkLimitedPercent: bottleneckAux?.networkPercent ?? 0,
           clientLimitedPercent: bottleneckAux?.clientPercent ?? 0,
           serverLimitedPercent: bottleneckAux?.serverPercent ?? 0,
@@ -292,8 +354,15 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
     uploadSpeed,
     rttAvg,
     minRTT,
+    maxRTT,
+    jitter,
+    varRTT,
+    desvRTT,
     downloadRtt,
     uploadRtt,
+    bytesSent,
+    bytesRetrans,
+    retransPercent,
     bottleneck,
     serverChosenCity,
     serverChosenCountry,

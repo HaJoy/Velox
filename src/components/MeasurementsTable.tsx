@@ -12,7 +12,7 @@ import { CSVLink } from "react-csv";
 import { deleteMeasurement, getUserHistory } from "@/api/measurementService";
 import type { User } from "@supabase/supabase-js";
 import { Download, Trash2 } from "lucide-react";
-import { toastError } from "@/lib/toast-utils";
+import { toastError, toastNotification } from "@/lib/toast-utils";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -21,9 +21,7 @@ import {
 } from "./ui/context-menu";
 import { Spinner } from "./ui/spinner";
 import { Button } from "./ui/button";
-
-const waitForHistoryTestDelay = () =>
-  new Promise<void>((resolve) => setTimeout(resolve, 5000));
+import { isAxiosError } from "axios";
 
 export const MeasurementsTable = ({
   user,
@@ -41,7 +39,6 @@ export const MeasurementsTable = ({
     const loadHistory = async () => {
       setHistoryLoading(true);
       try {
-        await waitForHistoryTestDelay();
         const data = await getUserHistory();
         // Ordenar de más antiguo a más reciente (fecha ascendente)
         const sorted = (data.measurementHistory ?? [])
@@ -84,6 +81,13 @@ export const MeasurementsTable = ({
     { label: "Subida (Mb/s)", key: "uploadSpeed" },
     { label: "RTT promedio (ms)", key: "avgRTT" },
     { label: "RTT mínimo (ms)", key: "minRTT" },
+    { label: "RTT máximo (ms)", key: "maxRTT" },
+    { label: "Jitter (ms)", key: "jitter" },
+    { label: "Varianza RTT (ms²)", key: "varRTT" },
+    { label: "Desviación estándar RTT (ms)", key: "desvRTT" },
+    { label: "Bytes enviados", key: "bytesSent" },
+    { label: "Bytes retransmitidos", key: "bytesRetrans" },
+    { label: "Retransmisión (%)", key: "retransPercent" },
     { label: "Congestión de red (%)", key: "networkLimitedPercent" },
     { label: "Congestión del cliente (%)", key: "clientLimitedPercent" },
     { label: "Congestión del servidor (%)", key: "serverLimitedPercent" },
@@ -99,6 +103,13 @@ export const MeasurementsTable = ({
     uploadSpeed: m.uploadSpeed ?? 0,
     avgRTT: m.avgRTT ?? 0,
     minRTT: m.minRTT ?? 0,
+    maxRTT: m.maxRTT ?? 0,
+    jitter: m.jitter ?? 0,
+    varRTT: m.varRTT ?? 0,
+    desvRTT: m.desvRTT ?? 0,
+    bytesSent: m.bytesSent ?? 0,
+    bytesRetrans: m.bytesRetrans ?? 0,
+    retransPercent: m.retransPercent ?? 0,
     networkLimitedPercent: m.networkLimitedPercent ?? 0,
     clientLimitedPercent: m.clientLimitedPercent ?? 0,
     serverLimitedPercent: m.serverLimitedPercent ?? 0,
@@ -110,19 +121,29 @@ export const MeasurementsTable = ({
 
   // Handler para eliminar una medicion
   const handleDelete = async (id: string) => {
-    const response = await deleteMeasurement(id);
-
-    // Notificar al usuario si ocurre un error (la medicion devuelta es null)
-    if (!response.measurement) {
-      toastError({
-        title: "Error al intentar eliminar la medición",
-        description:
-          "Ocurrió un error al intentar eliminar la medición, inténtelo de nuevo más tarde.",
+    try {
+      // Mostrar una notificacion al usuario mientras se borra la medicion.
+      // Notese que tiene los tres estados de la llamada.
+      await toastNotification(deleteMeasurement(id), {
+        loadingMsg: "Eliminando medición...",
+        successMsg: "Medición eliminada.",
+        errorMsg:
+          "No se pudo eliminar la medición, por favor inténtalo de nuevo más tarde.",
         toasterId: "toaster-home",
       });
+    } catch (error) {
+      // Si ocurre un error, logear a consola y terminar la operacion.
+      // No hace falta notificarle al usuario, el toast de arriba ya
+      // lo hace.
+      if (isAxiosError(error)) {
+        console.error("Error trying to delete measurement: ", error.message);
+        return
+      }
+      console.error("Unknown error while trying to delete measurement: ", error);
       return;
     }
 
+    // Actualizar la lista de mediciones
     setMeasurements((current) =>
       current.filter((measurement) => measurement._id !== id),
     );
@@ -178,6 +199,13 @@ export const MeasurementsTable = ({
             <TableHead>Subida (Mb/s)</TableHead>
             <TableHead>RTT promedio (ms)</TableHead>
             <TableHead>RTT mínimo (ms)</TableHead>
+            <TableHead>RTT máximo (ms)</TableHead>
+            <TableHead>Jitter (ms)</TableHead>
+            <TableHead>Varianza RTT (ms<sup className="text-[8px]">2</sup>)</TableHead>
+            <TableHead>Desviación estándar RTT (ms)</TableHead>
+            <TableHead>Bytes enviados</TableHead>
+            <TableHead>Bytes retransmitidos</TableHead>
+            <TableHead>Retransmisión (%)</TableHead>
             <TableHead>Congestión de red (%)</TableHead>
             <TableHead>Congestión del cliente (%)</TableHead>
             <TableHead>Congestión del servidor (%)</TableHead>
@@ -193,6 +221,13 @@ export const MeasurementsTable = ({
             const upload = m.uploadSpeed ?? 0;
             const avgRTT = m.avgRTT ?? 0;
             const minRTT = m.minRTT ?? 0;
+            const maxRTT = m.maxRTT ?? 0;
+            const jitter = m.jitter ?? 0;
+            const varRTT = m.varRTT ?? 0;
+            const desvRTT = m.desvRTT ?? 0;
+            const bytesSent = m.bytesSent ?? 0;
+            const bytesRetrans = m.bytesRetrans ?? 0;
+            const retransPercent = m.retransPercent ?? 0;
             const networkLimitedPercent = m.networkLimitedPercent ?? 0;
             const clientLimitedPercent = m.clientLimitedPercent ?? 0;
             const serverLimitedPercent = m.serverLimitedPercent ?? 0;
@@ -212,6 +247,13 @@ export const MeasurementsTable = ({
                     <TableCell>{upload}</TableCell>
                     <TableCell>{avgRTT}</TableCell>
                     <TableCell>{minRTT}</TableCell>
+                    <TableCell>{maxRTT}</TableCell>
+                    <TableCell>{jitter}</TableCell>
+                    <TableCell>{varRTT}</TableCell>
+                    <TableCell>{desvRTT}</TableCell>
+                    <TableCell>{bytesSent}</TableCell>
+                    <TableCell>{bytesRetrans}</TableCell>
+                    <TableCell>{retransPercent}</TableCell>
                     <TableCell>{networkLimitedPercent}</TableCell>
                     <TableCell>{clientLimitedPercent}</TableCell>
                     <TableCell>{serverLimitedPercent}</TableCell>

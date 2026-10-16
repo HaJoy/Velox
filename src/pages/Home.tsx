@@ -9,7 +9,7 @@ import { MeasurementsTable } from "@/components/MeasurementsTable";
 import { MetricsDetailsModal } from "@/components/MetricsDetailsModal";
 import { isIpinfoResponse } from "@/guards/isp.guard";
 import { isGetOneMeasurementResponse } from "@/guards/measurement.guard";
-import { Download, Network, Signal, Upload } from "lucide-react";
+import { Download, Network, Upload } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Field,
@@ -22,6 +22,9 @@ import { Link } from "react-router-dom";
 import { Toaster } from "sonner";
 import { CURRENT_POLICY_VERSION } from "./PrivacyPage";
 import { toastError } from "@/lib/toast-utils";
+
+const DOWNLOAD_COLORS = ["#0000FF", "#0040FF", "#0080FF", "#00BFFF", "#00FFFF"];
+const UPLOAD_COLORS = ["#4B0082", "#7B00D4", "#9900FF", "#C266FF", "#F0B3FF", ];
 
 // Este componente es toda la pagina de la aplicacion.
 export const Home = () => {
@@ -36,8 +39,15 @@ export const Home = () => {
     uploadSpeed,
     rttAvg,
     minRTT,
+    maxRTT,
+    jitter,
+    varRTT,
+    desvRTT,
     downloadRtt,
     uploadRtt,
+    bytesSent,
+    bytesRetrans,
+    retransPercent,
     bottleneck,
     serverChosenCity,
     serverChosenCountry,
@@ -156,7 +166,8 @@ export const Home = () => {
           <CardContent>
             <div className="flex flex-col gap-10">
               <div className="flex justify-center gap-8 w-full md:text-base">
-                {/* Mediciones de velocidad */}
+
+                {/* Velocidad de descarga */}
                 <div className="w-1/2 grid grid-cols-1 grid-rows-2">
                   <div>
                     <h2>Descarga</h2>
@@ -167,25 +178,22 @@ export const Home = () => {
                     <span>{`${downloadRtt && downloadRtt !== Infinity ? downloadRtt.toFixed(1) : 0} ms`}</span>
                   </div>
                 </div>
-                {complete && 
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className=" text-center hover:cursor-pointer"
-                    aria-label="Abrir análisis del cuello de botella"
-                    onClick={() => setIsMetricsDetailsModalOpen(true)}
-                  >
-                    <Network />
-                    <span className="hidden md:inline">Más métricas</span>
-                    {/* <h2>RTT promedio</h2>
-                    <div
-                      className={`flex justify-center items-center gap-2 text-sm mt-2 ${!complete ? "text-muted-foreground" : "font-bold"}`}
-                    >
-                      <Signal />
-                      <span>{`${rttAvg && rttAvg !== Infinity ? rttAvg.toFixed(1) : 0} ms`}</span>
-                    </div> */}
-                  </Button>
-                }
+
+                {/* Boton para abrir un modal con mas metricas (desaparece si hay una prueba en curso) */}
+                <Button
+                  type="button"
+                  variant="outline"
+                  className={`text-center hover:cursor-pointer ${complete ? "visible" : "invisible"}`}
+                  aria-label="Abrir análisis del cuello de botella"
+                  aria-hidden={!complete}
+                  disabled={!complete}
+                  onClick={() => setIsMetricsDetailsModalOpen(true)}
+                >
+                  <Network />
+                  <span className="hidden md:inline">Más métricas</span>
+                </Button>
+
+                {/* Velocidad de subida */}
                 <div className="w-1/2 grid grid-cols-1 grid-rows-2">
                   <div>
                     <h2>Subida</h2>
@@ -198,46 +206,56 @@ export const Home = () => {
                 </div>
               </div>
 
-              {/* Velocimetro */}
-              <div className="flex justify-center w-full">
-                <ReactSpeedometer
-                  minValue={0}
-                  maxValue={100}
-                  value={handleSpeed()}
-                  currentValueText={`${!complete ? (isDownStream ? downloadSpeed : uploadSpeed) : 0} Mb/s`}
-                  segmentColors={[
-                    "#0000FF",
-                    "#0040FF",
-                    "#0080FF",
-                    "#00BFFF",
-                    "#00FFFF",
-                  ]}
-                  height={180}
-                />
-              </div>
-
-              {/* Tiempo que duro la prueba */}
-              <h3>Duración: {`${testTime.toFixed(1) || 0} segundos`}</h3>
-
-              <div className="flex flex-col gap-2 w-full md:flex-row md:justify-evenly">
-                {/* Direccion IP e ISP del usuario */}
-                <div className="text-start text-sm sm:text-center md:text-base md:text-start">
-                  <p>IP: {ipErrorMsg ? ipErrorMsg : publicIp}</p>
-                  <p>Proveedor: {ispErrorMsg ? ispErrorMsg : userIsp}</p>
+              {/* Cambia del boton de iniciar la prueba al velocimetro si hay una prueba en curso */}
+              <div>
+                {/* Velocimetro */}
+                <div className={`${complete ? "hidden" : "flex"} justify-center w-full`}>
+                  <ReactSpeedometer
+                    key={isDownStream ? "download" : "upload"}
+                    minValue={0}
+                    maxValue={100}
+                    value={handleSpeed()}
+                    currentValueText={`${!complete ? (isDownStream ? downloadSpeed : uploadSpeed) : 0} Mb/s`}
+                    valueTextFontSize="25px"
+                    paddingVertical={10}
+                    segmentColors={isDownStream ? DOWNLOAD_COLORS : UPLOAD_COLORS}
+                    height={180}
+                    />
                 </div>
-                {/* Ubicacion del servidor de prueba */}
-                <div>
-                  <p>Ubicación del servidor:</p> 
-                  <p className={serverChosenCity && serverChosenCountry ? "" : "text-muted-foreground"}>
-                    {
-                      serverChosenCity && serverChosenCountry ?
-                    `${serverChosenCity}, ${serverChosenCountry}` :
-                    "Esperando a que la prueba comience."
-                    }
-                  </p>
-                </div>
-              </div>
+
+                {/* Boton para iniciar la prueba */}
+                <div className={`${complete ? "flex" : "hidden"}  justify-center`}>
+                  <Button
+                    className={`w-[200px] h-[200px] z-1 rounded-full border-2 !border-cyan-500 !bg-[#0b0b0f] text-3xl hover:cursor-pointer disabled:cursor-default disabled:!border-gray-200`}
+                    variant={"outline"}
+                    onClick={() => {
+                      // Comprobar por segunda vez que el consentimiento de privacidad
+                      if (!userAceptedPolicy) {
+                        toastError({
+                          title: "Por favor, primero acepta la política de privacidad.",
+                          toasterId: "toaster-home",
+                        })
+                        return;
+                      }
+
+                      // Guardar el consentimiento en localStorage
+                      localStorage.setItem("privacyPolicyConsent", JSON.stringify({
+                        version: CURRENT_POLICY_VERSION,
+                        acceptedAt: new Date().toISOString(),
+                      }));
+
+                      // Iniciar prueba
+                      startTest();
+                    }}
+                    disabled={!complete || isLoading || !userAceptedPolicy}
+                  >
+                    Iniciar
+                  </Button>
+                  {complete && !isLoading && userAceptedPolicy && <div className="absolute z-0 h-[125px] w-[125px] self-center border-2 border-cyan-500 rounded-full animate-ping animation-duration-[3s] [animation-delay:100ms]"></div>}
                   
+                </div>
+              </div>
+
               <FieldGroup className="flex w-full items-center">
                 <Field className="w-fit max-w-full" orientation={"horizontal"}>
                   <Checkbox
@@ -260,33 +278,23 @@ export const Home = () => {
                 </Field>
               </FieldGroup>
 
-              {/* Boton para iniciar la prueba */}
-              <div>
-                <Button
-                  className="w-[125px] hover:bg-primary/60 hover:cursor-pointer disabled:cursor-default"
-                  onClick={() => {
-                    // Comprobar por segunda vez que el consentimiento de privacidad
-                    if (!userAceptedPolicy) {
-                      toastError({
-                        title: "Por favor, primero acepta la política de privacidad.",
-                        toasterId: "toaster-home",
-                      })
-                      return;
+              <div className="flex flex-col gap-2 w-full md:flex-row md:justify-evenly">
+                {/* Direccion IP e ISP del usuario */}
+                <div className="text-start text-sm sm:text-center md:text-base md:text-start">
+                  <p>IP: {ipErrorMsg ? ipErrorMsg : publicIp}</p>
+                  <p>Proveedor: {ispErrorMsg ? ispErrorMsg : userIsp}</p>
+                </div>
+                {/* Ubicacion del servidor de prueba */}
+                <div>
+                  <p>Ubicación del servidor:</p> 
+                  <p className={serverChosenCity && serverChosenCountry ? "" : "text-muted-foreground"}>
+                    {
+                      serverChosenCity && serverChosenCountry ?
+                    `${serverChosenCity}, ${serverChosenCountry}` :
+                    "Esperando a que la prueba comience."
                     }
-
-                    // Guardar el consentimiento en localStorage
-                    localStorage.setItem("privacyPolicyConsent", JSON.stringify({
-                      version: CURRENT_POLICY_VERSION,
-                      acceptedAt: new Date().toISOString(),
-                    }));
-
-                    // Iniciar prueba
-                    startTest();
-                  }}
-                  disabled={!complete || isLoading || !userAceptedPolicy}
-                >
-                  {complete ? "Iniciar" : "Calculando..."}
-                </Button>
+                  </p>
+                </div>
               </div>
 
               {/* Tabla de historial del usuario (solo si está autenticado) */}
@@ -300,8 +308,16 @@ export const Home = () => {
       </div>
       <MetricsDetailsModal
         bottleneck={bottleneck}
-        minRTT={minRTT}
         avgRTT={rttAvg}
+        minRTT={minRTT}
+        maxRTT={maxRTT}
+        jitter={jitter}
+        varRTT={varRTT}
+        desvRTT={desvRTT}
+        bytesSent={bytesSent}
+        bytesRetrans={bytesRetrans}
+        retransPercent={retransPercent}
+        testTime={testTime}
         open={isMetricsDetailsModalOpen}
         onOpenChange={setIsMetricsDetailsModalOpen}
       />

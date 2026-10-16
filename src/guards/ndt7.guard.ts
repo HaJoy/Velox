@@ -58,6 +58,8 @@ export function isTCPInfo(v: unknown): v is TCPInfo {
   return (
     typeof maybe.BytesReceived === "number" &&
     typeof maybe.ElapsedTime === "number" &&
+    typeof maybe.BytesSent === "number" &&
+    typeof maybe.BytesRetrans === "number" &&
     typeof maybe.MinRTT === "number" &&
     typeof maybe.RTT === "number" &&
     (maybe.BusyTime === undefined || typeof maybe.BusyTime === "number") &&
