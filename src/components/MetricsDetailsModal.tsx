@@ -6,14 +6,23 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { BottleneckResult } from "@/lib/measurements/bottleneck";
-import { Network, Server, UserRound } from "lucide-react";
+import { Network, RefreshCw, Server, UserRound } from "lucide-react";
 import type { ReactNode } from "react";
 import { Card } from "./ui/card";
+import { formatBytes } from "@/lib/measurements/unitConversion";
 
 interface MetricsDetailsModalProps {
   bottleneck: BottleneckResult | null;
-  minRTT: number;
   avgRTT: number;
+  minRTT: number;
+  maxRTT: number;
+  jitter: number;
+  varRTT: number;
+  desvRTT: number;
+  bytesSent: number;
+  bytesRetrans: number;
+  retransPercent: number;
+  testTime: number;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -51,23 +60,23 @@ const noteList: { title?: string; content: ReactNode }[] = [
         <p>
           El cuello de botella muestra en qué estuvo "ocupada" la conexión entre
           el cliente (tu dispositivo) y el servidor de pruebas durante la prueba
-          de decarga, en este caso, el cuello de botella es el porcentaje del
+          de descarga; en este caso, el cuello de botella es el porcentaje del
           tiempo que el envío de datos estuvo limitado. Un cuello de botella
           alto en:
         </p>
         <br />
         <ul>
           <li>
-            <strong>Red: </strong>es normal. Cuando realizas la prueba de
+            <strong>Red:</strong> es normal. Cuando realizas la prueba de
             velocidad la conexión entre tu dispositivo y el servidor de pruebas
-            seleccionado se satura de datos para asi medir el rendimiento. Es
+            seleccionado se satura de datos para así medir el rendimiento. Es
             inversamente proporcional al cuello de botella en el cliente o
             servidor: un 100% aquí quiere decir que se usó todo el ancho de
             banda disponible durante toda la prueba.
           </li>
           <br />
           <li>
-            <strong>Cliente: </strong>tu dispostivo de interconexion
+            <strong>Cliente:</strong> tu dispositivo de interconexión
             (generalmente router) o el medio que usas para conectarte (como una
             antena Wi-Fi) no pudo procesar los datos lo suficientemente rápido,
             provocando una congestión de datos. Por ejemplo, si este porcentaje
@@ -78,7 +87,7 @@ const noteList: { title?: string; content: ReactNode }[] = [
           </li>
           <br />
           <li>
-            <strong>Servidor: </strong>el servidor de pruebas seleccionado no
+            <strong>Servidor:</strong> el servidor de pruebas seleccionado no
             está enviando los datos a un ritmo esperado, puede que el servidor
             no haya sido configurado correctamente. Este es un caso raro donde
             la causa no es tu red.
@@ -93,21 +102,52 @@ const noteList: { title?: string; content: ReactNode }[] = [
     title: "Round-Trip Time (RTT)",
     content: (
       <>
-        <p>Tiempo que tarda los datos de tu red en ir y volver del servidor.</p>
+        <p>Tiempo que tardan los datos de tu red en ir y volver del servidor.</p>
         <br />
         <ul>
           <li>
-            <strong>Mínimo: </strong>el RTT más bajo obtenido durante toda la
+            <strong>Mínimo:</strong> el RTT más bajo obtenido durante toda la
             prueba. Puede usarse como latencia en reposo{" "}
             <b>pero es solo una aproximación.</b>
           </li>
           <br />
           <li>
-            <strong>Promedio: </strong>el promedio de RTT bajo carga obtenido
+            <strong>Promedio:</strong> el promedio de RTT bajo carga obtenido
             durante toda la prueba.
+          </li>
+          <br />
+          <li>
+            <strong>Máximo:</strong> el RTT más alto obtenido durante la prueba.
+          </li>
+          <br />
+          <li>
+            <strong>Jitter:</strong> la inconsistencia entre retardos entre
+            mediciones de RTT consecutivas. Se usa la fórmula de RFC 3550.
+          </li>
+          <br />
+          <li>
+            <strong>Varianza:</strong> la varianza muestral de las mediciones de
+            RTT obtenidas durante la prueba.
+          </li>
+          <br />
+          <li>
+            <strong>Desviación estándar:</strong> la desviación estándar usando la varianza.
           </li>
         </ul>
       </>
+    ),
+  },
+
+  // Nota retransimisiones
+  {
+    title: "Retransmisión",
+    content: (
+      <p>
+        La cantidad de datos retransmitidos debido a anomalías en la conexión.
+        No equivale exactamente a la pérdida de paquetes, pero esta métrica
+        puede ayudar a estimarla. Por ejemplo, si se retransmite una gran parte
+        de los datos, puede que haya una pérdida de paquetes considerable.
+      </p>
     ),
   },
 ];
@@ -117,16 +157,32 @@ const noteList: { title?: string; content: ReactNode }[] = [
  * Usado en `Home.tsx`
  * @param {BottleneckResult} bottleneck El objeto con los resultados del cuello de botella medido
  * durante la prueba de descarga.
- * @param {number} minRTT RTT minimo medido.
  * @param {number} avgRTT RTT promedio medido.
+ * @param {number} minRTT RTT minimo medido.
+ * @param {number} maxRTT RTT maximo medido.
+ * @param {number} jitter Jitter medido.
+ * @param {number} varRTT Varianza de RTTs medida.
+ * @param {number} desvRTT Desviacion estandar medida.
+ * @param {number} bytesSent Bytes enviados servidor a cliente.
+ * @param {number} bytesRetrans Bytes retransmitidos.
+ * @param {number} retransPercent Porcentaje de retransmision.
+ * @param {number} testTime Duracion de la prueba.
  * @param {boolean} open Controla si el modal esta o no abierto.
  * @param {(open: boolean) => void} onOpenChange Funcion que controla la apertura y cierre del modal.
  * @returns {JSX.Element} Modal con la informacion dada.
  */
 export const MetricsDetailsModal = ({
   bottleneck,
-  minRTT,
   avgRTT,
+  minRTT,
+  maxRTT,
+  jitter,
+  varRTT,
+  desvRTT,
+  bytesSent,
+  bytesRetrans,
+  retransPercent,
+  testTime,
   open,
   onOpenChange,
 }: MetricsDetailsModalProps) => {
@@ -144,6 +200,11 @@ export const MetricsDetailsModal = ({
         <div className="grid grid-cols-1 md:grid-cols-[3fr_2fr] gap-3 max-h-[350px] overflow-y-auto md:overflow-y-hidden md:gap-5">
           {/* Lado izquierdo: Mas metricas */}
           <div className="custom-scrollbar flex flex-col gap-3 md:overflow-y-auto md:p-5">
+            {/* Duracion de la prueba */}
+            <p>
+              Duración de la prueba: {`${testTime.toFixed(1) || 0} segundos`}
+            </p>
+
             {/* Cuello de botella */}
             <div>
               <span className="text-lg font-bold">Cuello de botella</span>
@@ -203,9 +264,83 @@ export const MetricsDetailsModal = ({
             {/* Metricas de RTT */}
             <div className="flex flex-col gap-2">
               <span className="text-lg font-bold">Round-Trip Time</span>
-              <div className="flex gap-2 w-full">
-                <RTTMiniCards statName="RTT Mínimo" value={minRTT} />
-                <RTTMiniCards statName="RTT Promedio" value={avgRTT} />
+              <div className="grid grid-cols-3 grid-rows-2 gap-2 w-full">
+                <RTTMiniCards
+                  gridClassName="order-1"
+                  statName="RTT Mínimo"
+                  value={minRTT}
+                />
+                <RTTMiniCards
+                  gridClassName="order-3"
+                  statName="RTT Promedio"
+                  value={avgRTT}
+                />
+                <RTTMiniCards
+                  gridClassName="order-2"
+                  statName="RTT Máximo"
+                  value={maxRTT}
+                />
+                <RTTMiniCards
+                  gridClassName="order-4"
+                  statName="Jitter"
+                  value={jitter}
+                />
+                <RTTMiniCards
+                  gridClassName="order-5"
+                  statName="Varianza"
+                  value={varRTT}
+                  unitExponent={2}
+                />
+                <RTTMiniCards
+                  gridClassName="order-6"
+                  statName="Desviación estándar"
+                  value={desvRTT}
+                />
+              </div>
+            </div>
+
+            {/* Metricas de retransmision (se muestran las metricas en megabytes, MB) */}
+            <div className="flex flex-col gap-2">
+              <span className="text-lg font-bold">Retransmisión</span>
+              <div className="flex flex-col gap-2 w-full">
+                <div className="flex flex-col justify-between md:flex-row md:items-center">
+                  <div>
+                    Bytes enviados: <strong>{formatBytes(bytesSent)}</strong>
+                  </div>
+                  <div>
+                    Bytes retransmitidos:{" "}
+                    <strong>{formatBytes(bytesRetrans)}</strong>
+                  </div>
+                </div>
+
+                {/* Barra de progreso para mostrar retransmision */}
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex justify-between gap-4 text-sm">
+                    <span className="flex items-center gap-2">
+                      <RefreshCw
+                        className="h-4 w-4 text-muted-foreground"
+                        aria-hidden="true"
+                      />
+                      Tasa de retransmisión
+                    </span>
+                    <span className="font-medium">
+                      {retransPercent.toFixed(1)}%
+                    </span>
+                  </div>
+                  <div
+                    className="h-2 overflow-hidden rounded-full bg-muted"
+                    role="progressbar"
+                    aria-label={`Tasa de retransmisión: ${retransPercent.toFixed(1)}%`}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={parseFloat(retransPercent.toFixed(1))}
+                  >
+                    <div
+                      className="h-full rounded-full bg-primary"
+                      style={{ width: `${retransPercent.toFixed(1)}%` }}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -239,9 +374,13 @@ const Note = ({ title, children }: { title?: string; children: ReactNode }) => {
 const RTTMiniCards = ({
   statName,
   value,
+  unitExponent,
+  gridClassName,
 }: {
   statName: string;
   value: number;
+  unitExponent?: number;
+  gridClassName?: string;
 }) => {
   // Controlar que los RTTs no sean "Infinity"
   if (value === Infinity) {
@@ -249,7 +388,9 @@ const RTTMiniCards = ({
   }
 
   return (
-    <Card className="flex flex-col text-center w-1/2 max-h-fit py-0 gap-0">
+    <Card
+      className={`${gridClassName ?? ""} md:order-1 flex flex-col text-center max-h-fit py-0 gap-0 md:w-full`}
+    >
       <div className="rtt-card-name h-full py-2">
         <span className="text-sm">{statName}</span>
       </div>
@@ -259,6 +400,7 @@ const RTTMiniCards = ({
         */}
         <span className="text-lg font-bold">
           {value == 0 ? "--" : `${value} ms`}
+          <sup>{value == 0 ? "" : unitExponent}</sup>
         </span>
       </div>
     </Card>

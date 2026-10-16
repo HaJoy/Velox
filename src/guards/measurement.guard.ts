@@ -27,8 +27,20 @@ export function isMeasurement(v: unknown): v is Measurement {
     isNumber(m.downloadSpeed) &&
     isNumber(m.uploadSpeed) &&
     isNumber(m.avgRTT) &&
+    isNumber(m.minRTT) &&
+    isNumber(m.maxRTT) &&
+    isNumber(m.jitter) &&
+    isNumber(m.varRTT) &&
+    isNumber(m.desvRTT) &&
     isNumber(m.review) &&
-    isString(m.userAgent)
+    isNumber(m.bytesSent) &&
+    isNumber(m.bytesRetrans) &&
+    isNumber(m.retransPercent) &&
+    isNumber(m.networkLimitedPercent) &&
+    isNumber(m.clientLimitedPercent) &&
+    isNumber(m.serverLimitedPercent) &&
+    isString(m.userAgent) &&
+    isString(m.createdAt)
   );
 }
 
