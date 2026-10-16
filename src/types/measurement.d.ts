@@ -28,6 +28,8 @@ export interface Measurement {
     minRTT: number;
     maxRTT: number;
     jitter: number;
+    varRTT: number;
+    desvRTT: number;
     review: number;
 
     /* Retransmision stats */

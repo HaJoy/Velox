@@ -67,7 +67,7 @@ const noteList: { title?: string; content: ReactNode }[] = [
         <br />
         <ul>
           <li>
-            <strong>Red: </strong>es normal. Cuando realizas la prueba de
+            <strong>Red:</strong> es normal. Cuando realizas la prueba de
             velocidad la conexión entre tu dispositivo y el servidor de pruebas
             seleccionado se satura de datos para asi medir el rendimiento. Es
             inversamente proporcional al cuello de botella en el cliente o
@@ -76,7 +76,7 @@ const noteList: { title?: string; content: ReactNode }[] = [
           </li>
           <br />
           <li>
-            <strong>Cliente: </strong>tu dispostivo de interconexion
+            <strong>Cliente:</strong> tu dispostivo de interconexion
             (generalmente router) o el medio que usas para conectarte (como una
             antena Wi-Fi) no pudo procesar los datos lo suficientemente rápido,
             provocando una congestión de datos. Por ejemplo, si este porcentaje
@@ -87,7 +87,7 @@ const noteList: { title?: string; content: ReactNode }[] = [
           </li>
           <br />
           <li>
-            <strong>Servidor: </strong>el servidor de pruebas seleccionado no
+            <strong>Servidor:</strong> el servidor de pruebas seleccionado no
             está enviando los datos a un ritmo esperado, puede que el servidor
             no haya sido configurado correctamente. Este es un caso raro donde
             la causa no es tu red.
@@ -121,17 +121,17 @@ const noteList: { title?: string; content: ReactNode }[] = [
           </li>
           <br />
           <li>
-            <strong>Jitter:</strong> La inconsistencia entre retardos entre
+            <strong>Jitter:</strong> la inconsistencia entre retardos entre
             mediciones de RTT consecutivas. Se usa la formula de RFC 3550.
           </li>
           <br />
           <li>
-            <strong>Varianza:</strong> La varianza muestral de las mediciones de
+            <strong>Varianza:</strong> la varianza muestral de las mediciones de
             RTT obtenidas durante la prueba.
           </li>
           <br />
           <li>
-            <strong>Desviación estandar:</strong> La desviación estandar usando la varianza.
+            <strong>Desviación estandar:</strong> la desviación estandar usando la varianza.
           </li>
         </ul>
       </>
@@ -401,7 +401,7 @@ const RTTMiniCards = ({
         */}
         <span className="text-lg font-bold">
           {value == 0 ? "--" : `${value} ms`}
-          <sup>{unitExponent}</sup>
+          <sup>{value == 0 ? "" : unitExponent}</sup>
         </span>
       </div>
     </Card>

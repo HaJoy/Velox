@@ -30,6 +30,8 @@ export function isMeasurement(v: unknown): v is Measurement {
     isNumber(m.minRTT) &&
     isNumber(m.maxRTT) &&
     isNumber(m.jitter) &&
+    isNumber(m.varRTT) &&
+    isNumber(m.desvRTT) &&
     isNumber(m.review) &&
     isNumber(m.bytesSent) &&
     isNumber(m.bytesRetrans) &&

@@ -299,7 +299,6 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
 
         // Varianza y desviacion estandar de RTTs
         let {sampleVariance: auxVarRTT, stdDev: auxDesvRTT} = calcVarDesv(arrayRtts);
-        console.log(auxVarRTT, auxDesvRTT);
 
         // ----- Redondear metricas medidas -----
         // RTTs (dos decimales)
@@ -334,6 +333,8 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
           minRTT: currentMinRTT,
           maxRTT: currentMaxRTT,
           jitter: auxJitter,
+          varRTT: auxVarRTT,
+          desvRTT: auxDesvRTT,
           bytesSent: auxBytesSent,
           bytesRetrans: auxBytesRetrans,
           retransPercent: auxRetransPercent,

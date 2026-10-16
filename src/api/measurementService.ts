@@ -26,6 +26,8 @@ type CreateMeasurementPayload = {
   minRTT: number;
   maxRTT: number;
   jitter: number;
+  varRTT: number;
+  desvRTT: number;
   bytesSent: number;
   bytesRetrans: number;
   retransPercent: number;

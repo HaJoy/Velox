@@ -82,6 +82,8 @@ export const MeasurementsTable = ({
     { label: "RTT mínimo (ms)", key: "minRTT" },
     { label: "RTT máximo (ms)", key: "maxRTT" },
     { label: "Jitter (ms)", key: "jitter" },
+    { label: "Varianza RTT (ms²)", key: "varRTT" },
+    { label: "Desviación estándar RTT (ms)", key: "desvRTT" },
     { label: "Bytes enviados", key: "bytesSent" },
     { label: "Bytes retransmitidos", key: "bytesRetrans" },
     { label: "Retransmisión (%)", key: "retransPercent" },
@@ -102,6 +104,8 @@ export const MeasurementsTable = ({
     minRTT: m.minRTT ?? 0,
     maxRTT: m.maxRTT ?? 0,
     jitter: m.jitter ?? 0,
+    varRTT: m.varRTT ?? 0,
+    desvRTT: m.desvRTT ?? 0,
     bytesSent: m.bytesSent ?? 0,
     bytesRetrans: m.bytesRetrans ?? 0,
     retransPercent: m.retransPercent ?? 0,
@@ -186,6 +190,8 @@ export const MeasurementsTable = ({
             <TableHead>RTT mínimo (ms)</TableHead>
             <TableHead>RTT máximo (ms)</TableHead>
             <TableHead>Jitter (ms)</TableHead>
+            <TableHead>Varianza RTT (ms<sup className="text-[8px]">2</sup>)</TableHead>
+            <TableHead>Desviación estándar RTT (ms)</TableHead>
             <TableHead>Bytes enviados</TableHead>
             <TableHead>Bytes retransmitidos</TableHead>
             <TableHead>Retransmisión (%)</TableHead>
@@ -206,6 +212,8 @@ export const MeasurementsTable = ({
             const minRTT = m.minRTT ?? 0;
             const maxRTT = m.maxRTT ?? 0;
             const jitter = m.jitter ?? 0;
+            const varRTT = m.varRTT ?? 0;
+            const desvRTT = m.desvRTT ?? 0;
             const bytesSent = m.bytesSent ?? 0;
             const bytesRetrans = m.bytesRetrans ?? 0;
             const retransPercent = m.retransPercent ?? 0;
@@ -230,6 +238,8 @@ export const MeasurementsTable = ({
                     <TableCell>{minRTT}</TableCell>
                     <TableCell>{maxRTT}</TableCell>
                     <TableCell>{jitter}</TableCell>
+                    <TableCell>{varRTT}</TableCell>
+                    <TableCell>{desvRTT}</TableCell>
                     <TableCell>{bytesSent}</TableCell>
                     <TableCell>{bytesRetrans}</TableCell>
                     <TableCell>{retransPercent}</TableCell>
