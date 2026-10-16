@@ -60,7 +60,7 @@ const noteList: { title?: string; content: ReactNode }[] = [
         <p>
           El cuello de botella muestra en qué estuvo "ocupada" la conexión entre
           el cliente (tu dispositivo) y el servidor de pruebas durante la prueba
-          de decarga, en este caso, el cuello de botella es el porcentaje del
+          de descarga; en este caso, el cuello de botella es el porcentaje del
           tiempo que el envío de datos estuvo limitado. Un cuello de botella
           alto en:
         </p>
@@ -69,14 +69,14 @@ const noteList: { title?: string; content: ReactNode }[] = [
           <li>
             <strong>Red:</strong> es normal. Cuando realizas la prueba de
             velocidad la conexión entre tu dispositivo y el servidor de pruebas
-            seleccionado se satura de datos para asi medir el rendimiento. Es
+            seleccionado se satura de datos para así medir el rendimiento. Es
             inversamente proporcional al cuello de botella en el cliente o
             servidor: un 100% aquí quiere decir que se usó todo el ancho de
             banda disponible durante toda la prueba.
           </li>
           <br />
           <li>
-            <strong>Cliente:</strong> tu dispostivo de interconexion
+            <strong>Cliente:</strong> tu dispositivo de interconexión
             (generalmente router) o el medio que usas para conectarte (como una
             antena Wi-Fi) no pudo procesar los datos lo suficientemente rápido,
             provocando una congestión de datos. Por ejemplo, si este porcentaje
@@ -102,7 +102,7 @@ const noteList: { title?: string; content: ReactNode }[] = [
     title: "Round-Trip Time (RTT)",
     content: (
       <>
-        <p>Tiempo que tarda los datos de tu red en ir y volver del servidor.</p>
+        <p>Tiempo que tardan los datos de tu red en ir y volver del servidor.</p>
         <br />
         <ul>
           <li>
@@ -122,7 +122,7 @@ const noteList: { title?: string; content: ReactNode }[] = [
           <br />
           <li>
             <strong>Jitter:</strong> la inconsistencia entre retardos entre
-            mediciones de RTT consecutivas. Se usa la formula de RFC 3550.
+            mediciones de RTT consecutivas. Se usa la fórmula de RFC 3550.
           </li>
           <br />
           <li>
@@ -131,7 +131,7 @@ const noteList: { title?: string; content: ReactNode }[] = [
           </li>
           <br />
           <li>
-            <strong>Desviación estandar:</strong> la desviación estandar usando la varianza.
+            <strong>Desviación estándar:</strong> la desviación estándar usando la varianza.
           </li>
         </ul>
       </>
@@ -143,11 +143,10 @@ const noteList: { title?: string; content: ReactNode }[] = [
     title: "Retransmisión",
     content: (
       <p>
-        La cantidad de datos que fueron retransmitidos debido a anomalias en la
-        conexión. No es exactamentente pérdida de paquetes pero puede ayudar a
-        intuirla con esta métrica, por ejemplo, si una gran parte de los datos
-        fueron retransmitidos, puede que haya una pérdida de paquetes
-        considerable.
+        La cantidad de datos retransmitidos debido a anomalías en la conexión.
+        No equivale exactamente a la pérdida de paquetes, pero esta métrica
+        puede ayudar a estimarla. Por ejemplo, si se retransmite una gran parte
+        de los datos, puede que haya una pérdida de paquetes considerable.
       </p>
     ),
   },
@@ -294,7 +293,7 @@ export const MetricsDetailsModal = ({
                 />
                 <RTTMiniCards
                   gridClassName="order-6"
-                  statName="Desviación estandar"
+                  statName="Desviación estándar"
                   value={desvRTT}
                 />
               </div>
@@ -302,7 +301,7 @@ export const MetricsDetailsModal = ({
 
             {/* Metricas de retransmision (se muestran las metricas en megabytes, MB) */}
             <div className="flex flex-col gap-2">
-              <span className="text-lg font-bold">Retrasmisión</span>
+              <span className="text-lg font-bold">Retransmisión</span>
               <div className="flex flex-col gap-2 w-full">
                 <div className="flex flex-col justify-between md:flex-row md:items-center">
                   <div>

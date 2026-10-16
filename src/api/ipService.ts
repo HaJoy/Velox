@@ -4,6 +4,7 @@ import type { ipinfoResponse } from "@/types/isp";
 import type { GetOneMeasurementResponse } from "@/types/measurement";
 import axios from "axios";
 import { api } from "./axios";
+import { toastError } from "@/lib/toast-utils";
 
 /**
  * Obtiene la direccion IP publica del usuario
@@ -55,6 +56,12 @@ export const getISP = async (): Promise<ipinfoResponse | GetOneMeasurementRespon
                 throw new Error("Invalid response from IPinfo");
             }
         } catch (fallbackError) {
+            // Avisar al usuario mediante un toast para que recargue la pagina.
+            toastError({
+                title: "No se pudo obtener el ISP",
+                description: "No se pudo obtener tu proveedor de internet, por favor, recarga la página para reintentar.",
+                toasterId: "toaster-home",
+            })
             throw new AggregateError(
                 [primaryError, fallbackError],
                 "Could not obtain ISP from server or IPinfo"

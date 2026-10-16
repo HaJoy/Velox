@@ -90,7 +90,7 @@ export const PrivacyPage = () => {
           <Card id="ipify" className="scroll-mt-24 border-white/10 bg-[#111116]">
             <CardHeader><CardTitle>4. Obtención de la IP pública con Ipify</CardTitle></CardHeader>
             <CardContent className="space-y-4 leading-7 text-muted-foreground">
-              <p>Velox consulta la API de Ipify para obtener tu dirección IP pública y mostrarla en la aplicación. Ipify indica en su sitio web que no recopila información sobre del uso de su API ni de tu dirección IP pública.</p>
+              <p>Velox consulta la API de Ipify para obtener tu dirección IP pública y mostrarla en la aplicación. Ipify indica en su sitio web que no recopila información sobre el uso de su API ni sobre tu dirección IP pública.</p>
               <p>Antes de guardar una medición, la IP pública y la información relacionada que se muestra en la aplicación se mantienen temporalmente en el estado local del dispositivo; obtenerlas no crea ni almacena por sí solo un registro en la base de datos de Velox hasta después de una medición.</p>
               <a className="inline-flex items-center gap-2 text-cyan-400 hover:underline" href="https://www.ipify.org/" target="_blank" rel="noreferrer">Sitio web de Ipify <ExternalLink aria-hidden="true" size={15} /></a>
             </CardContent>
@@ -99,7 +99,7 @@ export const PrivacyPage = () => {
           <Card id="ipinfo" className="scroll-mt-24 border-white/10 bg-[#111116]">
             <CardHeader><CardTitle>5. Consulta de IP con IPinfo</CardTitle></CardHeader>
             <CardContent className="space-y-4 leading-7 text-muted-foreground">
-              <p>Cuando necesita identificar tu proveedor de internet (ISP) y tu país, Velox puede enviar tu dirección IP pública a la API de IPinfo. IPinfo devuelve el ISP y el país aproximado asociados a esa IP; este país puede no coincidir con tu país de residencia. Usamos esos datos para mostrar información sobre la conexión y contextualizar las mediciones.</p>
+              <p>Cuando Velox necesita identificar tu proveedor de internet (ISP) y tu país, puede enviar tu dirección IP pública a la API de IPinfo. IPinfo devuelve el ISP y el país aproximado asociados a esa IP; este país puede no coincidir con tu país de residencia. Usamos esos datos para mostrar información sobre la conexión y contextualizar las mediciones.</p>
               <p>IPinfo declara que no almacena las direcciones IP consultadas a través de su API ni la información devuelta para esas consultas. Esta declaración se refiere al almacenamiento por parte de IPinfo: Velox puede conservar tu IP pública, ISP y país junto con los resultados de medición, según se describe en esta política.</p>
               <a className="inline-flex items-center gap-2 text-cyan-400 hover:underline" href="https://support.ipinfo.io/hc/en-us/articles/30792479974930-Does-IPinfo-s-data-fall-under-GDPR-or-any-other-privacy-protection-law" target="_blank" rel="noreferrer">Artículo del centro de ayuda de IPinfo <ExternalLink aria-hidden="true" size={15} /></a>
             </CardContent>
