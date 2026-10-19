@@ -90,7 +90,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
       }
     };
 
-    // Compar y actualiza el maxRTT
+    // Compara y actualiza el maxRTT
     const updateMaxRTT = (value?: number) => {
       if (value === undefined || !Number.isFinite(value)) return;
       const measuredMaxRTT = value / 1000;
