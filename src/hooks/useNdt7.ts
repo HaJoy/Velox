@@ -102,7 +102,7 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
     // Proceso de medicion
     ndt7.test(
 
-      // Primer argumento: configuracion inicial del speedtest
+      // Primer argumento: configuracion inicial del speed test
       {
         userAcceptedDataPolicy: true,
         downloadworkerfile: '../ndt7-download-worker.min.js',
