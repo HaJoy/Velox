@@ -244,10 +244,10 @@ export const useNdt7 = ({ onMeasurementSaved }: { onMeasurementSaved?: () => voi
             const msg = data.LastServerMeasurement.TCPInfo;
             const bytesReceived = msg ? msg.BytesReceived : 0;
             const elapsed = msg ? msg.ElapsedTime : 0;
-            const throughput = elapsed > 0 ? (bytesReceived * 8) / elapsed : 0;
+            const goodput = elapsed > 0 ? (bytesReceived * 8) / elapsed : 0;
             const uploadRTTmsg = msg?.RTT ? msg.RTT / 1000 : Infinity;
             
-            currentUploadSpeed = parseFloat(throughput.toFixed(2));
+            currentUploadSpeed = parseFloat(goodput.toFixed(2));
             setUploadSpeed(currentUploadSpeed);
             setUploadRtt(uploadRTTmsg);
             updateMinRTT(msg?.MinRTT);
